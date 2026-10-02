@@ -9,6 +9,9 @@ export interface Item {
   kind: Kind
 }
 
+/** Sobe quando o jeito de ler o export muda; dados salvos de versões antigas são lidos de novo. */
+export const DATASET_VERSION = 2
+
 export const FLAG_SKIPPED = 1
 export const FLAG_SHUFFLE = 2
 export const FLAG_PODCAST = 4
@@ -18,7 +21,7 @@ export const FLAG_PODCAST = 4
  * ordenadas por horário de início.
  */
 export interface Dataset {
-  version: 1
+  version: number
   format: 'extended' | 'basic'
   items: Item[]
   creators: string[]

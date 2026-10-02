@@ -17,7 +17,7 @@ Funciona com o histórico estendido (`Streaming_History_Audio_*.json`) e com o b
 | Página | Status |
 | --- | --- |
 | Resumo: horas, top artistas e músicas, horas por mês | pronta |
-| Hábitos: calendário, relógio de escuta, plataformas, skips | em breve |
+| Hábitos: calendário, relógio de escuta, plataformas, aleatório e músicas puladas | pronta |
 | Linha do tempo: ranking por ano, descobertas, fases | em breve |
 | Artista | em breve |
 | Wrapped: cartões para compartilhar | em breve |

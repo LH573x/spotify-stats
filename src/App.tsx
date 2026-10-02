@@ -5,14 +5,37 @@ import { clearSaved, loadSaved, save } from './data/store'
 import { hasPodcasts, years, type Filter, type KindFilter } from './data/stats'
 import { Upload } from './pages/Upload'
 import { Resumo } from './pages/Resumo'
+import { Habitos } from './pages/Habitos'
 import { useTheme } from './ui/theme'
 
 const PAGES = [
   { id: 'resumo', label: 'Resumo', ready: true },
-  { id: 'habitos', label: 'Hábitos', ready: false },
+  { id: 'habitos', label: 'Hábitos', ready: true },
   { id: 'linha', label: 'Linha do tempo', ready: false },
   { id: 'wrapped', label: 'Wrapped', ready: false },
 ] as const
+
+type PageId = (typeof PAGES)[number]['id']
+
+/** Página atual vem do endereço (#habitos), para o botão voltar e links funcionarem. */
+function usePage(): [PageId, (p: PageId) => void] {
+  const read = (): PageId => {
+    const h = location.hash.slice(1)
+    return PAGES.some((p) => p.id === h && p.ready) ? (h as PageId) : 'resumo'
+  }
+  const [page, setPage] = useState<PageId>(read)
+  useEffect(() => {
+    const on = () => setPage(read())
+    window.addEventListener('hashchange', on)
+    return () => window.removeEventListener('hashchange', on)
+  }, [])
+  const go = (p: PageId) => {
+    location.hash = p === 'resumo' ? '' : p
+    setPage(p)
+    window.scrollTo({ top: 0 })
+  }
+  return [page, go]
+}
 
 const KINDS: { id: KindFilter; label: string }[] = [
   { id: 'all', label: 'Tudo' },
@@ -22,15 +45,18 @@ const KINDS: { id: KindFilter; label: string }[] = [
 
 export default function App() {
   const [theme, toggleTheme] = useTheme()
+  const [page, go] = usePage()
   const [data, setData] = useState<Dataset | null>(null)
   const [booting, setBooting] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
   const [filter, setFilter] = useState<Filter>({ year: null, kind: 'all' })
 
   useEffect(() => {
-    loadSaved().then((d) => {
-      setData(d)
+    loadSaved().then((saved) => {
+      setData(saved.dataset)
+      if (saved.outdated) setNotice('O site ganhou páginas novas. Solte seu arquivo de novo para atualizar os dados.')
       setBooting(false)
     })
   }, [])
@@ -74,8 +100,10 @@ export default function App() {
             {PAGES.map((p) => (
               <button
                 key={p.id}
-                className={p.id === 'resumo' ? 'active' : ''}
+                className={p.id === page ? 'active' : ''}
+                aria-current={p.id === page ? 'page' : undefined}
                 disabled={!p.ready}
+                onClick={() => go(p.id)}
                 title={p.ready ? undefined : 'Em breve'}
               >
                 {p.label}
@@ -121,9 +149,13 @@ export default function App() {
       )}
 
       {booting ? null : data ? (
-        <Resumo data={data} filter={filter} theme={theme} />
+        page === 'habitos' ? (
+          <Habitos data={data} filter={filter} theme={theme} lastYear={yearList[yearList.length - 1]} />
+        ) : (
+          <Resumo data={data} filter={filter} theme={theme} />
+        )
       ) : (
-        <Upload busy={busy} error={error} onFiles={onFiles} />
+        <Upload busy={busy} error={error} notice={notice} onFiles={onFiles} />
       )}
 
       <footer className="foot">Seus dados ficam só neste navegador.</footer>

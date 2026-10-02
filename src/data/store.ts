@@ -1,4 +1,4 @@
-import type { Dataset } from './types'
+import { DATASET_VERSION, type Dataset } from './types'
 
 // Os dados ficam só neste navegador (IndexedDB), para não precisar reenviar os arquivos.
 const DB = 'spotify-stats'
@@ -25,12 +25,19 @@ function run<T>(mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRequest)
   )
 }
 
-export async function loadSaved(): Promise<Dataset | null> {
+export interface Saved {
+  dataset: Dataset | null
+  /** Havia dados salvos, mas de uma versão antiga do site: é preciso enviar o arquivo de novo. */
+  outdated: boolean
+}
+
+export async function loadSaved(): Promise<Saved> {
   try {
     const d = await run<Dataset | undefined>('readonly', (s) => s.get(KEY))
-    return d && d.version === 1 ? d : null
+    if (!d) return { dataset: null, outdated: false }
+    return d.version === DATASET_VERSION ? { dataset: d, outdated: false } : { dataset: null, outdated: true }
   } catch {
-    return null
+    return { dataset: null, outdated: false }
   }
 }
 

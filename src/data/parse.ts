@@ -1,4 +1,4 @@
-import { FLAG_PODCAST, FLAG_SHUFFLE, FLAG_SKIPPED, type Dataset, type Kind } from './types'
+import { DATASET_VERSION, FLAG_PODCAST, FLAG_SHUFFLE, FLAG_SKIPPED, type Dataset, type Kind } from './types'
 
 /** Formato do "Histórico de streaming estendido" (Streaming_History_Audio_*.json). */
 interface ExtendedRow {
@@ -14,6 +14,7 @@ interface ExtendedRow {
   spotify_episode_uri?: string | null
   shuffle?: boolean | null
   skipped?: boolean | null
+  reason_end?: string | null
 }
 
 /** Formato do histórico básico (StreamingHistory_music_*.json / StreamingHistory_podcast_*.json). */
@@ -129,7 +130,8 @@ export function parseFiles(files: SourceFile[]): Dataset {
         } else {
           continue // audiobooks e reproduções sem metadados
         }
-        if (r.skipped) f |= FLAG_SKIPPED
+        // O campo `skipped` só existe a partir de 2022; "fwdbtn" (apertou próxima) existe desde sempre.
+        if (r.skipped || r.reason_end === 'fwdbtn') f |= FLAG_SKIPPED
         if (r.shuffle) f |= FLAG_SHUFFLE
         // ts é o horário em que a reprodução TERMINOU (UTC).
         push(Date.parse(r.ts) - played, played, it, f, platformId(r.platform))
@@ -174,7 +176,7 @@ export function parseFiles(files: SourceFile[]): Dataset {
   })
 
   return {
-    version: 1,
+    version: DATASET_VERSION,
     format: sawExtended ? 'extended' : 'basic',
     items,
     creators,

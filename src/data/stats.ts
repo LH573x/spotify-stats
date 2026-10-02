@@ -46,7 +46,7 @@ export function hasPodcasts(d: Dataset): boolean {
   return d.plays.flags.some((f) => (f & FLAG_PODCAST) !== 0)
 }
 
-function kindMatches(flags: number, kind: KindFilter): boolean {
+export function kindMatches(flags: number, kind: KindFilter): boolean {
   if (kind === 'all') return true
   const podcast = (flags & FLAG_PODCAST) !== 0
   return kind === 'podcast' ? podcast : !podcast
