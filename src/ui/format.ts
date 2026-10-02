@@ -24,3 +24,9 @@ export function date(ms: number): string {
 
 /** 0.623 → "62%" */
 export const pct = (share: number) => (share > 0 && share < 0.005 ? '<1%' : `${Math.round(share * 100)}%`)
+
+/** Data curta para destaques: "29 jun 2020". */
+export function shortDate(ms: number): string {
+  const d = new Date(ms)
+  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`
+}
