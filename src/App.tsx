@@ -8,13 +8,14 @@ import { Resumo } from './pages/Resumo'
 import { Habitos } from './pages/Habitos'
 import { LinhaDoTempo } from './pages/LinhaDoTempo'
 import { Artista } from './pages/Artista'
+import { Wrapped } from './pages/Wrapped'
 import { useTheme } from './ui/theme'
 
 const PAGES = [
   { id: 'resumo', label: 'Resumo', ready: true },
   { id: 'habitos', label: 'Hábitos', ready: true },
   { id: 'linha', label: 'Linha do tempo', ready: true },
-  { id: 'wrapped', label: 'Wrapped', ready: false },
+  { id: 'wrapped', label: 'Wrapped', ready: true },
 ] as const
 
 type PageId = (typeof PAGES)[number]['id']
@@ -74,6 +75,9 @@ export default function App() {
 
   const yearList = useMemo(() => (data ? years(data) : []), [data])
   const podcasts = useMemo(() => (data ? hasPodcasts(data) : false), [data])
+  const lastYear = yearList[yearList.length - 1]
+  // O Wrapped é sempre de um ano só: sem ano escolhido, mostra o mais recente.
+  const wrappedYear = filter.year ?? lastYear
 
   const onFiles = async (files: File[]) => {
     setError(null)
@@ -140,18 +144,23 @@ export default function App() {
           {page === 'linha' ? (
             <p className="filters-note">Todos os anos, do começo até hoje.</p>
           ) : (
-          <div className="chips" role="group" aria-label="Período">
-            <button className={filter.year === null ? 'on' : ''} onClick={() => setFilter({ ...filter, year: null })}>
-              Todos os anos
-            </button>
-            {yearList.map((y) => (
-              <button key={y} className={filter.year === y ? 'on' : ''} onClick={() => setFilter({ ...filter, year: y })}>
-                {y}
-              </button>
-            ))}
-          </div>
+            <div className="chips" role="group" aria-label="Período">
+              {page !== 'wrapped' && (
+                <button className={filter.year === null ? 'on' : ''} onClick={() => setFilter({ ...filter, year: null })}>
+                  Todos os anos
+                </button>
+              )}
+              {yearList.map((y) => {
+                const on = page === 'wrapped' ? wrappedYear === y : filter.year === y
+                return (
+                  <button key={y} className={on ? 'on' : ''} onClick={() => setFilter({ ...filter, year: y })}>
+                    {y}
+                  </button>
+                )
+              })}
+            </div>
           )}
-          {podcasts && (
+          {podcasts && page !== 'wrapped' && (
             <div className="segmented" role="group" aria-label="O que contar">
               {KINDS.map((k) => (
                 <button key={k.id} className={filter.kind === k.id ? 'on' : ''} onClick={() => setFilter({ ...filter, kind: k.id })}>
@@ -166,10 +175,12 @@ export default function App() {
       {booting ? null : data ? (
         route.page === 'artista' ? (
           <Artista data={data} id={route.artist} theme={theme} />
+        ) : page === 'wrapped' ? (
+          <Wrapped key={wrappedYear} data={data} year={wrappedYear} />
         ) : page === 'linha' ? (
           <LinhaDoTempo data={data} kind={filter.kind} theme={theme} />
         ) : page === 'habitos' ? (
-          <Habitos data={data} filter={filter} theme={theme} lastYear={yearList[yearList.length - 1]} />
+          <Habitos data={data} filter={filter} theme={theme} lastYear={lastYear} />
         ) : (
           <Resumo data={data} filter={filter} theme={theme} />
         )

@@ -10,6 +10,10 @@ export function hours(ms: number): string {
 }
 
 const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+const MONTHS_LONG = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro']
+
+/** 10 → "novembro" (mês de 0 a 11). */
+export const monthName = (m: number) => MONTHS_LONG[m]
 
 /** "2024-03" → "mar 2024" (ou só "mar" quando o ano é óbvio). */
 export function monthLabel(key: string, withYear = true): string {
@@ -29,4 +33,33 @@ export const pct = (share: number) => (share > 0 && share < 0.005 ? '<1%' : `${M
 export function shortDate(ms: number): string {
   const d = new Date(ms)
   return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`
+}
+
+/** Data sem ano, para quando o ano já está claro: "29 jun". */
+export function dayMonth(ms: number): string {
+  const d = new Date(ms)
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}`
+}
+
+/** Horas por extenso para frases: "773 horas", "1,5 hora", "45 minutos". */
+export function longHours(ms: number): string {
+  const h = ms / 3.6e6
+  if (h < 1) {
+    const m = Math.round(ms / 60000)
+    return `${m} ${m === 1 ? 'minuto' : 'minutos'}`
+  }
+  const s = h < 10 ? nf1.format(h) : nf.format(Math.round(h))
+  // Singular abaixo de 2 ("1,5 hora"), olhando o número já arredondado (1,98 vira "2 horas").
+  return `${s} ${Number(s.replace(',', '.')) < 2 ? 'hora' : 'horas'}`
+}
+
+const WEEKDAYS_LONG = ['segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo']
+
+/** 0 = segunda … 6 = domingo. */
+export const weekdayName = (i: number) => WEEKDAYS_LONG[i]
+
+/** "2024-03-07" → data local em ms. */
+export function keyToMs(key: string): number {
+  const [y, m, d] = key.split('-').map(Number)
+  return new Date(y, m - 1, d).getTime()
 }
