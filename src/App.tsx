@@ -6,35 +6,45 @@ import { hasPodcasts, years, type Filter, type KindFilter } from './data/stats'
 import { Upload } from './pages/Upload'
 import { Resumo } from './pages/Resumo'
 import { Habitos } from './pages/Habitos'
+import { LinhaDoTempo } from './pages/LinhaDoTempo'
+import { Artista } from './pages/Artista'
 import { useTheme } from './ui/theme'
 
 const PAGES = [
   { id: 'resumo', label: 'Resumo', ready: true },
   { id: 'habitos', label: 'Hábitos', ready: true },
-  { id: 'linha', label: 'Linha do tempo', ready: false },
+  { id: 'linha', label: 'Linha do tempo', ready: true },
   { id: 'wrapped', label: 'Wrapped', ready: false },
 ] as const
 
 type PageId = (typeof PAGES)[number]['id']
+type Route = { page: PageId } | { page: 'artista'; artist: number }
 
-/** Página atual vem do endereço (#habitos), para o botão voltar e links funcionarem. */
-function usePage(): [PageId, (p: PageId) => void] {
-  const read = (): PageId => {
-    const h = location.hash.slice(1)
-    return PAGES.some((p) => p.id === h && p.ready) ? (h as PageId) : 'resumo'
-  }
-  const [page, setPage] = useState<PageId>(read)
+/** A página atual vem do endereço (#habitos, #artista-12), para o botão voltar e links funcionarem. */
+function readRoute(): Route {
+  const h = location.hash.slice(1)
+  const m = /^artista-(\d+)$/.exec(h)
+  if (m) return { page: 'artista', artist: Number(m[1]) }
+  const p = PAGES.find((x) => x.id === h && x.ready)
+  return { page: p ? p.id : 'resumo' }
+}
+
+function useRoute(): [Route, (p: PageId) => void] {
+  const [route, setRoute] = useState<Route>(readRoute)
   useEffect(() => {
-    const on = () => setPage(read())
+    const on = () => {
+      setRoute(readRoute())
+      window.scrollTo({ top: 0 })
+    }
     window.addEventListener('hashchange', on)
     return () => window.removeEventListener('hashchange', on)
   }, [])
   const go = (p: PageId) => {
     location.hash = p === 'resumo' ? '' : p
-    setPage(p)
+    setRoute({ page: p })
     window.scrollTo({ top: 0 })
   }
-  return [page, go]
+  return [route, go]
 }
 
 const KINDS: { id: KindFilter; label: string }[] = [
@@ -45,7 +55,8 @@ const KINDS: { id: KindFilter; label: string }[] = [
 
 export default function App() {
   const [theme, toggleTheme] = useTheme()
-  const [page, go] = usePage()
+  const [route, go] = useRoute()
+  const page = route.page
   const [data, setData] = useState<Dataset | null>(null)
   const [booting, setBooting] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
@@ -124,8 +135,11 @@ export default function App() {
         </div>
       </header>
 
-      {data && (
+      {data && page !== 'artista' && (
         <div className="filters">
+          {page === 'linha' ? (
+            <p className="filters-note">Todos os anos, do começo até hoje.</p>
+          ) : (
           <div className="chips" role="group" aria-label="Período">
             <button className={filter.year === null ? 'on' : ''} onClick={() => setFilter({ ...filter, year: null })}>
               Todos os anos
@@ -136,6 +150,7 @@ export default function App() {
               </button>
             ))}
           </div>
+          )}
           {podcasts && (
             <div className="segmented" role="group" aria-label="O que contar">
               {KINDS.map((k) => (
@@ -149,7 +164,11 @@ export default function App() {
       )}
 
       {booting ? null : data ? (
-        page === 'habitos' ? (
+        route.page === 'artista' ? (
+          <Artista data={data} id={route.artist} theme={theme} />
+        ) : page === 'linha' ? (
+          <LinhaDoTempo data={data} kind={filter.kind} theme={theme} />
+        ) : page === 'habitos' ? (
           <Habitos data={data} filter={filter} theme={theme} lastYear={yearList[yearList.length - 1]} />
         ) : (
           <Resumo data={data} filter={filter} theme={theme} />

@@ -19,6 +19,8 @@ export interface BarRow {
   /** Comprimento da barra, de 0 a 1. */
   share: number
   title?: string
+  /** Link do nome (ex.: página do artista). */
+  href?: string
 }
 
 /** Lista com barras horizontais; `numbered` mostra a posição no ranking. */
@@ -35,7 +37,13 @@ export function BarList({ title, note, rows, numbered = true }: { title: string;
             {numbered && <span className="rank-n">{i + 1}</span>}
             <div className="rank-body">
               <div className="rank-line">
-                <span className="rank-name">{r.name}</span>
+                {r.href ? (
+                  <a className="rank-name" href={r.href}>
+                    {r.name}
+                  </a>
+                ) : (
+                  <span className="rank-name">{r.name}</span>
+                )}
                 <span className="rank-val">{r.value}</span>
               </div>
               {r.sub && <span className="rank-sub">{r.sub}</span>}
