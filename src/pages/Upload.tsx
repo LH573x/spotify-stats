@@ -3,10 +3,11 @@ import { useRef, useState } from 'react'
 interface Props {
   busy: string | null
   error: string | null
+  notice: string | null
   onFiles: (files: File[]) => void
 }
 
-export function Upload({ busy, error, onFiles }: Props) {
+export function Upload({ busy, error, notice, onFiles }: Props) {
   const input = useRef<HTMLInputElement>(null)
   const [over, setOver] = useState(false)
 
@@ -26,6 +27,7 @@ export function Upload({ busy, error, onFiles }: Props) {
         fases.
       </p>
 
+      {notice && <p className="notice">{notice}</p>}
       <div
         className={`drop ${over ? 'over' : ''} ${busy ? 'busy' : ''}`}
         onDragOver={(e) => {

@@ -21,3 +21,6 @@ export function monthLabel(key: string, withYear = true): string {
 export function date(ms: number): string {
   return new Date(ms).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' })
 }
+
+/** 0.623 → "62%" */
+export const pct = (share: number) => (share > 0 && share < 0.005 ? '<1%' : `${Math.round(share * 100)}%`)

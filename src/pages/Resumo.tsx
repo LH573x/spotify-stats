@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { Dataset } from '../data/types'
 import { summarize, type Filter, type Ranked } from '../data/stats'
+import { BarList, Tile } from '../ui/parts'
 import { Chart, type ChartOption } from '../ui/Chart'
 import { CHART_COLORS, type ThemeName } from '../ui/theme'
 import { date, hours, monthLabel, num } from '../ui/format'
@@ -121,47 +122,21 @@ export function Resumo({ data, filter, theme }: Props) {
       </section>
 
       <div className="two">
-        <RankList title={nouns.topC} rows={s.topCreators} />
-        <RankList title={nouns.topI} rows={s.topItems} />
+        <BarList title={nouns.topC} rows={toBars(s.topCreators)} />
+        <BarList title={nouns.topI} rows={toBars(s.topItems)} />
       </div>
     </main>
   )
 }
 
-function Tile({ label, value, hint }: { label: string; value: string; hint?: string }) {
-  return (
-    <div className="tile">
-      <span className="tile-label">{label}</span>
-      <span className="tile-value">{value}</span>
-      {hint && <span className="tile-hint">{hint}</span>}
-    </div>
-  )
-}
-
-function RankList({ title, rows }: { title: string; rows: Ranked[] }) {
+function toBars(rows: Ranked[]) {
   const max = rows[0]?.ms ?? 1
-  return (
-    <section className="card">
-      <header>
-        <h2>{title}</h2>
-      </header>
-      <ol className="rank">
-        {rows.map((r, i) => (
-          <li key={r.id} title={`${r.name}: ${hours(r.ms)}, ${num(r.plays)} reproduções`}>
-            <span className="rank-n">{i + 1}</span>
-            <div className="rank-body">
-              <div className="rank-line">
-                <span className="rank-name">{r.name}</span>
-                <span className="rank-val">{hours(r.ms)}</span>
-              </div>
-              {r.sub && <span className="rank-sub">{r.sub}</span>}
-              <div className="rank-bar">
-                <span style={{ width: `${(r.ms / max) * 100}%` }} />
-              </div>
-            </div>
-          </li>
-        ))}
-      </ol>
-    </section>
-  )
+  return rows.map((r) => ({
+    key: r.id,
+    name: r.name,
+    sub: r.sub,
+    value: hours(r.ms),
+    share: r.ms / max,
+    title: `${r.name}: ${hours(r.ms)}, ${num(r.plays)} reproduções`,
+  }))
 }
