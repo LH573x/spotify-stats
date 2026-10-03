@@ -1,5 +1,5 @@
 import type { WrappedYear } from '../data/wrapped'
-import { dayMonth, keyToMs, longHours, monthName, num, pct } from './format'
+import { cleanTitle, dayMonth, keyToMs, longHours, monthName, num, pct } from './format'
 
 export type CardId =
   | 'capa'
@@ -25,12 +25,6 @@ export interface CardInfo {
 export const minutes = (w: WrappedYear) => Math.round(w.totalMs / 60000)
 export const peakMonth = (w: WrappedYear) => w.months.reduce((best, v, i, a) => (v > a[best] ? i : best), 0)
 export const capitalize = (s: string) => s[0].toUpperCase() + s.slice(1)
-
-/** Tira o "- Remastered 2011" e o "(feat. Fulano)" do nome da música, que só ocupam espaço no cartão. */
-export const cleanTitle = (name: string) =>
-  name
-    .replace(/\s+(?:-\s+|\()(?:\d{4}\s+)?(?:remaster(?:ed)?|remasterizad[ao])(?:\s+\d{4})?(?:\s+version)?\)?$/i, '')
-    .replace(/\s+[([]feat\.?\s[^)\]]*[)\]]/i, '') || name
 
 /** Os cartões do ano, na ordem; os que não têm dados ficam de fora. */
 export function deck(w: WrappedYear): CardInfo[] {

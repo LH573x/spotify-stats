@@ -38,6 +38,28 @@ export const CHART_COLORS: Record<ThemeName, ChartColors> = {
   },
 }
 
+/** Cor de destaque de cada aba: cada parte do site tem a sua. */
+export type Tone = 'green' | 'coral' | 'amber' | 'pink'
+
+const TONES: Record<Tone, Record<ThemeName, Pick<ChartColors, 'accent' | 'ramp'>>> = {
+  green: { dark: CHART_COLORS.dark, light: CHART_COLORS.light },
+  coral: {
+    dark: { accent: '#ff7a59', ramp: ['#2a201d', '#4d2b21', '#7a3a27', '#b24e31', '#ff7a59', '#ffb6a2'] },
+    light: { accent: '#c2410c', ramp: ['#f3eeeb', '#f8d6ca', '#f3ae95', '#e5805d', '#cc5530', '#9a3412'] },
+  },
+  amber: {
+    dark: { accent: '#f5b33d', ramp: ['#2a261a', '#4a3b18', '#7a5b17', '#b07f1c', '#f5b33d', '#ffd98a'] },
+    light: { accent: '#a15c00', ramp: ['#f2efe6', '#f6e2b4', '#efc670', '#d99a2b', '#b8730a', '#8a5200'] },
+  },
+  pink: {
+    dark: { accent: '#ff6fae', ramp: ['#2a1d23', '#4d2338', '#7a2c53', '#b23a74', '#ff6fae', '#ffb3d4'] },
+    light: { accent: '#c0266d', ramp: ['#f3edf0', '#f8d0e2', '#f19cc2', '#e0609a', '#c0266d', '#8f1650'] },
+  },
+}
+
+/** Cores dos gráficos no tema e na cor da aba. */
+export const chartColors = (theme: ThemeName, tone: Tone = 'green'): ChartColors => ({ ...CHART_COLORS[theme], ...TONES[tone][theme] })
+
 const KEY = 'spotify-stats-theme'
 
 function initial(): ThemeName {

@@ -5,28 +5,32 @@ import { clearSaved, loadSaved, save } from './data/store'
 import { hasPodcasts, years, type Filter, type KindFilter } from './data/stats'
 import { Upload } from './pages/Upload'
 import { Resumo } from './pages/Resumo'
-import { Habitos } from './pages/Habitos'
+import { Curiosidades } from './pages/Curiosidades'
 import { LinhaDoTempo } from './pages/LinhaDoTempo'
 import { Artista } from './pages/Artista'
 import { Wrapped } from './pages/Wrapped'
-import { useTheme } from './ui/theme'
+import { useTheme, type Tone } from './ui/theme'
 
+/** As abas, cada uma com a sua cor. */
 const PAGES = [
-  { id: 'resumo', label: 'Resumo', ready: true },
-  { id: 'habitos', label: 'Hábitos', ready: true },
-  { id: 'linha', label: 'Linha do tempo', ready: true },
-  { id: 'wrapped', label: 'Wrapped', ready: true },
-] as const
+  { id: 'resumo', label: 'Resumo', tone: 'green' },
+  { id: 'curiosidades', label: 'Curiosidades', tone: 'coral' },
+  { id: 'linha', label: 'Linha do tempo', tone: 'amber' },
+  { id: 'wrapped', label: 'Wrapped', tone: 'pink' },
+] as const satisfies readonly { id: string; label: string; tone: Tone }[]
 
 type PageId = (typeof PAGES)[number]['id']
 type Route = { page: PageId } | { page: 'artista'; artist: number }
 
-/** A página atual vem do endereço (#habitos, #artista-12), para o botão voltar e links funcionarem. */
+/** Endereços antigos que mudaram de nome. */
+const RENAMED: Record<string, PageId> = { habitos: 'curiosidades' }
+
+/** A página atual vem do endereço (#curiosidades, #artista-12), para o botão voltar e links funcionarem. */
 function readRoute(): Route {
   const h = location.hash.slice(1)
   const m = /^artista-(\d+)$/.exec(h)
   if (m) return { page: 'artista', artist: Number(m[1]) }
-  const p = PAGES.find((x) => x.id === h && x.ready)
+  const p = PAGES.find((x) => x.id === (RENAMED[h] ?? h))
   return { page: p ? p.id : 'resumo' }
 }
 
@@ -58,6 +62,10 @@ export default function App() {
   const [theme, toggleTheme] = useTheme()
   const [route, go] = useRoute()
   const page = route.page
+  const tone: Tone = PAGES.find((p) => p.id === page)?.tone ?? 'green'
+  useEffect(() => {
+    document.documentElement.dataset.tone = tone
+  }, [tone])
   const [data, setData] = useState<Dataset | null>(null)
   const [booting, setBooting] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
@@ -115,14 +123,11 @@ export default function App() {
             {PAGES.map((p) => (
               <button
                 key={p.id}
-                className={p.id === page ? 'active' : ''}
+                className={`tab-${p.tone} ${p.id === page ? 'active' : ''}`}
                 aria-current={p.id === page ? 'page' : undefined}
-                disabled={!p.ready}
                 onClick={() => go(p.id)}
-                title={p.ready ? undefined : 'Em breve'}
               >
                 {p.label}
-                {!p.ready && <small>em breve</small>}
               </button>
             ))}
           </nav>
@@ -179,8 +184,8 @@ export default function App() {
           <Wrapped key={wrappedYear} data={data} year={wrappedYear} />
         ) : page === 'linha' ? (
           <LinhaDoTempo data={data} kind={filter.kind} theme={theme} />
-        ) : page === 'habitos' ? (
-          <Habitos data={data} filter={filter} theme={theme} lastYear={lastYear} />
+        ) : page === 'curiosidades' ? (
+          <Curiosidades data={data} filter={filter} theme={theme} lastYear={lastYear} />
         ) : (
           <Resumo data={data} filter={filter} theme={theme} />
         )
