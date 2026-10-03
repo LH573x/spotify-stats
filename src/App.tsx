@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react'
 import type { Dataset } from './data/types'
 import { loadFiles } from './data/load'
 import { clearSaved, loadSaved, save } from './data/store'
@@ -13,14 +13,16 @@ import { Musica } from './pages/Musica'
 import { PlayerDock } from './ui/player'
 import { Wrapped } from './pages/Wrapped'
 import { useTheme, type Tone } from './ui/theme'
+import { BulbIcon, CalendarIcon, DiscIcon, GiftIcon } from './ui/icons'
+import { ExitButton } from './ui/ExitButton'
 
-/** As abas, cada uma com a sua cor. */
+/** As abas, cada uma com a sua cor e o seu ícone. */
 const PAGES = [
-  { id: 'resumo', label: 'Resumo', tone: 'green' },
-  { id: 'curiosidades', label: 'Curiosidades', tone: 'coral' },
-  { id: 'linha', label: 'Linha do tempo', tone: 'amber' },
-  { id: 'wrapped', label: 'Wrapped', tone: 'pink' },
-] as const satisfies readonly { id: string; label: string; tone: Tone }[]
+  { id: 'resumo', label: 'Resumo', tone: 'green', Icon: DiscIcon },
+  { id: 'curiosidades', label: 'Curiosidades', tone: 'coral', Icon: BulbIcon },
+  { id: 'linha', label: 'Linha do tempo', tone: 'amber', Icon: CalendarIcon },
+  { id: 'wrapped', label: 'Wrapped', tone: 'pink', Icon: GiftIcon },
+] as const satisfies readonly { id: string; label: string; tone: Tone; Icon: () => ReactElement }[]
 
 type PageId = (typeof PAGES)[number]['id']
 type Route = { page: PageId } | { page: 'artista'; artist: number } | { page: 'musica'; item: number }
@@ -140,19 +142,18 @@ export default function App() {
                 key={p.id}
                 className={`tab-${p.tone} ${p.id === page ? 'active' : ''}`}
                 aria-current={p.id === page ? 'page' : undefined}
+                aria-label={p.label}
+                title={p.label}
                 onClick={() => go(p.id)}
               >
-                {p.label}
+                <p.Icon />
+                <span>{p.label}</span>
               </button>
             ))}
           </nav>
         )}
         <div className="actions">
-          {data && (
-            <button className="ghost" onClick={reset}>
-              Trocar dados
-            </button>
-          )}
+          {data && <ExitButton onConfirm={reset} />}
           <button className="ghost icon" onClick={toggleTheme} aria-label="Alternar tema claro/escuro">
             {theme === 'dark' ? '☀' : '☾'}
           </button>
