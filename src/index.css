@@ -294,6 +294,21 @@ a {
 .drop.busy {
   cursor: progress;
 }
+/* No celular não dá para arrastar: o texto fala em tocar. */
+.drop .on-touch {
+  display: none;
+}
+@media (hover: none) and (pointer: coarse) {
+  .drop .on-desk {
+    display: none;
+  }
+  .drop .on-touch {
+    display: inline;
+  }
+}
+.howto + .howto {
+  margin-top: 12px;
+}
 .spinner {
   width: 28px;
   height: 28px;
