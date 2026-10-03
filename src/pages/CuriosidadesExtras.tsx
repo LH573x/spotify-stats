@@ -4,7 +4,9 @@ import type { Filter, KindFilter } from '../data/stats'
 import { forgotten, records, yearProfile, type YearProfile } from '../data/curiosities'
 import { artistRef, itemRef } from '../data/refs'
 import { Art, Thumb } from '../ui/Thumb'
-import { artistHref } from '../ui/links'
+import { artistHref, songHref } from '../ui/links'
+import { PlayButton } from '../ui/player'
+import { trackOf } from '../ui/playerStore'
 import { cleanTitle, clock, date, duration, hours, keyToMs, monthLabel, num } from '../ui/format'
 
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -17,6 +19,11 @@ const monthOf = (ms: number) => {
 export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
   const r = useMemo(() => records(data, filter), [data, filter])
   const song = (id: number) => ({ name: cleanTitle(data.items[id].name), artist: data.creators[data.items[id].creator] })
+  const link = (id: number) => (
+    <a href={songHref(id)}>
+      <b>{song(id).name}</b>
+    </a>
+  )
 
   return (
     <div className="bento">
@@ -33,10 +40,11 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
       {r.repeatDay && (
         <article className="rec rec-pic">
           <Thumb image={itemRef(data, r.repeatDay.item) ?? { kind: 'artist', name: song(r.repeatDay.item).artist }} label={song(r.repeatDay.item).name} size={72} />
+          <PlayButton track={trackOf(data, r.repeatDay.item)} className="play-corner" />
           <p className="rec-label">Repetiu no mesmo dia</p>
           <p className="rec-big">{num(r.repeatDay.count)} vezes</p>
           <p className="rec-text">
-            <b>{song(r.repeatDay.item).name}</b>, de {song(r.repeatDay.item).artist}, em {date(keyToMs(r.repeatDay.day))}.
+            {link(r.repeatDay.item)}, de {song(r.repeatDay.item).artist}, em {date(keyToMs(r.repeatDay.day))}.
           </p>
         </article>
       )}
@@ -60,19 +68,23 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
       {r.loyal && (
         <article className="rec rec-pic">
           <Thumb image={itemRef(data, r.loyal.item) ?? { kind: 'artist', name: song(r.loyal.item).artist }} label={song(r.loyal.item).name} size={72} />
+          <PlayButton track={trackOf(data, r.loyal.item)} className="play-corner" />
           <p className="rec-label">A mais fiel</p>
           <p className="rec-big">{num(r.loyal.days)} dias</p>
           <p className="rec-text">
-            diferentes com <b>{song(r.loyal.item).name}</b>, de {song(r.loyal.item).artist}.
+            diferentes com {link(r.loyal.item)}, de {song(r.loyal.item).artist}.
           </p>
         </article>
       )}
       {r.first && (
         <article className="rec rec-wide rec-first">
+          <PlayButton track={trackOf(data, r.first.item)} className="play-corner" />
           <Art image={itemRef(data, r.first.item) ?? { kind: 'artist', name: song(r.first.item).artist }} label={song(r.first.item).name} size={120} />
           <div>
             <p className="rec-label">{filter.year ? `A primeira de ${filter.year}` : 'Onde tudo começou'}</p>
-            <p className="rec-big rec-name">{song(r.first.item).name}</p>
+            <p className="rec-big rec-name">
+              <a href={songHref(r.first.item)}>{song(r.first.item).name}</a>
+            </p>
             <p className="rec-text">
               de {song(r.first.item).artist}, em {date(r.first.t)} às {clock(r.first.t)}.
             </p>
@@ -103,8 +115,11 @@ export function Esquecidas({ data, filter }: { data: Dataset; filter: Filter }) 
           <li key={f.id} title={`${name}: ${num(f.plays)} reproduções, a última em ${date(f.last)}`}>
             <div className="wall-art">
               <Art image={itemRef(data, f.id)} label={name} round={false} />
+              <PlayButton track={trackOf(data, f.id)} className="play-over" />
             </div>
-            <span className="wall-name">{name}</span>
+            <a className="wall-name" href={songHref(f.id)}>
+              {name}
+            </a>
             <span className="wall-sub">{data.creators[it.creator]}</span>
             <span className="wall-value">
               {num(f.plays)} vezes, mais em {f.peakYear}
@@ -226,7 +241,11 @@ export function Comparar({ data, years, filter }: { data: Dataset; years: number
             </ol>
             {p.topItem && (
               <p className="vs-song">
-                {words.top}: <b>{cleanTitle(p.topItem.name)}</b>, de {p.topItem.sub}
+                {words.top}:{' '}
+                <a href={songHref(p.topItem.id)}>
+                  <b>{cleanTitle(p.topItem.name)}</b>
+                </a>
+                , de {p.topItem.sub}
               </p>
             )}
           </div>

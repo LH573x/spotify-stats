@@ -8,6 +8,8 @@ import { BarList } from '../ui/parts'
 import { Section, StatStrip } from '../ui/blocks'
 import { Art } from '../ui/Thumb'
 import { artistRef, itemRef } from '../data/refs'
+import { songHref } from '../ui/links'
+import { trackOf } from '../ui/playerStore'
 
 interface Props {
   data: Dataset
@@ -139,6 +141,8 @@ export function Artista({ data, id, theme }: Props) {
             name: it.name,
             sub: podcast ? undefined : it.album,
             image: podcast ? undefined : itemRef(data, it.id),
+            href: songHref(it.id),
+            track: trackOf(data, it.id),
             value: hours(it.ms),
             share: it.ms / maxItem,
             title: `${it.name}: ${hours(it.ms)}, ${num(it.plays)} reproduções`,

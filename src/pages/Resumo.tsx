@@ -2,7 +2,8 @@ import { useMemo } from 'react'
 import type { Dataset } from '../data/types'
 import { summarize, type Filter, type Ranked } from '../data/stats'
 import { CoverWall, PhotoStack, Podium, Section, StatStrip, type RankItem } from '../ui/blocks'
-import { artistHref } from '../ui/links'
+import { artistHref, songHref } from '../ui/links'
+import { trackOf } from '../ui/playerStore'
 import { artistRef, itemRef } from '../data/refs'
 import { Chart, type ChartOption } from '../ui/Chart'
 import { chartColors, type ThemeName } from '../ui/theme'
@@ -95,7 +96,13 @@ export function Resumo({ data, filter, theme }: Props) {
     image: artistRef(data, r.id),
     detail: `${num(r.plays)} reproduções · ${pct(r.ms / s.totalMs)} de tudo o que você ouviu`,
   }))
-  const items: RankItem[] = s.topItems.map((r) => ({ ...toItem(r), name: cleanTitle(r.name), image: itemRef(data, r.id) }))
+  const items: RankItem[] = s.topItems.map((r) => ({
+    ...toItem(r),
+    name: cleanTitle(r.name),
+    href: songHref(r.id),
+    image: itemRef(data, r.id),
+    track: trackOf(data, r.id),
+  }))
   const period = filter.year ? `em ${filter.year}` : 'desde o começo'
 
   return (

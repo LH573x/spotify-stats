@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import type { ImageRef } from '../data/images'
 import { Art, Thumb } from './Thumb'
+import { PlayButton } from './player'
+import type { Track } from './playerStore'
 
 /** Um trecho da página, com título grande e uma linha dizendo o que é. */
 export function Section({
@@ -54,6 +56,8 @@ export interface RankItem {
   image?: ImageRef
   href?: string
   title?: string
+  /** Faixa para o botão de tocar. */
+  track?: Track | null
 }
 
 function Name({ item, className }: { item: RankItem; className: string }) {
@@ -127,6 +131,7 @@ export function CoverWall({ items }: { items: RankItem[] }) {
           <div className="wall-art">
             <Art image={r.image} label={r.name} round={false} />
             <span className="badge">{i + 1}</span>
+            <PlayButton track={r.track ?? null} className="play-over" />
           </div>
           <Name item={r} className="wall-name" />
           {r.sub && <span className="wall-sub">{r.sub}</span>}

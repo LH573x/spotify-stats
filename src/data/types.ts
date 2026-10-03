@@ -7,10 +7,12 @@ export interface Item {
   creator: number
   album: string
   kind: Kind
+  /** Endereço no Spotify ("spotify:track:…" ou "spotify:episode:…"), quando o export traz. */
+  uri?: string
 }
 
 /** Sobe quando o jeito de ler o export muda; dados salvos de versões antigas são lidos de novo. */
-export const DATASET_VERSION = 2
+export const DATASET_VERSION = 3
 
 export const FLAG_SKIPPED = 1
 export const FLAG_SHUFFLE = 2

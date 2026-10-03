@@ -8,6 +8,8 @@ import { Resumo } from './pages/Resumo'
 import { Curiosidades } from './pages/Curiosidades'
 import { LinhaDoTempo } from './pages/LinhaDoTempo'
 import { Artista } from './pages/Artista'
+import { Musica } from './pages/Musica'
+import { PlayerDock } from './ui/player'
 import { Wrapped } from './pages/Wrapped'
 import { useTheme, type Tone } from './ui/theme'
 
@@ -20,7 +22,7 @@ const PAGES = [
 ] as const satisfies readonly { id: string; label: string; tone: Tone }[]
 
 type PageId = (typeof PAGES)[number]['id']
-type Route = { page: PageId } | { page: 'artista'; artist: number }
+type Route = { page: PageId } | { page: 'artista'; artist: number } | { page: 'musica'; item: number }
 
 /** Endereços antigos que mudaram de nome. */
 const RENAMED: Record<string, PageId> = { habitos: 'curiosidades' }
@@ -30,6 +32,8 @@ function readRoute(): Route {
   const h = location.hash.slice(1)
   const m = /^artista-(\d+)$/.exec(h)
   if (m) return { page: 'artista', artist: Number(m[1]) }
+  const s = /^musica-(\d+)$/.exec(h)
+  if (s) return { page: 'musica', item: Number(s[1]) }
   const p = PAGES.find((x) => x.id === (RENAMED[h] ?? h))
   return { page: p ? p.id : 'resumo' }
 }
@@ -144,7 +148,7 @@ export default function App() {
         </div>
       </header>
 
-      {data && page !== 'artista' && (
+      {data && page !== 'artista' && page !== 'musica' && (
         <div className="filters">
           {page === 'linha' ? (
             <p className="filters-note">Todos os anos, do começo até hoje.</p>
@@ -180,6 +184,8 @@ export default function App() {
       {booting ? null : data ? (
         route.page === 'artista' ? (
           <Artista data={data} id={route.artist} theme={theme} />
+        ) : route.page === 'musica' ? (
+          <Musica data={data} id={route.item} theme={theme} />
         ) : page === 'wrapped' ? (
           <Wrapped key={wrappedYear} data={data} year={wrappedYear} />
         ) : page === 'linha' ? (
@@ -195,8 +201,9 @@ export default function App() {
 
       <footer className="foot">
         Seu histórico fica só neste navegador. Fotos do <a href="https://www.wikidata.org/">Wikidata</a> e capas do{' '}
-        <a href="https://musicbrainz.org/">MusicBrainz</a>, buscadas pelo nome.
+        <a href="https://musicbrainz.org/">MusicBrainz</a>, buscadas pelo nome. O botão de tocar abre o player do próprio Spotify.
       </footer>
+      {data && <PlayerDock />}
     </div>
   )
 }

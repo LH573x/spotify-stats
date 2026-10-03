@@ -10,6 +10,8 @@ import { Section, StatStrip } from '../ui/blocks'
 import { years } from '../data/stats'
 import { Comparar, Esquecidas, Recordes } from './CuriosidadesExtras'
 import { itemRef } from '../data/refs'
+import { songHref } from '../ui/links'
+import { trackOf } from '../ui/playerStore'
 
 interface Props {
   data: Dataset
@@ -261,6 +263,8 @@ export function Curiosidades({ data, filter, theme, lastYear }: Props) {
                 name: s.name,
                 sub: s.sub,
                 image: itemRef(data, s.id),
+                href: songHref(s.id),
+                track: trackOf(data, s.id),
                 value: `${num(s.skips)} de ${num(s.starts)}`,
                 share: s.skips / maxSkips,
                 title: `${s.name}: pulada ${num(s.skips)} de ${num(s.starts)} vezes (${pct(s.skips / s.starts)})`,
