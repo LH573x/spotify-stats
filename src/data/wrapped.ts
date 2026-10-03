@@ -2,10 +2,13 @@ import type { Dataset } from './types'
 import { MIN_PLAY_MS, summarize, type Ranked } from './stats'
 import { dayParts, habits, type Habits } from './habits'
 import { timeline, type Discovery } from './timeline'
+import type { ImageRef } from './images'
+import { artistRef, itemRef } from './refs'
 
 /** Um artista (ou podcast) no ano, com a faixa favorita e desde quando você ouve. */
 export interface Favorite extends Ranked {
-  topItem: { name: string; ms: number; plays: number } | null
+  topItem: { name: string; ms: number; plays: number; image?: ImageRef } | null
+  image: ImageRef
   /** Quantas músicas (ou episódios) diferentes dele você ouviu no ano. */
   itemCount: number
   /** Primeira reprodução de todos os tempos. */
@@ -41,6 +44,8 @@ export interface WrappedYear {
   streak: Habits['streak']
   bestDay: Habits['bestDay']
   discovery: Discovery | null
+  /** Fotos e capas para os cartões (mesma ordem das listas). */
+  images: { artists: ImageRef[]; songs: (ImageRef | undefined)[]; discovery?: ImageRef }
 }
 
 /** Podcast com menos que isso no ano não ganha cartão próprio. */
@@ -64,7 +69,8 @@ function favorite(d: Dataset, r: Ranked | undefined, year: number): Favorite | n
   for (const e of byItem) if (!best || e[1].ms > best[1].ms) best = e
   return {
     ...r,
-    topItem: best && { name: d.items[best[0]].name, ms: best[1].ms, plays: best[1].plays },
+    topItem: best && { name: d.items[best[0]].name, ms: best[1].ms, plays: best[1].plays, image: itemRef(d, best[0]) },
+    image: artistRef(d, r.id),
     itemCount: byItem.size,
     since,
   }
@@ -86,6 +92,7 @@ export function wrapped(d: Dataset, year: number): WrappedYear | null {
   const to = new Date(all.last)
   const pod = podcast.topCreators[0]
   const firstYear = new Date(d.plays.start[0]).getFullYear() === year
+  const discovery = firstYear ? null : (timeline(d, 'music').discoveries.find((x) => x.year === year) ?? null)
 
   return {
     year,
@@ -109,6 +116,11 @@ export function wrapped(d: Dataset, year: number): WrappedYear | null {
     peak: h.peak,
     streak: h.streak,
     bestDay: h.bestDay,
-    discovery: firstYear ? null : (timeline(d, 'music').discoveries.find((x) => x.year === year) ?? null),
+    discovery,
+    images: {
+      artists: music.topCreators.map((c) => artistRef(d, c.id)),
+      songs: music.topItems.map((t) => itemRef(d, t.id)),
+      discovery: discovery?.best ? artistRef(d, discovery.best.id) : undefined,
+    },
   }
 }

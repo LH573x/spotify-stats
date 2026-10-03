@@ -68,8 +68,8 @@ export function Upload({ busy, error, notice, onFiles }: Props) {
       {error && <p className="error">{error}</p>}
 
       <p className="privacy">
-        Seus dados não saem deste computador: tudo é lido aqui mesmo no navegador, e nada é enviado para servidor
-        nenhum.
+        Seu histórico não sai deste computador: tudo é lido aqui mesmo no navegador. Para mostrar fotos e capas, o site
+        só procura os nomes dos artistas e álbuns que aparecem na tela no Wikidata e no MusicBrainz.
       </p>
 
       <details className="howto">

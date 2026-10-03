@@ -6,6 +6,7 @@ import { Chart, type ChartOption } from '../ui/Chart'
 import { CHART_COLORS, type ThemeName } from '../ui/theme'
 import { hours, num, pct } from '../ui/format'
 import { BarList, Tile } from '../ui/parts'
+import { itemRef } from '../data/refs'
 
 interface Props {
   data: Dataset
@@ -233,6 +234,7 @@ export function Habitos({ data, filter, theme, lastYear }: Props) {
               key: s.id,
               name: s.name,
               sub: s.sub,
+              image: itemRef(data, s.id),
               value: `${num(s.skips)} de ${num(s.starts)}`,
               share: s.skips / maxSkips,
               title: `${s.name}: pulada ${num(s.skips)} de ${num(s.starts)} vezes (${pct(s.skips / s.starts)})`,

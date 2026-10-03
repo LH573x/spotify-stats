@@ -7,6 +7,7 @@ import { CHART_COLORS, type ThemeName } from '../ui/theme'
 import { date, hours, monthLabel, num, pct } from '../ui/format'
 import { BarList } from '../ui/parts'
 import { artistHref } from '../ui/links'
+import { artistRef } from '../data/refs'
 
 interface Props {
   data: Dataset
@@ -242,6 +243,7 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
               key: p.id,
               name: p.name,
               href: artistHref(p.id),
+              image: artistRef(data, p.id),
               sub: `${monthLabel(p.month)} · ${pct(p.peakMs / p.totalMs)} do total de ${hours(p.totalMs)}`,
               value: hours(p.peakMs),
               share: p.peakMs / maxPeak,

@@ -5,6 +5,8 @@ import { Chart, type ChartOption } from '../ui/Chart'
 import { CHART_COLORS, type ThemeName } from '../ui/theme'
 import { hours, monthLabel, num, shortDate } from '../ui/format'
 import { BarList, Tile } from '../ui/parts'
+import { Thumb } from '../ui/Thumb'
+import { artistRef, itemRef } from '../data/refs'
 
 interface Props {
   data: Dataset
@@ -92,16 +94,19 @@ export function Artista({ data, id, theme }: Props) {
       <button className="ghost back" onClick={back}>
         ← Voltar
       </button>
-      <section className="hero">
-        <p className="eyebrow">
-          {podcast ? 'Podcast' : 'Artista'} · nº {num(a.rank)} de {num(a.rankOf)} {podcast ? 'podcasts' : 'artistas'} que você já
-          ouviu
-        </p>
-        <h1 className="artist-name">{a.name}</h1>
-        <p className="sub">
-          <span className="accent">{hours(a.totalMs)}</span> ouvindo, {num(a.plays)} reproduções, {num(a.itemCount)}{' '}
-          {podcast ? 'episódios' : a.itemCount === 1 ? 'música' : 'músicas'}.
-        </p>
+      <section className="hero artist-hero">
+        <Thumb image={artistRef(data, id)} label={a.name} size={128} />
+        <div>
+          <p className="eyebrow">
+            {podcast ? 'Podcast' : 'Artista'} · nº {num(a.rank)} de {num(a.rankOf)} {podcast ? 'podcasts' : 'artistas'} que você já
+            ouviu
+          </p>
+          <h1 className="artist-name">{a.name}</h1>
+          <p className="sub">
+            <span className="accent">{hours(a.totalMs)}</span> ouvindo, {num(a.plays)} reproduções, {num(a.itemCount)}{' '}
+            {podcast ? 'episódios' : a.itemCount === 1 ? 'música' : 'músicas'}.
+          </p>
+        </div>
       </section>
 
       <section className="tiles">
@@ -132,6 +137,7 @@ export function Artista({ data, id, theme }: Props) {
           key: it.id,
           name: it.name,
           sub: podcast ? undefined : it.album,
+          image: podcast ? undefined : itemRef(data, it.id),
           value: hours(it.ms),
           share: it.ms / maxItem,
           title: `${it.name}: ${hours(it.ms)}, ${num(it.plays)} reproduções`,

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import type { WrappedYear } from '../data/wrapped'
+import { useImagesData } from '../data/images'
 import { CARD_FONT, ellipsize, fitText } from './svgText'
 import { capitalize, cleanTitle, minutes, peakMonth, type CardInfo } from './wrappedDeck'
 import { dayMonth, keyToMs, longHours, monthName, num, pct, weekdayName } from './format'
@@ -134,6 +135,25 @@ const Circle = ({ p, cx, cy, r }: { p: Palette; cx: number; cy: number; r: numbe
 
 const Divider = ({ p, y }: { p: Palette; y: number }) => <rect x={M} y={y} width={CW} height={3} fill={p.soft} />
 
+/** Foto (círculo) ou capa (quadrado arredondado) recortada; `id` precisa ser único na página. */
+function Pic({ id, href, x, y, size, round, ring }: { id: string; href: string; x: number; y: number; size: number; round: boolean; ring?: string }) {
+  const r = round ? size / 2 : size * 0.08
+  return (
+    <g>
+      <defs>
+        <clipPath id={id}>
+          <rect x={x} y={y} width={size} height={size} rx={r} />
+        </clipPath>
+      </defs>
+      <image href={href} x={x} y={y} width={size} height={size} preserveAspectRatio="xMidYMid slice" clipPath={`url(#${id})`} />
+      {ring && <rect x={x} y={y} width={size} height={size} rx={r} fill="none" stroke={ring} strokeWidth={8} />}
+    </g>
+  )
+}
+
+/** Cartões de destaque (artista, descoberta, podcast): com foto, ela entra no topo e o texto desce. */
+const PHOTO = { top: 250, size: 380 }
+
 /** Barras verticais simples, com a(s) barra(s) em destaque e rótulos embaixo. */
 function Bars({
   values,
@@ -196,20 +216,43 @@ function Bars({
   )
 }
 
-/** Lista numerada de 5 com barra proporcional às horas. */
-function TopRows({ rows, top, p }: { rows: { name: string; sub: string; share: number }[]; top: number; p: Palette }) {
-  const x = M + 150
-  const width = CW - 150
+/** Lista numerada de 5 com barra proporcional às horas; com imagens, cada linha ganha foto ou capa. */
+function TopRows({
+  rows,
+  top,
+  p,
+  images,
+  round,
+  uid,
+}: {
+  rows: { name: string; sub: string; share: number }[]
+  top: number
+  p: Palette
+  images: (string | null)[]
+  round: boolean
+  uid: string
+}) {
+  const withPics = images.some(Boolean)
+  const pic = 124
+  const x = withPics ? M + 100 + pic + 32 : M + 150
+  const width = W - M - x
   return (
     <>
       {rows.map((r, i) => {
         const y = top + i * 210
         const name = textBlock(r.name, y + 4, { size: 64, min: 52, weight: 800, fill: p.ink, x, width })
+        const img = images[i]
         return (
           <g key={i} className="wa" style={{ animationDelay: `${250 + i * 110}ms` }}>
             <text x={M} y={y + 104} fontSize={120} fontWeight={800} fill={p.accent}>
               {i + 1}
             </text>
+            {withPics &&
+              (img ? (
+                <Pic id={`${uid}-${i}`} href={img} x={M + 100} y={y + 16} size={pic} round={round} />
+              ) : (
+                <rect x={M + 100} y={y + 16} width={pic} height={pic} rx={round ? pic / 2 : pic * 0.08} fill={p.soft} />
+              ))}
             {name.el}
             <text x={x} y={y + 4 + name.height + 52} fontSize={40} fill={p.ink2}>
               {ellipsize(r.sub, width, 40, 400)}
@@ -283,11 +326,12 @@ function Minutos({ w, label }: { w: WrappedYear; label: string }) {
 function Artista({ w, label }: { w: WrappedYear; label: string }) {
   const p = PAL.forest
   const a = w.topArtist!
-  const s = makeStack(380)
+  const [photo, cover] = useImagesData([a.image, a.topItem?.image])
+  const s = makeStack(photo ? PHOTO.top + PHOTO.size + 60 : 380)
     .text('Seu artista do ano', { size: 56, weight: 700, fill: p.accent })
-    .gap(40)
-    .text(a.name, { size: 170, min: 84, weight: 800, fill: p.ink, lines: 3, lh: 1.02 })
-    .gap(56)
+    .gap(photo ? 28 : 40)
+    .text(a.name, { size: photo ? 140 : 170, min: 84, weight: 800, fill: p.ink, lines: photo ? 2 : 3, lh: 1.02 })
+    .gap(photo ? 40 : 56)
     .text(`${capitalize(longHours(a.ms))} e ${num(a.plays)} reproduções`, { size: 52, weight: 700, fill: p.ink, lines: 2 })
   // No primeiro ano do export, "desde quando" é só o começo dos dados.
   if (a.since !== null && !w.firstYear) {
@@ -299,16 +343,22 @@ function Artista({ w, label }: { w: WrappedYear; label: string }) {
     })
   }
   if (a.topItem) {
-    s.at(Math.max(s.y + 110, 1200))
-      .draw(64, (y) => <Divider p={p} y={y} />)
-      .text('A preferida', { size: 44, weight: 700, fill: p.muted })
-      .gap(18)
-      .text(cleanTitle(a.topItem.name), { size: 76, min: 48, weight: 800, fill: p.ink, lines: 2 })
-      .gap(18)
-      .text(`tocou ${num(a.topItem.plays)} ${a.topItem.plays === 1 ? 'vez' : 'vezes'}`, { size: 44, fill: p.ink2 })
+    s.at(Math.max(s.y + (photo ? 70 : 110), photo ? 1300 : 1200)).draw(64, (y) => <Divider p={p} y={y} />)
+    const top = s.y
+    const size = 176
+    const tx = cover ? M + size + 36 : M
+    const width = W - M - tx
+    if (cover) s.draw(0, (y) => <Pic id="artista-capa" href={cover} x={M} y={y} size={size} round={false} />)
+    s.text('A preferida', { size: 44, weight: 700, fill: p.muted, x: tx, width })
+      .gap(14)
+      .text(cleanTitle(a.topItem.name), { size: 72, min: 46, weight: 800, fill: p.ink, lines: 2, x: tx, width })
+      .gap(14)
+      .text(`tocou ${num(a.topItem.plays)} ${a.topItem.plays === 1 ? 'vez' : 'vezes'}`, { size: 44, fill: p.ink2, x: tx, width })
+    if (cover) s.at(Math.max(s.y, top + size))
   }
   return (
     <Frame p={p} year={w.year} label={label} deco={<Circle p={p} cx={W - 60} cy={H - 360} r={300} />}>
+      {photo && <Pic id="artista-foto" href={photo} x={M} y={PHOTO.top} size={PHOTO.size} round ring={p.accent} />}
       {s.els}
     </Frame>
   )
@@ -322,10 +372,11 @@ function TopArtistas({ w, label }: { w: WrappedYear; label: string }) {
     .gap(24)
     .text('Seus artistas', { size: 120, min: 80, weight: 800, fill: p.ink })
   const rows = w.topArtists.map((a) => ({ name: a.name, sub: longHours(a.ms), share: a.ms / max }))
+  const images = useImagesData(w.images.artists)
   return (
     <Frame p={p} year={w.year} label={label}>
       {s.els}
-      <TopRows rows={rows} top={s.y + 110} p={p} />
+      <TopRows rows={rows} top={s.y + 110} p={p} images={images} round uid="top-artistas" />
     </Frame>
   )
 }
@@ -342,10 +393,11 @@ function TopMusicas({ w, label }: { w: WrappedYear; label: string }) {
     sub: `${t.sub} · ${num(t.plays)} ${t.plays === 1 ? 'vez' : 'vezes'}`,
     share: t.ms / max,
   }))
+  const images = useImagesData(w.images.songs)
   return (
     <Frame p={p} year={w.year} label={label}>
       {s.els}
-      <TopRows rows={rows} top={s.y + 110} p={p} />
+      <TopRows rows={rows} top={s.y + 110} p={p} images={images} round={false} uid="top-musicas" />
     </Frame>
   )
 }
@@ -439,19 +491,21 @@ function Descoberta({ w, label }: { w: WrappedYear; label: string }) {
   const p = PAL.black
   const d = w.discovery!
   const b = d.best!
-  const s = makeStack(380)
+  const [photo] = useImagesData([w.images.discovery])
+  const s = makeStack(photo ? PHOTO.top + PHOTO.size + 60 : 380)
     .text('Sua melhor descoberta', { size: 56, weight: 700, fill: p.accent })
-    .gap(40)
-    .text(b.name, { size: 170, min: 84, weight: 800, fill: p.ink, lines: 3, lh: 1.02 })
-    .gap(56)
+    .gap(photo ? 28 : 40)
+    .text(b.name, { size: photo ? 140 : 170, min: 84, weight: 800, fill: p.ink, lines: photo ? 2 : 3, lh: 1.02 })
+    .gap(photo ? 40 : 56)
     .text(`Primeira vez em ${dayMonth(b.first)}. Desde então, foram ${longHours(b.ms)}.`, { size: 52, fill: p.ink2, lines: 3 })
-  s.at(Math.max(s.y + 110, 1180))
+  s.at(Math.max(s.y + (photo ? 70 : 110), photo ? 1300 : 1180))
     .draw(64, (y) => <Divider p={p} y={y} />)
-    .text(num(d.count), { size: 200, min: 120, weight: 800, fill: p.accent, lh: 1 })
+    .text(num(d.count), { size: photo ? 170 : 200, min: 120, weight: 800, fill: p.accent, lh: 1 })
     .gap(10)
     .text(`${d.count === 1 ? 'artista novo' : 'artistas novos'} em ${w.year}`, { size: 56, weight: 700, fill: p.ink, lines: 2 })
   return (
     <Frame p={p} year={w.year} label={label} deco={<Circle p={p} cx={-40} cy={H - 420} r={340} />}>
+      {photo && <Pic id="descoberta-foto" href={photo} x={M} y={PHOTO.top} size={PHOTO.size} round ring={p.accent} />}
       {s.els}
     </Frame>
   )
@@ -460,11 +514,12 @@ function Descoberta({ w, label }: { w: WrappedYear; label: string }) {
 function Podcast({ w, label }: { w: WrappedYear; label: string }) {
   const p = PAL.forest
   const pc = w.topPodcast!
-  const s = makeStack(380)
+  const [photo] = useImagesData([pc.image])
+  const s = makeStack(photo ? PHOTO.top + PHOTO.size + 60 : 380)
     .text('Seu podcast do ano', { size: 56, weight: 700, fill: p.accent })
-    .gap(40)
-    .text(pc.name, { size: 170, min: 84, weight: 800, fill: p.ink, lines: 3, lh: 1.02 })
-    .gap(56)
+    .gap(photo ? 28 : 40)
+    .text(pc.name, { size: photo ? 140 : 170, min: 84, weight: 800, fill: p.ink, lines: photo ? 2 : 3, lh: 1.02 })
+    .gap(photo ? 40 : 56)
     .text(`${capitalize(longHours(pc.ms))} e ${num(pc.itemCount)} ${pc.itemCount === 1 ? 'episódio' : 'episódios'}`, {
       size: 52,
       weight: 700,
@@ -472,7 +527,7 @@ function Podcast({ w, label }: { w: WrappedYear; label: string }) {
       lines: 2,
     })
   if (pc.topItem) {
-    s.at(Math.max(s.y + 110, 1160))
+    s.at(Math.max(s.y + (photo ? 70 : 110), photo ? 1300 : 1160))
       .draw(64, (y) => <Divider p={p} y={y} />)
       .text('O episódio mais ouvido', { size: 44, weight: 700, fill: p.muted })
       .gap(18)
@@ -480,6 +535,7 @@ function Podcast({ w, label }: { w: WrappedYear; label: string }) {
   }
   return (
     <Frame p={p} year={w.year} label={label} deco={<Circle p={p} cx={W - 40} cy={240} r={300} />}>
+      {photo && <Pic id="podcast-foto" href={photo} x={M} y={PHOTO.top} size={PHOTO.size} round={false} ring={p.accent} />}
       {s.els}
     </Frame>
   )
