@@ -2,6 +2,7 @@ import { createContext, useContext, type ReactNode } from 'react'
 import type { TopPeriod, WrappedYear } from '../data/wrapped'
 import { useImagesData } from '../data/images'
 import { CARD_FONT, DISPLAY_FONT, fitText } from './svgText'
+import { LyraShape } from './LyraMark'
 import { capitalize, minutes, monthKeyOf, peakMonth, PERIOD_TITLES, periodRange, type CardInfo } from './wrappedDeck'
 import { cleanTitle, dayMonth, hue, keyToMs, longHours, monthLabel, monthName, num, pct, weekdayName } from './format'
 
@@ -174,13 +175,12 @@ function Frame({
       </ShadowId.Provider>
       {brand && (
         <g>
-          <g fill={p.ink}>
-            <rect x={M} y={H - 104 - 26} width={13} height={26} rx={5} />
-            <rect x={M + 20} y={H - 104 - 52} width={13} height={52} rx={5} />
-            <rect x={M + 40} y={H - 104 - 38} width={13} height={38} rx={5} />
+          {/* A constelação ocupa x 10,2–22,9 e y 2,1–28,8 na caixa de 32: o pé fica na linha do texto. */}
+          <g transform={`translate(${M - 10.2 * 2.4} ${H - 104 - 28.8 * 2.4}) scale(2.4)`}>
+            <LyraShape color={p.ink} />
           </g>
-          <text x={M + 72} y={H - 104} fontSize={48} fontWeight={800} fill={p.ink} fontFamily={DISPLAY_FONT}>
-            MEU SPOTIFY
+          <text x={M + 52} y={H - 104} fontSize={48} fontWeight={800} fill={p.ink} fontFamily={DISPLAY_FONT}>
+            LYRA
           </text>
         </g>
       )}
@@ -418,7 +418,7 @@ function Capa({ w, label }: CardProps) {
   const p = PAL.pink
   const endsEarly = new Date(w.to).getMonth() < 11
   const s = makeStack(TOP + 20)
-    .text('Meu Spotify', { size: 68, display: true, fill: p.accent })
+    .text('Lyra', { size: 68, display: true, fill: p.accent })
     .gap(36)
     .text(String(w.year), { size: 430, min: 260, display: true, fill: p.ink, lh: 0.85 })
     .gap(56)
@@ -1020,7 +1020,7 @@ function Resumo({ w, label }: CardProps) {
   const size = 440
   const tx = M + size + 44
   const head = makeStack(TOP + 20)
-    .text('Meu Spotify', { size: 60, display: true, fill: p.accent, x: tx, width: W - M - tx })
+    .text('Lyra', { size: 60, display: true, fill: p.accent, x: tx, width: W - M - tx })
     .gap(20)
     .text(String(w.year), { size: 250, min: 150, display: true, fill: p.ink, x: tx, width: W - M - tx, lh: 0.85 })
   if (lead) head.gap(30).text(`Artista do ano: ${lead.name}`, { size: 40, weight: 700, fill: p.ink2, x: tx, width: W - M - tx, lines: 3 })

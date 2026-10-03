@@ -64,9 +64,9 @@ export function Wrapped({ data, year }: Props) {
               key={year}
               stories={cards}
               label={`Retrospectiva de ${year}`}
-              fileName={(i) => `meu-spotify-${year}-${String(i + 1).padStart(2, '0')}-${slug(cards[i].title)}`}
-              zipName={`meu-spotify-${year}.zip`}
-              shareTitle={`Meu Spotify ${year}`}
+              fileName={(i) => `lyra-${year}-${String(i + 1).padStart(2, '0')}-${slug(cards[i].title)}`}
+              zipName={`lyra-${year}.zip`}
+              shareTitle={`Lyra ${year}`}
             />
           ) : (
             <p className="empty">Nada por aqui nesse ano.</p>

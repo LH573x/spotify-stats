@@ -1,4 +1,4 @@
-# Meu Spotify
+# Lyra
 
 Site para explorar o histórico completo de escuta do Spotify: horas, artistas, músicas, podcasts e como tudo isso mudou ao longo dos anos.
 
