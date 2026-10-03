@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react'
+import type { ImageRef } from '../data/images'
+import { Thumb } from './Thumb'
 
 export function Tile({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
@@ -21,6 +23,8 @@ export interface BarRow {
   title?: string
   /** Link do nome (ex.: página do artista). */
   href?: string
+  /** Foto do artista ou capa do álbum, mostrada antes do nome. */
+  image?: ImageRef
 }
 
 /** Lista com barras horizontais; `numbered` mostra a posição no ranking. */
@@ -35,6 +39,7 @@ export function BarList({ title, note, rows, numbered = true }: { title: string;
         {rows.map((r, i) => (
           <li key={r.key} title={r.title}>
             {numbered && <span className="rank-n">{i + 1}</span>}
+            {r.image && <Thumb image={r.image} label={r.name} />}
             <div className="rank-body">
               <div className="rank-line">
                 {r.href ? (

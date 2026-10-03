@@ -188,7 +188,10 @@ export default function App() {
         <Upload busy={busy} error={error} notice={notice} onFiles={onFiles} />
       )}
 
-      <footer className="foot">Seus dados ficam só neste navegador.</footer>
+      <footer className="foot">
+        Seu histórico fica só neste navegador. Fotos do <a href="https://www.wikidata.org/">Wikidata</a> e capas do{' '}
+        <a href="https://musicbrainz.org/">MusicBrainz</a>, buscadas pelo nome.
+      </footer>
     </div>
   )
 }

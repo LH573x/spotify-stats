@@ -3,6 +3,7 @@ import type { Dataset } from '../data/types'
 import { summarize, type Filter, type Ranked } from '../data/stats'
 import { BarList, Tile } from '../ui/parts'
 import { artistHref } from '../ui/links'
+import { artistRef, itemRef } from '../data/refs'
 import { Chart, type ChartOption } from '../ui/Chart'
 import { CHART_COLORS, type ThemeName } from '../ui/theme'
 import { date, hours, monthLabel, num } from '../ui/format'
@@ -123,8 +124,11 @@ export function Resumo({ data, filter, theme }: Props) {
       </section>
 
       <div className="two">
-        <BarList title={nouns.topC} rows={toBars(s.topCreators).map((r) => ({ ...r, href: artistHref(r.key) }))} />
-        <BarList title={nouns.topI} rows={toBars(s.topItems)} />
+        <BarList
+          title={nouns.topC}
+          rows={toBars(s.topCreators).map((r) => ({ ...r, href: artistHref(r.key), image: artistRef(data, r.key) }))}
+        />
+        <BarList title={nouns.topI} rows={toBars(s.topItems).map((r) => ({ ...r, image: itemRef(data, r.key) }))} />
       </div>
     </main>
   )
