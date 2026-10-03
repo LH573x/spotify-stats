@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Dataset } from './data/types'
 import { loadFiles } from './data/load'
 import { clearSaved, loadSaved, save } from './data/store'
+import { takeSharedFiles } from './data/shared'
 import { hasPodcasts, years, type Filter, type KindFilter } from './data/stats'
 import { Upload } from './pages/Upload'
 import { Resumo } from './pages/Resumo'
@@ -77,13 +78,6 @@ export default function App() {
   const [notice, setNotice] = useState<string | null>(null)
   const [filter, setFilter] = useState<Filter>({ year: null, kind: 'all' })
 
-  useEffect(() => {
-    loadSaved().then((saved) => {
-      setData(saved.dataset)
-      if (saved.outdated) setNotice('O site ganhou páginas novas. Solte seu arquivo de novo para atualizar os dados.')
-      setBooting(false)
-    })
-  }, [])
 
   const yearList = useMemo(() => (data ? years(data) : []), [data])
   const podcasts = useMemo(() => (data ? hasPodcasts(data) : false), [data])
@@ -91,7 +85,7 @@ export default function App() {
   // O Wrapped é sempre de um ano só: sem ano escolhido, mostra o mais recente.
   const wrappedYear = filter.year ?? lastYear
 
-  const onFiles = async (files: File[]) => {
+  const onFiles = useCallback(async (files: File[]) => {
     setError(null)
     setBusy('Preparando…')
     try {
@@ -104,7 +98,24 @@ export default function App() {
     } finally {
       setBusy(null)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    takeSharedFiles().then((shared) => {
+      // Chegou um arquivo pelo "Compartilhar" do Android: lê ele no lugar dos dados salvos.
+      if (shared) {
+        setBooting(false)
+        if (shared.length > 0) onFiles(shared)
+        else setError('O arquivo compartilhado não chegou. Tente compartilhar de novo ou escolha o arquivo aqui.')
+        return
+      }
+      loadSaved().then((saved) => {
+        setData(saved.dataset)
+        if (saved.outdated) setNotice('O site ganhou páginas novas. Solte seu arquivo de novo para atualizar os dados.')
+        setBooting(false)
+      })
+    })
+  }, [onFiles])
 
   const reset = async () => {
     await clearSaved()

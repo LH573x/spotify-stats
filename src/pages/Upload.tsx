@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useInstall } from '../ui/install'
 
 interface Props {
   busy: string | null
@@ -10,6 +11,7 @@ interface Props {
 export function Upload({ busy, error, notice, onFiles }: Props) {
   const input = useRef<HTMLInputElement>(null)
   const [over, setOver] = useState(false)
+  const install = useInstall()
 
   const take = (list: FileList | null) => {
     if (list && list.length) onFiles([...list])
@@ -70,6 +72,15 @@ export function Upload({ busy, error, notice, onFiles }: Props) {
       </div>
       {error && <p className="error">{error}</p>}
 
+      {install && (
+        <div className="install">
+          <button className="primary" onClick={install}>
+            Instalar o app
+          </button>
+          <span>Com o app instalado, é só tocar em Compartilhar no zip e escolher Meu Spotify.</span>
+        </div>
+      )}
+
       <p className="privacy">
         Seu histórico não sai deste aparelho: tudo é lido aqui mesmo no navegador. Para mostrar fotos e capas, o site
         só procura os nomes dos artistas e álbuns que aparecem na tela no Wikidata e no MusicBrainz.
@@ -109,6 +120,11 @@ export function Upload({ busy, error, notice, onFiles }: Props) {
           <li>
             Se o celular abriu o zip e ele virou uma pasta, tudo bem: entre na pasta e marque os arquivos que começam com{' '}
             <code>Streaming_History_Audio</code>.
+          </li>
+          <li>
+            No Android tem um atalho: instale o site como app (botão <strong>Instalar o app</strong> ou menu ⋮ do Chrome →{' '}
+            <strong>Instalar app</strong>). Depois, em Downloads, segure o zip, toque em <strong>Compartilhar</strong> e
+            escolha <strong>Meu Spotify</strong>.
           </li>
         </ol>
       </details>

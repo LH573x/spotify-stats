@@ -309,6 +309,21 @@ a {
 .howto + .howto {
   margin-top: 12px;
 }
+/* Instalar como app só faz sentido no celular (é por ele que o Android deixa compartilhar o zip). */
+.install {
+  display: none;
+}
+@media (hover: none) and (pointer: coarse) {
+  .install {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 16px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+}
 .spinner {
   width: 28px;
   height: 28px;
