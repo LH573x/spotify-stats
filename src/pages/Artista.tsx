@@ -101,13 +101,12 @@ export function Artista({ data, id, theme }: Props) {
         <Art image={artistRef(data, id)} label={a.name} className="artist-photo" />
         <div>
           <p className="eyebrow">
-            {podcast ? 'Podcast' : 'Artista'} · nº {num(a.rank)} de {num(a.rankOf)} {podcast ? 'podcasts' : 'artistas'} que você já
-            ouviu
+            {podcast ? 'Podcast' : 'Artista'} · nº {num(a.rank)}
           </p>
           <h1 className="artist-name">{a.name}</h1>
           <p className="sub">
-            <span className="accent">{hours(a.totalMs)}</span> ouvindo, {num(a.plays)} reproduções, {num(a.itemCount)}{' '}
-            {podcast ? 'episódios' : a.itemCount === 1 ? 'música' : 'músicas'}.
+            <span className="accent">{hours(a.totalMs)}</span> · {num(a.plays)} reproduções · {num(a.itemCount)}{' '}
+            {podcast ? 'episódios' : a.itemCount === 1 ? 'música' : 'músicas'}
           </p>
         </div>
       </section>
@@ -116,12 +115,12 @@ export function Artista({ data, id, theme }: Props) {
         items={[
           ...(a.first ? [{ label: 'Primeira vez', value: shortDate(a.first.t), hint: a.first.item }] : []),
           ...(a.last ? [{ label: 'Última vez', value: shortDate(a.last.t), hint: a.last.item }] : []),
-          { label: 'Ano favorito', value: String(bestYear.year), hint: `${hours(bestYear.ms)}, nº ${bestYear.rank} do ano` },
+          { label: 'Ano favorito', value: String(bestYear.year), hint: hours(bestYear.ms) },
           { label: 'Mês recorde', value: monthLabel(peak.month), hint: hours(peak.hours * 3.6e6) },
         ]}
       />
 
-      <Section kicker="Mês a mês" title={`Sua história com ${a.name}`}>
+      <Section title={`Sua história com ${a.name}`}>
         <div className="card">
           <Chart option={option} height={240} label={`Horas por mês ouvindo ${a.name}`} />
           <div className="year-chips" aria-label="Posição em cada ano">
@@ -134,7 +133,7 @@ export function Artista({ data, id, theme }: Props) {
         </div>
       </Section>
 
-      <Section kicker={`Top ${a.topItems.length}`} title={podcast ? 'Episódios mais ouvidos' : 'Músicas mais ouvidas'}>
+      <Section title={podcast ? 'Episódios mais ouvidos' : 'Músicas mais ouvidas'}>
         <BarList
           rows={a.topItems.map((it) => ({
             key: it.id,

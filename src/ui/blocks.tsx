@@ -4,15 +4,13 @@ import { Art, Thumb } from './Thumb'
 import { PlayButton } from './player'
 import type { Track } from './playerStore'
 
-/** Um trecho da página, com título grande e uma linha dizendo o que é. */
+/** Um trecho da página: só o título grande (e, raramente, uma linha curta com um dado a mais). */
 export function Section({
-  kicker,
   title,
   note,
   children,
   className = '',
 }: {
-  kicker: string
   title: ReactNode
   note?: ReactNode
   children: ReactNode
@@ -21,7 +19,6 @@ export function Section({
   return (
     <section className={`sec ${className}`}>
       <header className="sec-head">
-        <p className="kicker">{kicker}</p>
         <h2>{title}</h2>
         {note && <p className="sec-note">{note}</p>}
       </header>

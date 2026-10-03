@@ -159,11 +159,9 @@ export default function App() {
         </div>
       </header>
 
-      {data && page !== 'artista' && page !== 'musica' && (page !== 'resumo' || podcasts) && (
+      {data && page !== 'artista' && page !== 'musica' && ((page !== 'resumo' && page !== 'linha') || podcasts) && (
         <div className="filters">
-          {page === 'linha' ? (
-            <p className="filters-note">Todos os anos, do começo até hoje.</p>
-          ) : page === 'resumo' ? null : (
+          {page === 'linha' || page === 'resumo' ? null : (
             <div className="chips" role="group" aria-label="Período">
               {page !== 'wrapped' && (
                 <button className={filter.year === null ? 'on' : ''} onClick={() => setFilter({ ...filter, year: null })}>
@@ -211,8 +209,8 @@ export default function App() {
       )}
 
       <footer className="foot">
-        Seu histórico fica só neste navegador. Fotos do <a href="https://www.wikidata.org/">Wikidata</a> e capas do{' '}
-        <a href="https://musicbrainz.org/">MusicBrainz</a>, buscadas pelo nome. O botão de tocar abre o player do próprio Spotify.
+        Seus dados ficam só neste aparelho · Fotos: <a href="https://www.wikidata.org/">Wikidata</a> · Capas:{' '}
+        <a href="https://musicbrainz.org/">MusicBrainz</a>
       </footer>
       {data && <PlayerDock />}
     </div>

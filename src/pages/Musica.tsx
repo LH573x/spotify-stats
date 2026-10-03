@@ -4,7 +4,7 @@ import { trackDetail } from '../data/track'
 import { itemRef } from '../data/refs'
 import { Chart, type ChartOption } from '../ui/Chart'
 import { chartColors, type ThemeName } from '../ui/theme'
-import { cleanTitle, date, hours, keyToMs, monthLabel, num, pct, shortDate } from '../ui/format'
+import { cleanTitle, hours, keyToMs, monthLabel, num, pct, shortDate } from '../ui/format'
 import { Section, StatStrip } from '../ui/blocks'
 import { Art } from '../ui/Thumb'
 import { artistHref } from '../ui/links'
@@ -98,7 +98,7 @@ export function Musica({ data, id, theme }: Props) {
         </div>
         <div className="song-text">
           <p className="eyebrow">
-            {podcast ? 'Episódio' : 'Música'} · nº {num(t.rank)} de {num(t.rankOf)} {podcast ? 'episódios' : 'músicas'} que você já ouviu
+            {podcast ? 'Episódio' : 'Música'} · nº {num(t.rank)}
           </p>
           <h1 className="song-name" title={t.name}>
             {cleanTitle(t.name)}
@@ -120,23 +120,14 @@ export function Musica({ data, id, theme }: Props) {
 
       <StatStrip
         items={[
-          { label: 'Reproduções', value: num(t.plays), hint: `${hours(t.totalMs)} ouvindo` },
-          ...(t.first ? [{ label: 'Primeira vez', value: shortDate(t.first), hint: `às ${new Date(t.first).getHours()}h` }] : []),
+          { label: 'Reproduções', value: num(t.plays), hint: hours(t.totalMs) },
+          ...(t.first ? [{ label: 'Primeira vez', value: shortDate(t.first) }] : []),
           ...(t.last ? [{ label: 'Última vez', value: shortDate(t.last) }] : []),
-          { label: 'Dias diferentes', value: num(t.days), hint: t.bestDay ? `recorde: ${num(t.bestDay.plays)} vezes em ${date(keyToMs(t.bestDay.day))}` : undefined },
+          { label: 'Dias diferentes', value: num(t.days), hint: t.bestDay ? `recorde: ${num(t.bestDay.plays)} ${t.bestDay.plays === 1 ? 'vez' : 'vezes'} em ${shortDate(keyToMs(t.bestDay.day))}` : undefined },
         ]}
       />
 
-      <Section
-        kicker="Mês a mês"
-        title="Quantas vezes por mês"
-        note={
-          <>
-            {pct(t.artistShare)} do tempo que você passou ouvindo {artist} foi com {podcast ? 'este episódio' : 'esta música'}.
-            {t.starts > 0 && t.skips > 0 && <> Você pulou {pct(t.skips / t.starts)} das vezes em que ela começou.</>}
-          </>
-        }
-      >
+      <Section title="Quantas vezes por mês" note={`${pct(t.artistShare)} do seu tempo com ${artist}`}>
         <div className="card">
           <Chart option={option} height={220} label={`Vezes por mês que ${t.name} tocou`} />
           <div className="year-chips" aria-label="Posição em cada ano">
@@ -149,7 +140,7 @@ export function Musica({ data, id, theme }: Props) {
         </div>
       </Section>
 
-      <Section kicker="Relógio" title="Em que hora do dia você ouve" note={`Mais às ${topHour}h.`}>
+      <Section title="Em que hora do dia você ouve">
         <div className="card hours24" role="img" aria-label={`Reproduções por hora do dia. Mais às ${topHour}h.`}>
           {t.byHour.map((v, h) => (
             <div key={h} className={h === topHour ? 'on' : ''} title={`${h}h: ${num(v)} ${v === 1 ? 'vez' : 'vezes'}`}>

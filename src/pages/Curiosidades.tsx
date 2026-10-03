@@ -4,7 +4,7 @@ import type { Filter } from '../data/stats'
 import { dayParts, habits } from '../data/habits'
 import { Chart, type ChartOption } from '../ui/Chart'
 import { chartColors, type ThemeName } from '../ui/theme'
-import { hours, num, pct } from '../ui/format'
+import { dayMonth, hours, keyToMs, num, pct, shortDate } from '../ui/format'
 import { BarList } from '../ui/parts'
 import { Section, StatStrip } from '../ui/blocks'
 import { years } from '../data/stats'
@@ -159,29 +159,24 @@ export function Curiosidades({ data, filter, theme, lastYear }: Props) {
     h.streak && {
       label: 'Sequência recorde',
       value: `${num(h.streak.days)} ${h.streak.days === 1 ? 'dia' : 'dias'}`,
-      hint: `seguidos, de ${dayLabel(h.streak.from, false)} a ${dayLabel(h.streak.to, false)}`,
+      hint: `${h.streak.from.slice(0, 4) === h.streak.to.slice(0, 4) ? dayMonth(keyToMs(h.streak.from)) : shortDate(keyToMs(h.streak.from))} – ${shortDate(keyToMs(h.streak.to))}`,
     },
-    { label: 'Dia recorde', value: hours(h.bestDay.ms), hint: dayLabel(h.bestDay.day) },
-    h.shuffleShare !== null && { label: 'No aleatório', value: pct(h.shuffleShare), hint: 'das reproduções' },
-    h.skipShare !== null && { label: 'Puladas', value: pct(h.skipShare), hint: 'das faixas, apertando próxima' },
+    { label: 'Dia recorde', value: hours(h.bestDay.ms), hint: shortDate(keyToMs(h.bestDay.day)) },
+    h.shuffleShare !== null && { label: 'No aleatório', value: pct(h.shuffleShare) },
+    h.skipShare !== null && { label: 'Puladas', value: pct(h.skipShare) },
   ].filter((x) => !!x)
 
   return (
     <main className="page">
       <section className="hero">
-        <p className="eyebrow">{filter.year ? `Em ${filter.year}` : 'Desde o começo'}</p>
         <h1>
           Você é da <span className="accent">{topPart.name.toLowerCase()}</span>
         </h1>
-        <p className="sub">
-          {pct(topPart.hours / totalHours)} do que você ouve toca entre {topPart.from}h e {topPart.to}h.
-          {h.peak && (
-            <>
-              {' '}
-              Seu horário nobre é {WEEKDAYS_LONG[h.peak.weekday]} às {h.peak.hour}h.
-            </>
-          )}
-        </p>
+        {h.peak && (
+          <p className="sub">
+            Horário nobre: {WEEKDAYS_LONG[h.peak.weekday]} às {h.peak.hour}h
+          </p>
+        )}
         <div className="daybar" role="img" aria-label={partHours.map((p) => `${p.name}: ${pct(p.hours / totalHours)}`).join(', ')}>
           {partHours.map((p) => (
             <div key={p.name} className={p === topPart ? 'on' : ''} style={{ flexGrow: Math.max(p.hours / totalHours, 0.0001) }}>
@@ -197,39 +192,27 @@ export function Curiosidades({ data, filter, theme, lastYear }: Props) {
 
       <StatStrip items={stats} />
 
-      <Section kicker="Recordes" title={filter.year ? `Seus recordes de ${filter.year}` : 'Seus recordes'}>
+      <Section title={filter.year ? `Seus recordes de ${filter.year}` : 'Seus recordes'}>
         <Recordes data={data} filter={filter} />
       </Section>
 
       {filter.kind !== 'podcast' && (
-        <Section
-          kicker="Cápsula do tempo"
-          title="Músicas que você esqueceu"
-          note={
-            filter.year
-              ? `Você ouviu muito em ${filter.year} e não tocou mais no último ano dos seus dados.`
-              : 'Você ouviu muito e não tocou mais no último ano dos seus dados.'
-          }
-        >
+        <Section title="Músicas que você esqueceu">
           <Esquecidas data={data} filter={filter} />
         </Section>
       )}
 
-      <Section kicker="Frente a frente" title="Um ano contra o outro" note="Escolha dois anos para comparar.">
+      <Section title="Um ano contra o outro">
         <Comparar key={`${filter.year}-${filter.kind}`} data={data} years={yearList} filter={filter} />
       </Section>
 
-      <Section kicker="Relógio" title="A que horas você dá play" note="Cada quadrado é uma hora da semana. Quanto mais forte, mais você ouviu.">
+      <Section title="A que horas você dá play">
         <div className="card">
           <Chart option={clockOption} height={300} label="Horas ouvidas por dia da semana e hora do dia" />
         </div>
       </Section>
 
-      <Section
-        kicker="Calendário"
-        title={`Seu ${h.calendarYear}, dia por dia`}
-        note={<>Cada quadrado é um dia.{filter.year === null && ' Escolha um ano no topo para ver outro.'}</>}
-      >
+      <Section title={`Seu ${h.calendarYear}, dia por dia`}>
         <div className="card">
           <div className="scroll-x">
             <div style={{ minWidth: 720 }}>
@@ -241,7 +224,7 @@ export function Curiosidades({ data, filter, theme, lastYear }: Props) {
 
       <div className="two">
         {h.platforms.length > 0 && (
-          <Section kicker="Aparelhos" title="Onde você ouve">
+          <Section title="Onde você ouve">
             <ul className="card shares">
               {h.platforms.map((p) => (
                 <li key={p.name} title={`${p.name}: ${hours(p.ms)}`}>
@@ -256,7 +239,7 @@ export function Curiosidades({ data, filter, theme, lastYear }: Props) {
           </Section>
         )}
         {h.topSkipped.length > 0 && (
-          <Section kicker="Botão de pular" title="O que você mais pula" note="Vezes que você apertou próxima, entre as faixas que tocaram 5 vezes ou mais.">
+          <Section title="O que você mais pula">
             <BarList
               rows={h.topSkipped.map((s) => ({
                 key: s.id,
