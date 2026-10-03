@@ -1299,6 +1299,9 @@ a.rank-name:focus-visible {
   background: var(--surface);
   box-shadow: 0 18px 40px var(--shadow);
 }
+.dock[hidden] {
+  display: none;
+}
 .dock-frame {
   flex: 1;
   min-width: 0;
