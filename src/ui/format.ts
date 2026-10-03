@@ -69,3 +69,15 @@ export const cleanTitle = (name: string) =>
   name
     .replace(/\s+(?:-\s+|\()(?:\d{4}\s+)?(?:remaster(?:ed)?|remasterizad[ao])(?:\s+\d{4})?(?:\s+version)?\)?$/i, '')
     .replace(/\s+[([]feat\.?\s[^)\]]*[)\]]/i, '') || name
+
+/** Duração para recordes: "10 h 13 min", "45 min". */
+export function duration(ms: number): string {
+  const total = Math.round(ms / 60000)
+  const h = Math.floor(total / 60)
+  const m = total % 60
+  if (h === 0) return `${m} min`
+  return m === 0 ? `${h} h` : `${h} h ${m} min`
+}
+
+/** Hora do dia: "21:02". */
+export const clock = (ms: number) => new Date(ms).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
