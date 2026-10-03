@@ -12,7 +12,7 @@ export interface Item {
 }
 
 /** Sobe quando o jeito de ler o export muda; dados salvos de versões antigas são lidos de novo. */
-export const DATASET_VERSION = 3
+export const DATASET_VERSION = 4
 
 export const FLAG_SKIPPED = 1
 export const FLAG_SHUFFLE = 2

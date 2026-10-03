@@ -1,4 +1,5 @@
 import { DATASET_VERSION, FLAG_PODCAST, FLAG_SHUFFLE, FLAG_SKIPPED, type Dataset, type Kind } from './types'
+import { mergeSameSongs } from './merge'
 
 /** Formato do "Histórico de streaming estendido" (Streaming_History_Audio_*.json). */
 interface ExtendedRow {
@@ -176,7 +177,7 @@ export function parseFiles(files: SourceFile[]): Dataset {
     plays.platform[i] = platform[src]
   })
 
-  return {
+  return mergeSameSongs({
     version: DATASET_VERSION,
     format: sawExtended ? 'extended' : 'basic',
     items,
@@ -184,5 +185,5 @@ export function parseFiles(files: SourceFile[]): Dataset {
     platforms,
     plays,
     importedAt: Date.now(),
-  }
+  })
 }
