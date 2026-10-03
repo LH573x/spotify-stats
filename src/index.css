@@ -372,11 +372,18 @@ a {
   text-decoration-color: var(--accent);
   text-underline-offset: 3px;
 }
-.hero-split {
+.hero-deck {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-  gap: 32px;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  grid-template-areas: 'deck text' 'crate crate';
+  gap: 16px 40px;
   align-items: center;
+}
+.hero-deck .hero-text {
+  grid-area: text;
+}
+.hero-deck h1 {
+  font-size: clamp(44px, 6.4vw, 88px);
 }
 .empty {
   color: var(--muted);
@@ -549,28 +556,6 @@ a {
   color: var(--accent-ink);
   font: 800 20px/1 var(--display);
   box-shadow: 0 0 0 3px var(--page);
-}
-
-/* Fotos sobrepostas do topo */
-.stack {
-  position: relative;
-  width: 100%;
-  max-width: 400px;
-  aspect-ratio: 5 / 4;
-  justify-self: end;
-}
-.stack-art {
-  position: absolute;
-  height: auto !important;
-  aspect-ratio: 1;
-  box-shadow: 0 0 0 4px var(--page), 0 14px 30px var(--shadow);
-  animation: pop-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1.1) both;
-}
-@keyframes pop-in {
-  from {
-    opacity: 0;
-    transform: scale(0.6);
-  }
 }
 
 /* Pódio: nº 1 grande, 2º ao 5º em cartões, o resto em lista */
@@ -1318,6 +1303,272 @@ a.rank-name:focus-visible {
   padding-bottom: 130px;
 }
 
+/* Toca-discos do Resumo: madeira, tampo de metal, prato, disco, braço e a caixa de discos */
+.td-deck {
+  grid-area: deck;
+  position: relative;
+  width: min(100%, 540px);
+  aspect-ratio: 5 / 4;
+  justify-self: center;
+  border-radius: 14px;
+  background:
+    repeating-linear-gradient(92deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 9px, rgba(255, 255, 255, 0.04) 9px 10px, transparent 10px 17px),
+    linear-gradient(170deg, #6d4426, #4a2b16 60%, #3a2111);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.12), inset 0 -4px 0 rgba(0, 0, 0, 0.35), 0 18px 40px var(--shadow);
+}
+.td-deck::before {
+  content: '';
+  position: absolute;
+  inset: 4.5%;
+  border-radius: 8px;
+  background: linear-gradient(160deg, #2b2b29, #1b1b1a);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+.td-platter {
+  position: absolute;
+  left: 8%;
+  top: 50%;
+  width: 62%;
+  aspect-ratio: 1;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, transparent 0 94%, #3a3a37 94.5% 100%),
+    repeating-conic-gradient(#8a8a85 0 1.6deg, #2c2c2a 1.6deg 3.6deg);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+.td-disc {
+  position: absolute;
+  inset: 3%;
+  border-radius: 50%;
+  background: #0c0c0c;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px #000;
+  container-type: inline-size;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+.td-disc.td-out {
+  transform: translateX(-12%) scale(0.92);
+  opacity: 0;
+}
+.td-spin {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, transparent 0 34%, #0a0a0a 34.4% 36%, transparent 36.2% 47%, rgba(255, 255, 255, 0.05) 47.3% 47.8%, transparent 48% 64%, rgba(255, 255, 255, 0.05) 64.3% 64.8%, transparent 65% 96%, #050505 96.5%),
+    repeating-radial-gradient(circle, #121212 0 1.2px, #1b1b1b 1.2px 2.4px);
+}
+.td-disc.td-turning .td-spin {
+  animation: spin 6s linear infinite;
+}
+.td-lbl {
+  position: absolute;
+  inset: 33%;
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--ink-c);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  overflow: hidden;
+}
+.td-lbl::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, transparent 0 58%, rgba(0, 0, 0, 0.18) 59% 60%, transparent 61%);
+}
+.td-lbl b {
+  position: relative;
+  top: -12%;
+  font: 800 11cqi / 0.9 var(--display);
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+.td-lbl i {
+  position: absolute;
+  bottom: 20%;
+  font: 600 3.4cqi / 1 var(--display);
+  font-style: normal;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.td-hole {
+  position: absolute;
+  inset: 48.6%;
+  border-radius: 50%;
+  background: #d8d6cf;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.td-sheen {
+  /* reflexo da luz: fica parado enquanto o disco gira */
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 20deg, transparent 0 8%, rgba(255, 255, 255, 0.13) 13%, transparent 19% 58%, rgba(255, 255, 255, 0.09) 63%, transparent 69%);
+  -webkit-mask: radial-gradient(circle, transparent 0 34%, #000 35%);
+  mask: radial-gradient(circle, transparent 0 34%, #000 35%);
+  pointer-events: none;
+}
+.td-arm {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.td-swing {
+  transform-box: view-box;
+  transform-origin: 430px 72px;
+  transition: transform 0.6s cubic-bezier(0.3, 0.6, 0.2, 1);
+}
+.td-arm.td-down .td-swing {
+  transform: rotate(33deg);
+}
+.td-knobs {
+  position: absolute;
+  right: 8%;
+  bottom: 9%;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.td-knob {
+  border: 0;
+  border-radius: 4px;
+  padding: 5px 9px;
+  background: linear-gradient(#e9e6dc, #bdb9ad);
+  color: #1b1b1b;
+  font: 700 12px/1 var(--display);
+  letter-spacing: 0.06em;
+  box-shadow: 0 2px 0 #6f6b60;
+}
+.td-knob[aria-pressed='true'] {
+  background: linear-gradient(#bdb9ad, #e9e6dc);
+  box-shadow: 0 0 0 #6f6b60;
+  transform: translateY(2px);
+}
+.td-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4a1d14;
+}
+.td-knobs.td-lit .td-led {
+  background: #ff5a3c;
+  box-shadow: 0 0 8px #ff5a3c;
+}
+.td-crate {
+  grid-area: crate;
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 10px 4px 8px;
+  margin: 0 -4px;
+  scrollbar-width: thin;
+}
+.td-crate button {
+  flex: none;
+  border: 0;
+  padding: 0;
+  background: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.td-crate button:hover .td-sleeve {
+  transform: translateY(-3px);
+}
+.td-crate button[aria-pressed='true'] {
+  color: var(--ink);
+  font-weight: 600;
+}
+.td-crate button[aria-pressed='true'] .td-sleeve {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.td-sleeve {
+  --s: 76px;
+  position: relative;
+  display: block;
+  width: var(--s);
+  aspect-ratio: 1;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink-c);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 6px 16px var(--shadow);
+  transition: transform 0.2s;
+}
+.td-sleeve::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.td-sleeve::after {
+  /* papel gasto: um brilho leve e cantos mais escuros */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 30% 20%, rgba(255, 255, 255, 0.1), transparent 55%), radial-gradient(140% 140% at 50% 50%, transparent 60%, rgba(0, 0, 0, 0.28));
+  pointer-events: none;
+}
+.td-p-rings::before {
+  background: repeating-radial-gradient(circle at 100% 100%, var(--a) 0 calc(var(--s) * 0.055), transparent calc(var(--s) * 0.055) calc(var(--s) * 0.11));
+}
+.td-p-stripes::before {
+  background: linear-gradient(to bottom, var(--bg) 0 42%, transparent 42%),
+    repeating-linear-gradient(135deg, var(--a) 0 calc(var(--s) * 0.06), transparent calc(var(--s) * 0.06) calc(var(--s) * 0.15));
+}
+.td-p-dots::before {
+  background: radial-gradient(circle, var(--a) 0 32%, transparent 34%) 0 0 / calc(var(--s) * 0.11) calc(var(--s) * 0.11);
+  opacity: 0.9;
+}
+.td-p-sun::before {
+  background: repeating-conic-gradient(from 0deg at 50% 112%, var(--a) 0 5deg, transparent 5deg 11deg);
+}
+.td-p-split::before {
+  background: linear-gradient(90deg, var(--a) 0 36%, transparent 36%), linear-gradient(0deg, var(--a) 0 6%, transparent 6%);
+}
+.td-p-box::before {
+  background: repeating-linear-gradient(90deg, transparent 0 calc(var(--s) * 0.09), rgba(255, 255, 255, 0.05) calc(var(--s) * 0.09) calc(var(--s) * 0.1)),
+    linear-gradient(160deg, #2a2a28, #0e0e0e);
+}
+.td-who {
+  position: absolute;
+  top: 8%;
+  left: 8%;
+  right: 8%;
+  z-index: 1;
+  font: 700 calc(var(--s) * 0.105) / 1.05 var(--display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: left;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.td-yr {
+  position: absolute;
+  left: 7%;
+  bottom: 4%;
+  z-index: 1;
+  font: 800 calc(var(--s) * 0.34) / 0.85 var(--display);
+  letter-spacing: -0.02em;
+  text-align: left;
+}
+.td-p-box .td-yr {
+  font-size: calc(var(--s) * 0.15);
+  line-height: 1;
+}
+
 /* Página de uma música */
 .song-hero {
   display: flex;
@@ -1807,7 +2058,7 @@ a.find-card:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stack-art,
+  .td-disc.td-turning .td-spin,
   .art img {
     animation: none !important;
   }
@@ -1841,14 +2092,10 @@ a.find-card:hover {
   .page {
     gap: 32px;
   }
-  .hero-split {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-  .stack {
-    order: -1;
-    max-width: 260px;
-    justify-self: center;
+  .hero-deck {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'deck' 'crate' 'text';
+    gap: 12px;
   }
   .artist-hero {
     gap: 16px;

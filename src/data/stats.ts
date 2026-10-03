@@ -136,3 +136,44 @@ export function summarize(d: Dataset, f: Filter, topN = 10): Summary {
     previousYearMs: f.year !== null && previousYearMs > 0 ? previousYearMs : null,
   }
 }
+
+export interface YearTop {
+  /** null = todos os anos juntos. */
+  year: number | null
+  /** Quem você mais ouviu no ano (artista ou podcast). */
+  top: string | null
+  ms: number
+}
+
+/** Para cada ano (e para todos juntos), o artista mais ouvido: vai na capa do disco daquele ano. */
+export function yearTops(d: Dataset, kind: KindFilter): YearTop[] {
+  const { start, ms, item, flags } = d.plays
+  const perYear = new Map<number, Map<number, number>>()
+  const all = new Map<number, number>()
+  const totals = new Map<number, number>()
+  let allMs = 0
+  for (const y of years(d)) {
+    perYear.set(y, new Map())
+    totals.set(y, 0)
+  }
+  for (let i = 0; i < start.length; i++) {
+    if (!kindMatches(flags[i], kind)) continue
+    const y = new Date(start[i]).getFullYear()
+    const c = d.items[item[i]].creator
+    const m = perYear.get(y)!
+    m.set(c, (m.get(c) ?? 0) + ms[i])
+    all.set(c, (all.get(c) ?? 0) + ms[i])
+    totals.set(y, totals.get(y)! + ms[i])
+    allMs += ms[i]
+  }
+  const best = (m: Map<number, number>) => {
+    let id = -1
+    let v = 0
+    for (const [k, x] of m) if (x > v) [id, v] = [k, x]
+    return id < 0 ? null : d.creators[id]
+  }
+  return [
+    ...[...perYear.entries()].map(([year, m]) => ({ year, top: best(m), ms: totals.get(year)! })),
+    { year: null, top: best(all), ms: allMs },
+  ]
+}

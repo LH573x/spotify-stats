@@ -148,11 +148,11 @@ export default function App() {
         </div>
       </header>
 
-      {data && page !== 'artista' && page !== 'musica' && (
+      {data && page !== 'artista' && page !== 'musica' && (page !== 'resumo' || podcasts) && (
         <div className="filters">
           {page === 'linha' ? (
             <p className="filters-note">Todos os anos, do começo até hoje.</p>
-          ) : (
+          ) : page === 'resumo' ? null : (
             <div className="chips" role="group" aria-label="Período">
               {page !== 'wrapped' && (
                 <button className={filter.year === null ? 'on' : ''} onClick={() => setFilter({ ...filter, year: null })}>
@@ -193,7 +193,7 @@ export default function App() {
         ) : page === 'curiosidades' ? (
           <Curiosidades data={data} filter={filter} theme={theme} lastYear={lastYear} />
         ) : (
-          <Resumo data={data} filter={filter} theme={theme} />
+          <Resumo data={data} filter={filter} theme={theme} onYear={(year) => setFilter({ ...filter, year })} />
         )
       ) : (
         <Upload busy={busy} error={error} notice={notice} onFiles={onFiles} />

@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
 import type { Dataset } from '../data/types'
-import { summarize, type Filter, type Ranked } from '../data/stats'
-import { CoverWall, PhotoStack, Podium, Section, StatStrip, type RankItem } from '../ui/blocks'
+import { summarize, yearTops, type Filter, type Ranked } from '../data/stats'
+import { CoverWall, Podium, Section, StatStrip, type RankItem } from '../ui/blocks'
+import { TocaDiscos } from '../ui/TocaDiscos'
 import { artistHref, songHref } from '../ui/links'
 import { trackOf } from '../ui/playerStore'
 import { artistRef, itemRef } from '../data/refs'
@@ -13,6 +14,7 @@ interface Props {
   data: Dataset
   filter: Filter
   theme: ThemeName
+  onYear: (year: number | null) => void
 }
 
 const NOUNS = {
@@ -26,8 +28,9 @@ const NOUNS = {
   podcast: { creators: 'Programas', items: 'Episódios', topC: 'Os podcasts que mais tocaram', topI: 'Os episódios que mais tocaram' },
 }
 
-export function Resumo({ data, filter, theme }: Props) {
+export function Resumo({ data, filter, theme, onYear }: Props) {
   const s = useMemo(() => summarize(data, filter), [data, filter])
+  const discs = useMemo(() => yearTops(data, filter.kind), [data, filter.kind])
   const c = chartColors(theme, 'green')
   const nouns = NOUNS[filter.kind]
 
@@ -82,8 +85,19 @@ export function Resumo({ data, filter, theme }: Props) {
     }
   }, [s, c, filter.year])
 
+  const deck = <TocaDiscos years={discs} year={filter.year} onPick={onYear} />
+
   if (s.totalMs === 0) {
-    return <p className="empty">Nada por aqui nesse período.</p>
+    return (
+      <main className="page">
+        <section className="hero hero-deck">
+          {deck}
+          <div className="hero-text">
+            <p className="empty">Nada por aqui nesse período.</p>
+          </div>
+        </section>
+      </main>
+    )
   }
 
   const totalHours = s.totalMs / 3.6e6
@@ -107,7 +121,8 @@ export function Resumo({ data, filter, theme }: Props) {
 
   return (
     <main className="page">
-      <section className="hero hero-split">
+      <section className="hero hero-deck">
+        {deck}
         <div className="hero-text">
           <p className="eyebrow">
             {filter.year ? `Em ${filter.year}` : 'Desde o começo'} · {s.first !== null && date(s.first)} a{' '}
@@ -126,7 +141,6 @@ export function Resumo({ data, filter, theme }: Props) {
             )}
           </p>
         </div>
-        <PhotoStack items={creators} />
       </section>
 
       <StatStrip

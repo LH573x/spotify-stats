@@ -141,30 +141,3 @@ export function CoverWall({ items }: { items: RankItem[] }) {
     </ol>
   )
 }
-
-/** As fotos dos mais ouvidos, sobrepostas, ao lado do número grande. */
-const SPOTS = [
-  { left: 26, top: 14, size: 52 },
-  { left: 0, top: 50, size: 34 },
-  { left: 70, top: 0, size: 30 },
-  { left: 72, top: 50, size: 26 },
-  { left: 6, top: 6, size: 20 },
-]
-
-export function PhotoStack({ items }: { items: { key: number | string; name: string; image?: ImageRef }[] }) {
-  if (items.length === 0) return null
-  return (
-    <div className="stack" aria-hidden>
-      {items.slice(0, SPOTS.length).map((it, i) => (
-        <Art
-          key={it.key}
-          image={it.image}
-          label={it.name}
-          round
-          className="stack-art"
-          style={{ left: `${SPOTS[i].left}%`, top: `${SPOTS[i].top}%`, width: `${SPOTS[i].size}%`, zIndex: 10 - i, animationDelay: `${i * 90}ms` }}
-        />
-      ))}
-    </div>
-  )
-}
