@@ -1,12 +1,6 @@
 import { useState, type CSSProperties } from 'react'
 import { useImage, type ImageRef } from '../data/images'
-
-/** Um tom fixo por nome, para a inicial não ficar sempre no mesmo cinza. */
-function hue(s: string) {
-  let h = 0
-  for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) % 360
-  return h
-}
+import { hue } from './format'
 
 interface ArtProps {
   image?: ImageRef

@@ -5,6 +5,8 @@ export interface YearTop {
   year: number
   totalMs: number
   top: { id: number; name: string; ms: number }[]
+  /** As músicas (ou episódios) mais ouvidas do ano. */
+  topItems: { id: number; name: string; ms: number }[]
 }
 
 export interface Discovery {
@@ -23,6 +25,15 @@ export interface Phase {
   totalMs: number
 }
 
+/** Uma música ouvida muito num mês só. */
+export interface SongPhase {
+  id: number
+  /** Mês do pico, "2021-06". */
+  month: string
+  peakPlays: number
+  totalPlays: number
+}
+
 export interface Timeline {
   years: YearTop[]
   /** Artistas novos por mês: "2021-06" → quantidade. */
@@ -31,6 +42,9 @@ export interface Timeline {
   phases: Phase[]
   /** Todos os artistas, do mais ouvido ao menos ouvido (para a busca). */
   ranking: { id: number; name: string; ms: number }[]
+  songPhases: SongPhase[]
+  /** As músicas mais ouvidas de todos os tempos (para a busca). */
+  songRanking: { id: number; ms: number }[]
 }
 
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -39,6 +53,8 @@ const monthKey = (dt: Date) => `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}`
 /** Uma fase precisa de pelo menos 5 h no total e de metade disso concentrada num único mês. */
 const PHASE_MIN_MS = 5 * 3.6e6
 const PHASE_MIN_SHARE = 0.5
+/** Para músicas: pelo menos 12 reproduções, metade delas no mesmo mês. */
+const SONG_PHASE_MIN_PLAYS = 12
 
 export function timeline(d: Dataset, kind: KindFilter, topN = 5): Timeline {
   const { start, ms, item, flags } = d.plays
@@ -47,6 +63,9 @@ export function timeline(d: Dataset, kind: KindFilter, topN = 5): Timeline {
   const total = new Map<number, number>()
   const firstHeard = new Map<number, number>()
   const perMonth = new Map<number, Map<string, number>>()
+  const itemsPerYear = new Map<number, Map<number, number>>()
+  const itemTotal = new Map<number, number>()
+  const itemPlays = new Map<number, Map<string, number>>()
   let firstMonth: string | null = null
   let lastMonth: string | null = null
 
@@ -70,6 +89,17 @@ export function timeline(d: Dataset, kind: KindFilter, topN = 5): Timeline {
     let cm = perMonth.get(c)
     if (!cm) perMonth.set(c, (cm = new Map()))
     cm.set(mk, (cm.get(mk) ?? 0) + played)
+
+    const it = item[i]
+    let iy = itemsPerYear.get(y)
+    if (!iy) itemsPerYear.set(y, (iy = new Map()))
+    iy.set(it, (iy.get(it) ?? 0) + played)
+    itemTotal.set(it, (itemTotal.get(it) ?? 0) + played)
+    if (played >= MIN_PLAY_MS) {
+      let ip = itemPlays.get(it)
+      if (!ip) itemPlays.set(it, (ip = new Map()))
+      ip.set(mk, (ip.get(mk) ?? 0) + 1)
+    }
   }
 
   const years: YearTop[] = [...perYear.entries()]
@@ -81,6 +111,10 @@ export function timeline(d: Dataset, kind: KindFilter, topN = 5): Timeline {
         .sort((a, b) => b[1] - a[1])
         .slice(0, topN)
         .map(([id, v]) => ({ id, name: d.creators[id], ms: v })),
+      topItems: [...(itemsPerYear.get(year) ?? new Map<number, number>()).entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, topN)
+        .map(([id, v]) => ({ id, name: d.items[id].name, ms: v })),
     }))
 
   // Descobertas: o primeiro play de 30 s+ de cada artista.
@@ -121,6 +155,21 @@ export function timeline(d: Dataset, kind: KindFilter, topN = 5): Timeline {
   }
   phases.sort((a, b) => b.peakMs - a.peakMs)
 
+  const songPhases: SongPhase[] = []
+  for (const [it, months] of itemPlays) {
+    if (d.items[it].kind !== 'music') continue
+    let total = 0
+    let peak: [string, number] = ['', 0]
+    for (const e of months) {
+      total += e[1]
+      if (e[1] > peak[1]) peak = e
+    }
+    if (total >= SONG_PHASE_MIN_PLAYS && peak[1] / total >= PHASE_MIN_SHARE) {
+      songPhases.push({ id: it, month: peak[0], peakPlays: peak[1], totalPlays: total })
+    }
+  }
+  songPhases.sort((a, b) => b.peakPlays - a.peakPlays)
+
   return {
     years,
     newPerMonth,
@@ -129,5 +178,9 @@ export function timeline(d: Dataset, kind: KindFilter, topN = 5): Timeline {
     ranking: [...total.entries()]
       .sort((a, b) => b[1] - a[1])
       .map(([id, v]) => ({ id, name: d.creators[id], ms: v })),
+    songPhases: songPhases.slice(0, 10),
+    songRanking: [...itemTotal.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([id, ms]) => ({ id, ms })),
   }
 }

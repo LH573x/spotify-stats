@@ -7,7 +7,11 @@ import { chartColors, type ThemeName } from '../ui/theme'
 import { hours, num, pct } from '../ui/format'
 import { BarList } from '../ui/parts'
 import { Section, StatStrip } from '../ui/blocks'
+import { years } from '../data/stats'
+import { Comparar, Esquecidas, Recordes } from './CuriosidadesExtras'
 import { itemRef } from '../data/refs'
+import { songHref } from '../ui/links'
+import { trackOf } from '../ui/playerStore'
 
 interface Props {
   data: Dataset
@@ -43,6 +47,7 @@ function useNarrow(px = 720) {
 
 export function Curiosidades({ data, filter, theme, lastYear }: Props) {
   const h = useMemo(() => habits(data, filter, lastYear), [data, filter, lastYear])
+  const yearList = useMemo(() => years(data), [data])
   const c = chartColors(theme, 'coral')
   const narrow = useNarrow()
 
@@ -192,6 +197,28 @@ export function Curiosidades({ data, filter, theme, lastYear }: Props) {
 
       <StatStrip items={stats} />
 
+      <Section kicker="Recordes" title={filter.year ? `Seus recordes de ${filter.year}` : 'Seus recordes'}>
+        <Recordes data={data} filter={filter} />
+      </Section>
+
+      {filter.kind !== 'podcast' && (
+        <Section
+          kicker="Cápsula do tempo"
+          title="Músicas que você esqueceu"
+          note={
+            filter.year
+              ? `Você ouviu muito em ${filter.year} e não tocou mais no último ano dos seus dados.`
+              : 'Você ouviu muito e não tocou mais no último ano dos seus dados.'
+          }
+        >
+          <Esquecidas data={data} filter={filter} />
+        </Section>
+      )}
+
+      <Section kicker="Frente a frente" title="Um ano contra o outro" note="Escolha dois anos para comparar.">
+        <Comparar key={`${filter.year}-${filter.kind}`} data={data} years={yearList} filter={filter} />
+      </Section>
+
       <Section kicker="Relógio" title="A que horas você dá play" note="Cada quadrado é uma hora da semana. Quanto mais forte, mais você ouviu.">
         <div className="card">
           <Chart option={clockOption} height={300} label="Horas ouvidas por dia da semana e hora do dia" />
@@ -236,6 +263,8 @@ export function Curiosidades({ data, filter, theme, lastYear }: Props) {
                 name: s.name,
                 sub: s.sub,
                 image: itemRef(data, s.id),
+                href: songHref(s.id),
+                track: trackOf(data, s.id),
                 value: `${num(s.skips)} de ${num(s.starts)}`,
                 share: s.skips / maxSkips,
                 title: `${s.name}: pulada ${num(s.skips)} de ${num(s.starts)} vezes (${pct(s.skips / s.starts)})`,

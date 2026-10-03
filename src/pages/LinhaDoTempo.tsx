@@ -4,12 +4,13 @@ import type { KindFilter } from '../data/stats'
 import { timeline } from '../data/timeline'
 import { Chart, type ChartOption } from '../ui/Chart'
 import { chartColors, type ThemeName } from '../ui/theme'
-import { date, hours, monthLabel, num, pct } from '../ui/format'
+import { cleanTitle, date, hours, monthLabel, num, pct } from '../ui/format'
 import { BarList } from '../ui/parts'
 import { Section } from '../ui/blocks'
 import { Art } from '../ui/Thumb'
-import { artistHref } from '../ui/links'
-import { artistRef } from '../data/refs'
+import { artistHref, songHref } from '../ui/links'
+import { trackOf } from '../ui/playerStore'
+import { artistRef, itemRef } from '../data/refs'
 
 interface Props {
   data: Dataset
@@ -29,6 +30,8 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
   const who = WHO[kind]
   const [hover, setHover] = useState<number | null>(null)
   const [query, setQuery] = useState('')
+  const [view, setView] = useState<'artists' | 'songs'>('artists')
+  const songs = view === 'songs'
 
   const newOption = useMemo<ChartOption>(
     () => ({
@@ -71,6 +74,17 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
     [t, c, who],
   )
 
+  // Busca: artistas pelo nome e músicas como "Nome — Artista".
+  const options = useMemo(() => {
+    const list: { label: string; href: string }[] = []
+    for (const r of t.ranking.slice(0, 1500)) list.push({ label: r.name, href: artistHref(r.id) })
+    for (const r of t.songRanking.slice(0, 1500)) {
+      const it = data.items[r.id]
+      list.push({ label: `${it.name} — ${data.creators[it.creator]}`, href: songHref(r.id) })
+    }
+    return list
+  }, [t, data])
+  const hrefs = useMemo(() => new Map(options.map((o) => [o.label.toLowerCase(), o.href])), [options])
   if (t.years.length === 0) return <p className="empty">Nada por aqui.</p>
 
   // Quem foi nº 1 em mais anos.
@@ -80,9 +94,9 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
   const discovered = t.discoveries.reduce((a, d) => a + d.count, 0)
   const rows = Math.max(...t.years.map((y) => y.top.length))
   const maxPeak = t.phases[0]?.peakMs ?? 1
+  const maxSongPeak = t.songPhases[0]?.peakPlays ?? 1
 
-  const ids = new Map(t.ranking.map((r) => [r.name.toLowerCase(), r.id]))
-  const found = ids.get(query.trim().toLowerCase())
+  const found = hrefs.get(query.trim().toLowerCase())
 
   return (
     <main className="page">
@@ -110,10 +124,10 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
         role="search"
         onSubmit={(e) => {
           e.preventDefault()
-          if (found !== undefined) location.hash = artistHref(found)
+          if (found !== undefined) location.hash = found
         }}
       >
-        <label htmlFor="artist-search">Buscar {who.one}</label>
+        <label htmlFor="artist-search">Buscar {who.one} ou {kind === 'podcast' ? 'episódio' : 'música'}</label>
         <div className="search-row">
           <input
             id="artist-search"
@@ -123,9 +137,9 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
             onChange={(e) => {
               setQuery(e.target.value)
               // Escolher uma sugestão já abre a página.
-              const id = ids.get(e.target.value.trim().toLowerCase())
+              const href = hrefs.get(e.target.value.trim().toLowerCase())
               const how = (e.nativeEvent as InputEvent).inputType
-              if (id !== undefined && (!how || how === 'insertReplacementText')) location.hash = artistHref(id)
+              if (href !== undefined && (!how || how === 'insertReplacementText')) location.hash = href
             }}
             autoComplete="off"
           />
@@ -134,8 +148,8 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
           </button>
         </div>
         <datalist id="artist-names">
-          {t.ranking.slice(0, 1500).map((r) => (
-            <option key={r.id} value={r.name} />
+          {options.map((o) => (
+            <option key={o.href} value={o.label} />
           ))}
         </datalist>
       </form>
@@ -145,6 +159,28 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
         title={`Seu top ${rows} de cada ano`}
         note="Passe o mouse num nome para ver em que outros anos ele aparece. Clique ou toque para abrir a página."
       >
+        <div className="segmented view-switch" role="group" aria-label="Mostrar">
+          <button
+            className={songs ? '' : 'on'}
+            aria-pressed={!songs}
+            onClick={() => {
+              setView('artists')
+              setHover(null)
+            }}
+          >
+            {kind === 'podcast' ? 'Podcasts' : 'Artistas'}
+          </button>
+          <button
+            className={songs ? 'on' : ''}
+            aria-pressed={songs}
+            onClick={() => {
+              setView('songs')
+              setHover(null)
+            }}
+          >
+            {kind === 'podcast' ? 'Episódios' : 'Músicas'}
+          </button>
+        </div>
         <div className="card">
           <div className="scroll-x">
             <table className="years-grid" style={{ minWidth: 40 + t.years.length * 100 }} onMouseLeave={() => setHover(null)}>
@@ -164,19 +200,22 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
                   <tr key={r}>
                     <th scope="row">{r + 1}º</th>
                     {t.years.map((y) => {
-                      const a = y.top[r]
+                      const a = songs ? y.topItems[r] : y.top[r]
                       if (!a) return <td key={y.year} />
+                      const name = songs ? cleanTitle(a.name) : a.name
+                      const sub = songs ? data.creators[data.items[a.id].creator] : null
+                      const image = songs ? itemRef(data, a.id) : artistRef(data, a.id)
                       return (
                         <td key={y.year} className={hover === a.id ? 'on' : hover !== null ? 'dim' : ''}>
                           <a
-                            href={artistHref(a.id)}
+                            href={songs ? songHref(a.id) : artistHref(a.id)}
                             onMouseEnter={() => setHover(a.id)}
                             onFocus={() => setHover(a.id)}
-                            title={`${a.name}: ${hours(a.ms)} em ${y.year}`}
+                            title={`${name}${sub ? `, de ${sub}` : ''}: ${hours(a.ms)} em ${y.year}`}
                           >
-                            <Art image={artistRef(data, a.id)} label={a.name} size={r === 0 ? 48 : 30} />
-                            <span>{a.name}</span>
-                            <small>{hours(a.ms)}</small>
+                            {image ? <Art image={image} label={name} size={r === 0 ? 48 : 30} /> : <Art label={name} size={r === 0 ? 48 : 30} />}
+                            <span>{name}</span>
+                            <small>{sub ? `${sub} · ${hours(a.ms)}` : hours(a.ms)}</small>
                           </a>
                         </td>
                       )
@@ -220,20 +259,45 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
         </div>
       </Section>
 
-      {t.phases.length > 0 && (
-        <Section kicker="Fases" title="Fases e obsessões" note="Quem você ouviu muito num mês só: mais da metade de tudo o que ouviu dele.">
-          <BarList
-            rows={t.phases.map((p) => ({
-              key: p.id,
-              name: p.name,
-              href: artistHref(p.id),
-              image: artistRef(data, p.id),
-              sub: `${monthLabel(p.month)} · ${pct(p.peakMs / p.totalMs)} do total de ${hours(p.totalMs)}`,
-              value: hours(p.peakMs),
-              share: p.peakMs / maxPeak,
-              title: `${p.name}: ${hours(p.peakMs)} em ${monthLabel(p.month)}`,
-            }))}
-          />
+      {(t.phases.length > 0 || t.songPhases.length > 0) && (
+        <Section kicker="Fases" title="Fases e obsessões" note="O que você ouviu muito num mês só: mais da metade de tudo o que ouviu dele.">
+          <div className="two">
+            {t.phases.length > 0 && (
+              <BarList
+                title={kind === 'podcast' ? 'Podcasts' : 'Artistas'}
+                rows={t.phases.map((p) => ({
+                  key: p.id,
+                  name: p.name,
+                  href: artistHref(p.id),
+                  image: artistRef(data, p.id),
+                  sub: `${monthLabel(p.month)} · ${pct(p.peakMs / p.totalMs)} do total de ${hours(p.totalMs)}`,
+                  value: hours(p.peakMs),
+                  share: p.peakMs / maxPeak,
+                  title: `${p.name}: ${hours(p.peakMs)} em ${monthLabel(p.month)}`,
+                }))}
+              />
+            )}
+            {t.songPhases.length > 0 && (
+              <BarList
+                title="Músicas"
+                rows={t.songPhases.map((p) => {
+                  const it = data.items[p.id]
+                  const name = cleanTitle(it.name)
+                  return {
+                    key: p.id,
+                    name,
+                    href: songHref(p.id),
+                    image: itemRef(data, p.id),
+                    track: trackOf(data, p.id),
+                    sub: `${data.creators[it.creator]} · ${monthLabel(p.month)}`,
+                    value: `${num(p.peakPlays)} de ${num(p.totalPlays)}`,
+                    share: p.peakPlays / maxSongPeak,
+                    title: `${name}: ${num(p.peakPlays)} das ${num(p.totalPlays)} vezes foram em ${monthLabel(p.month)}`,
+                  }
+                })}
+              />
+            )}
+          </div>
         </Section>
       )}
     </main>

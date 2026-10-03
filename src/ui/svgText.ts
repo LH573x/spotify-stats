@@ -1,57 +1,77 @@
 /** Medição de texto para os cartões em SVG, que não quebram linha sozinhos. */
 export const CARD_FONT = "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+/** Fonte estreita dos títulos e números (a mesma do site), embutida no PNG na hora de baixar. */
+export const DISPLAY_FONT = "'Barlow Condensed', 'Arial Narrow', sans-serif"
 
 let ctx: CanvasRenderingContext2D | null = null
 
-export function measure(text: string, size: number, weight: number): number {
+export function measure(text: string, size: number, weight: number, family = CARD_FONT): number {
   ctx ??= document.createElement('canvas').getContext('2d')
-  if (!ctx) return text.length * size * 0.55
-  ctx.font = `${weight} ${size}px ${CARD_FONT}`
+  if (!ctx) return text.length * size * (family === CARD_FONT ? 0.55 : 0.42)
+  ctx.font = `${weight} ${size}px ${family}`
   return ctx.measureText(text).width
 }
 
 /** Corta o fim com reticências até caber na largura. */
-export function ellipsize(text: string, width: number, size: number, weight: number): string {
-  if (measure(text, size, weight) <= width) return text
+export function ellipsize(text: string, width: number, size: number, weight: number, family = CARD_FONT): string {
+  if (measure(text, size, weight, family) <= width) return text
   let lo = 0
   let hi = text.length
   while (lo < hi) {
     const mid = Math.ceil((lo + hi) / 2)
-    if (measure(text.slice(0, mid).trimEnd() + '…', size, weight) <= width) lo = mid
+    if (measure(text.slice(0, mid).trimEnd() + '…', size, weight, family) <= width) lo = mid
     else hi = mid - 1
   }
   return text.slice(0, lo).trimEnd() + '…'
 }
 
 /** Quebra em linhas por palavra; `fits` diz se coube sem cortar nada. */
-function wrap(text: string, width: number, size: number, weight: number, maxLines: number) {
+function wrap(text: string, width: number, size: number, weight: number, maxLines: number, family: string) {
   const words = text.split(/\s+/).filter(Boolean)
   const lines: string[] = []
   let cur = ''
   for (const w of words) {
     const next = cur ? `${cur} ${w}` : w
-    if (!cur || measure(next, size, weight) <= width) cur = next
+    if (!cur || measure(next, size, weight, family) <= width) cur = next
     else {
       lines.push(cur)
       cur = w
     }
   }
   if (cur) lines.push(cur)
-  const fits = lines.length <= maxLines && lines.every((l) => measure(l, size, weight) <= width)
+  const fits = lines.length <= maxLines && lines.every((l) => measure(l, size, weight, family) <= width)
   if (fits) return { lines, fits }
   const kept = lines.slice(0, maxLines)
-  kept[kept.length - 1] = ellipsize(lines.slice(maxLines - 1).join(' '), width, size, weight)
-  return { lines: kept.map((l) => ellipsize(l, width, size, weight)), fits }
+  kept[kept.length - 1] = ellipsize(lines.slice(maxLines - 1).join(' '), width, size, weight, family)
+  return { lines: kept.map((l) => ellipsize(l, width, size, weight, family)), fits }
 }
 
 /**
  * Escolhe o maior tamanho (entre `max` e `min`) em que o texto cabe em até `maxLines` linhas.
  * Se nem no mínimo couber, corta com reticências.
  */
-export function fitText(text: string, width: number, opts: { max: number; min: number; weight: number; maxLines: number }) {
+export function fitText(
+  text: string,
+  width: number,
+  opts: { max: number; min: number; weight: number; maxLines: number; family?: string },
+) {
+  const family = opts.family ?? CARD_FONT
   for (let size = opts.max; size > opts.min; size = Math.floor(size * 0.92)) {
-    const r = wrap(text, width, size, opts.weight, opts.maxLines)
+    const r = wrap(text, width, size, opts.weight, opts.maxLines, family)
     if (r.fits) return { size, lines: r.lines }
   }
-  return { size: opts.min, lines: wrap(text, width, opts.min, opts.weight, opts.maxLines).lines }
+  return { size: opts.min, lines: wrap(text, width, opts.min, opts.weight, opts.maxLines, family).lines }
 }
+
+let fontLoad: Promise<void> | null = null
+let fontLoaded = false
+/** Espera a fonte dos títulos carregar, para as medidas acima saírem certas. */
+export function loadDisplayFont(): Promise<void> {
+  fontLoad ??= Promise.all([600, 700, 800].map((w) => document.fonts.load(`${w} 64px 'Barlow Condensed'`)))
+    .catch(() => undefined)
+    .then(() => {
+      fontLoaded = true
+    })
+  return fontLoad
+}
+export const displayFontLoaded = () => fontLoaded

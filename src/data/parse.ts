@@ -73,11 +73,11 @@ export function parseFiles(files: SourceFile[]): Dataset {
     }
     return id
   }
-  const itemId = (key: string, name: string, creator: string, album: string, kind: Kind) => {
+  const itemId = (key: string, name: string, creator: string, album: string, kind: Kind, uri?: string | null) => {
     let id = itemIndex.get(key)
     if (id === undefined) {
       id = items.length
-      items.push({ name, creator: creatorId(creator), album, kind })
+      items.push(uri ? { name, creator: creatorId(creator), album, kind, uri } : { name, creator: creatorId(creator), album, kind })
       itemIndex.set(key, id)
     }
     return id
@@ -122,10 +122,11 @@ export function parseFiles(files: SourceFile[]): Dataset {
             artist,
             r.master_metadata_album_album_name ?? '',
             'music',
+            r.spotify_track_uri,
           )
         } else if (r.episode_name) {
           const show = r.episode_show_name ?? 'Podcast'
-          it = itemId(r.spotify_episode_uri ?? `${show}|${r.episode_name}`, r.episode_name, show, show, 'podcast')
+          it = itemId(r.spotify_episode_uri ?? `${show}|${r.episode_name}`, r.episode_name, show, show, 'podcast', r.spotify_episode_uri)
           f |= FLAG_PODCAST
         } else {
           continue // audiobooks e reproduções sem metadados

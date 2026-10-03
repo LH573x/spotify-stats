@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import type { ImageRef } from '../data/images'
 import { Thumb } from './Thumb'
+import { PlayButton } from './player'
+import type { Track } from './playerStore'
 
 export interface BarRow {
   key: string | number
@@ -15,6 +17,8 @@ export interface BarRow {
   href?: string
   /** Foto do artista ou capa do álbum, mostrada antes do nome. */
   image?: ImageRef
+  /** Faixa para o botão de tocar, por cima da capa. */
+  track?: Track | null
 }
 
 /** Lista com barras horizontais; `numbered` mostra a posição no ranking. Sem título, é só a lista num cartão. */
@@ -24,7 +28,12 @@ export function BarList({ title, note, rows, numbered = true }: { title?: string
       {rows.map((r, i) => (
         <li key={r.key} title={r.title}>
           {numbered && <span className="rank-n">{i + 1}</span>}
-          {r.image && <Thumb image={r.image} label={r.name} />}
+          {r.image && (
+            <span className="thumb-wrap">
+              <Thumb image={r.image} label={r.name} />
+              <PlayButton track={r.track ?? null} className="play-thumb" />
+            </span>
+          )}
           <div className="rank-body">
             <div className="rank-line">
               {r.href ? (

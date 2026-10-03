@@ -20,7 +20,7 @@ Funciona com o histórico estendido (`Streaming_History_Audio_*.json`) e com o b
 | Curiosidades: calendário, relógio de escuta, plataformas, aleatório e músicas puladas | pronta |
 | Linha do tempo: top 5 de cada ano, descobertas, fases e busca | pronta |
 | Artista: horas por mês, posição em cada ano, músicas mais ouvidas | pronta |
-| Wrapped: cartões de um ano no formato de story, para baixar ou compartilhar | pronta |
+| Wrapped: stories para o Instagram (Top 5 do último mês, do último ano e desde sempre, e a retrospectiva de cada ano), para baixar ou compartilhar | pronta |
 
 ## Desenvolvimento
 
