@@ -81,3 +81,10 @@ export function duration(ms: number): string {
 
 /** Hora do dia: "21:02". */
 export const clock = (ms: number) => new Date(ms).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+
+/** Um tom fixo por nome, para a inicial não ficar sempre no mesmo cinza. */
+export function hue(s: string) {
+  let h = 0
+  for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) % 360
+  return h
+}

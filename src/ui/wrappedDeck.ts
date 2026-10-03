@@ -1,5 +1,5 @@
-import type { WrappedYear } from '../data/wrapped'
-import { cleanTitle, dayMonth, keyToMs, longHours, monthName, num, pct } from './format'
+import type { TopPeriod, WrappedYear } from '../data/wrapped'
+import { cleanTitle, dayMonth, keyToMs, longHours, monthLabel, monthName, num, pct, shortDate } from './format'
 
 export type CardId =
   | 'capa'
@@ -64,4 +64,25 @@ export function deck(w: WrappedYear): CardInfo[] {
   }
   add('resumo', 'Resumo', `Resumo de ${w.year}: ${num(minutes(w))} minutos ouvidos, mês favorito ${monthName(pm)}.`)
   return cards
+}
+
+/** Data em ms → "2026-09" (no fuso de quem está vendo). */
+export const monthKeyOf = (ms: number) => {
+  const d = new Date(ms)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+
+export const PERIOD_TITLES: Record<TopPeriod['id'], string> = { mes: 'Último mês', ano: 'Último ano', sempre: 'Desde sempre' }
+
+/** "3 set a 2 out 2026", "out 2025 a out 2026", "desde mar 2017". */
+export function periodRange(t: TopPeriod) {
+  if (t.id === 'sempre') return `desde ${monthLabel(monthKeyOf(t.from))}`
+  if (t.id === 'mes') return `${dayMonth(t.from)} a ${shortDate(t.to)}`
+  return `${monthLabel(monthKeyOf(t.from))} a ${monthLabel(monthKeyOf(t.to))}`
+}
+
+/** O que o story do Top 5 diz, para leitores de tela. */
+export function topAlt(t: TopPeriod) {
+  const list = (xs: { name: string }[]) => xs.map((x, i) => `${i + 1}. ${cleanTitle(x.name)}`).join(', ')
+  return `Meu Top 5, ${PERIOD_TITLES[t.id].toLowerCase()} (${periodRange(t)}). Artistas: ${list(t.artists)}. Músicas: ${list(t.songs)}.`
 }

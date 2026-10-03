@@ -279,7 +279,7 @@ export const useImage = (ref: ImageRef | null | undefined) => useImages([ref])[0
 const dataUrls = new Map<string, Promise<string | null>>()
 const dataCache = new Map<string, string>()
 
-function ensureData(url: string) {
+function ensureData(url: string, fallback?: string) {
   if (dataUrls.has(url)) return
   dataUrls.set(
     url,
@@ -300,27 +300,41 @@ function ensureData(url: string) {
         if (d) {
           dataCache.set(url, d)
           for (const l of listeners) l()
-        }
+        } else if (fallback) ensureData(fallback)
         return d
       }),
   )
 }
 
 /**
+ * A mesma imagem em tamanho maior, para os stories (a tela de 1080 px de largura).
+ * Se o tamanho maior não existir (foto original pequena), fica a de sempre.
+ */
+function largeUrl(url: string) {
+  if (/^https:\/\/upload\.wikimedia\.org\/.+\/thumb\//.test(url)) return url.replace(/\/\d+px-([^/]+)$/, '/960px-$1')
+  if (url.startsWith('https://coverartarchive.org/')) return url.replace(/\/front-250$/, '/front-500')
+  return url
+}
+
+/**
  * As mesmas imagens como data URL, para entrar nos cartões do Wrapped (o SVG vira PNG e não
  * pode carregar imagens de fora). Se o site da imagem não deixar, fica sem.
  */
-export function useImagesData(list: (ImageRef | null | undefined)[]): (string | null)[] {
+export function useImagesData(list: (ImageRef | null | undefined)[], large = false): (string | null)[] {
   const urls = useImages(list)
   const joined = urls.map((u) => u ?? '').join(SEP)
   const data = useSyncExternalStore(subscribe, () =>
     joined
       .split(SEP)
-      .map((u) => (u && dataCache.get(u)) || '')
+      .map((u) => (u && ((large && dataCache.get(largeUrl(u))) || dataCache.get(u))) || '')
       .join(SEP),
   )
   useEffect(() => {
-    for (const u of joined.split(SEP)) if (u) ensureData(u)
-  }, [joined])
+    for (const u of joined.split(SEP)) {
+      if (!u) continue
+      const big = large ? largeUrl(u) : u
+      ensureData(big, big === u ? undefined : u)
+    }
+  }, [joined, large])
   return data.split(SEP).map((d) => d || null)
 }

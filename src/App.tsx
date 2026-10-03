@@ -187,7 +187,7 @@ export default function App() {
         ) : route.page === 'musica' ? (
           <Musica data={data} id={route.item} theme={theme} />
         ) : page === 'wrapped' ? (
-          <Wrapped key={wrappedYear} data={data} year={wrappedYear} />
+          <Wrapped data={data} year={wrappedYear} />
         ) : page === 'linha' ? (
           <LinhaDoTempo data={data} kind={filter.kind} theme={theme} />
         ) : page === 'curiosidades' ? (

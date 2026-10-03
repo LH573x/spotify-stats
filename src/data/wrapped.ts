@@ -1,5 +1,5 @@
 import type { Dataset } from './types'
-import { MIN_PLAY_MS, summarize, type Ranked } from './stats'
+import { kindMatches, MIN_PLAY_MS, summarize, top, type Ranked } from './stats'
 import { dayParts, habits, type Habits } from './habits'
 import { timeline, type Discovery } from './timeline'
 import type { ImageRef } from './images'
@@ -123,4 +123,72 @@ export function wrapped(d: Dataset, year: number): WrappedYear | null {
       discovery: discovery?.best ? artistRef(d, discovery.best.id) : undefined,
     },
   }
+}
+
+export type PeriodId = 'mes' | 'ano' | 'sempre'
+
+/** Top 5 de um período que termina na última reprodução do arquivo (só música). */
+export interface TopPeriod {
+  id: PeriodId
+  from: number
+  to: number
+  totalMs: number
+  artists: Ranked[]
+  songs: Ranked[]
+  images: { artists: ImageRef[]; songs: (ImageRef | undefined)[] }
+}
+
+const DAY = 86_400_000
+
+/** Os Top 5 do último mês (30 dias), do último ano (365 dias) e desde sempre. */
+export function topPeriods(d: Dataset): TopPeriod[] {
+  const { start, ms, item, flags } = d.plays
+  if (start.length === 0) return []
+  const end = start[start.length - 1]
+  const windows = [
+    { id: 'mes' as const, from: end - 30 * DAY },
+    { id: 'ano' as const, from: end - 365 * DAY },
+    { id: 'sempre' as const, from: start[0] },
+  ].map((w) => ({ ...w, totalMs: 0, first: Infinity, byCreator: new Map<number, { ms: number; plays: number }>(), byItem: new Map<number, { ms: number; plays: number }>() }))
+
+  for (let i = 0; i < start.length; i++) {
+    if (!kindMatches(flags[i], 'music')) continue
+    const it = item[i]
+    const c = d.items[it].creator
+    const counted = ms[i] >= MIN_PLAY_MS ? 1 : 0
+    for (const w of windows) {
+      if (start[i] < w.from) continue
+      w.totalMs += ms[i]
+      w.first = Math.min(w.first, start[i])
+      const ce = w.byCreator.get(c) ?? { ms: 0, plays: 0 }
+      ce.ms += ms[i]
+      ce.plays += counted
+      w.byCreator.set(c, ce)
+      const ie = w.byItem.get(it) ?? { ms: 0, plays: 0 }
+      ie.ms += ms[i]
+      ie.plays += counted
+      w.byItem.set(it, ie)
+    }
+  }
+
+  const year = windows[1]
+  return (
+    windows
+      .filter((w) => w.byCreator.size > 0)
+      // Com menos de um ano de dados, "o último ano" e "desde sempre" seriam o mesmo cartão.
+      .filter((w) => !(w.id === 'ano' && year.from <= start[0]))
+      .map((w) => {
+        const artists = top(w.byCreator, 5, (id) => [d.creators[id], ''])
+        const songs = top(w.byItem, 5, (id) => [d.items[id].name, d.creators[d.items[id].creator]])
+        return {
+          id: w.id,
+          from: w.id === 'sempre' ? w.first : w.from,
+          to: end,
+          totalMs: w.totalMs,
+          artists,
+          songs,
+          images: { artists: artists.map((a) => artistRef(d, a.id)), songs: songs.map((s) => itemRef(d, s.id)) },
+        }
+      })
+  )
 }

@@ -56,7 +56,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
 const monthKey = (dt: Date) => `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}`
 const dayKey = (dt: Date) => `${monthKey(dt)}-${pad(dt.getDate())}`
 
-function top(map: Map<number, { ms: number; plays: number }>, n: number, label: (id: number) => [string, string]): Ranked[] {
+export function top(map: Map<number, { ms: number; plays: number }>, n: number, label: (id: number) => [string, string]): Ranked[] {
   return [...map.entries()]
     .sort((a, b) => b[1].ms - a[1].ms)
     .slice(0, n)

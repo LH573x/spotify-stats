@@ -1417,11 +1417,6 @@ a.wall-name:hover {
 .rec-name a:hover {
   color: var(--accent);
 }
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
 
 /* Linha do tempo */
 .search {
@@ -1666,14 +1661,23 @@ a.find-card:hover {
   cursor: default;
   opacity: 0.5;
 }
-.wrapped {
+.wgrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 40px 32px;
+  align-items: start;
+}
+.wviewer {
+  --story-w: min(100%, 400px, calc((100svh - 240px) * 9 / 16));
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  padding-top: 8px;
+  gap: 14px;
 }
 .wprogress {
   display: flex;
   gap: 4px;
-  width: min(100%, 420px);
+  width: max(var(--story-w), min(100%, 280px));
 }
 .wprogress button {
   flex: 1;
@@ -1699,7 +1703,7 @@ a.find-card:hover {
 }
 .wstage {
   position: relative;
-  width: min(100%, 420px, calc((100svh - 320px) * 9 / 16));
+  width: var(--story-w);
   min-width: min(100%, 280px);
   aspect-ratio: 9 / 16;
   border-radius: 20px;
@@ -1710,6 +1714,10 @@ a.find-card:hover {
   user-select: none;
   -webkit-user-select: none;
   cursor: pointer;
+}
+.wstage:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
 }
 .wcard {
   position: absolute;
@@ -1728,6 +1736,11 @@ a.find-card:hover {
 }
 .wcard .wa {
   animation: wa-in 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.wcard .wspin {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spin 9s linear infinite;
 }
 .wcard .wbar {
   transform-box: fill-box;
@@ -1760,7 +1773,8 @@ a.find-card:hover {
 @media (prefers-reduced-motion: reduce) {
   .wcard,
   .wcard .wa,
-  .wcard .wbar {
+  .wcard .wbar,
+  .wcard .wspin {
     animation: none !important;
   }
 }
@@ -1821,6 +1835,9 @@ a.find-card:hover {
 }
 
 @media (max-width: 760px) {
+  .wgrid {
+    grid-template-columns: 1fr;
+  }
   .page {
     gap: 32px;
   }
