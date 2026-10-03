@@ -1,4 +1,5 @@
 import { DATASET_VERSION, type Dataset } from './types'
+import { mergeSameSongs } from './merge'
 
 // Os dados ficam só neste navegador (IndexedDB), para não precisar reenviar os arquivos.
 const DB = 'spotify-stats'
@@ -35,7 +36,14 @@ export async function loadSaved(): Promise<Saved> {
   try {
     const d = await run<Dataset | undefined>('readonly', (s) => s.get(KEY))
     if (!d) return { dataset: null, outdated: false }
-    return d.version === DATASET_VERSION ? { dataset: d, outdated: false } : { dataset: null, outdated: true }
+    if (d.version === DATASET_VERSION) return { dataset: d, outdated: false }
+    // A versão 3 só não juntava músicas repetidas: dá para corrigir aqui, sem pedir o arquivo de novo.
+    if (d.version === 3) {
+      const fixed = mergeSameSongs(d)
+      await save(fixed)
+      return { dataset: fixed, outdated: false }
+    }
+    return { dataset: null, outdated: true }
   } catch {
     return { dataset: null, outdated: false }
   }
