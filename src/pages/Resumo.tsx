@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
 import type { Dataset } from '../data/types'
 import { summarize, type Filter, type Ranked } from '../data/stats'
-import { BarList, Tile } from '../ui/parts'
+import { CoverWall, PhotoStack, Podium, Section, StatStrip, type RankItem } from '../ui/blocks'
 import { artistHref } from '../ui/links'
 import { artistRef, itemRef } from '../data/refs'
 import { Chart, type ChartOption } from '../ui/Chart'
-import { CHART_COLORS, type ThemeName } from '../ui/theme'
-import { date, hours, monthLabel, num } from '../ui/format'
+import { chartColors, type ThemeName } from '../ui/theme'
+import { cleanTitle, date, hours, monthLabel, num, pct } from '../ui/format'
 
 interface Props {
   data: Dataset
@@ -15,14 +15,19 @@ interface Props {
 }
 
 const NOUNS = {
-  all: { creators: 'Artistas e programas', items: 'Músicas e episódios', topC: 'Top artistas e podcasts', topI: 'Top músicas e episódios' },
-  music: { creators: 'Artistas', items: 'Músicas', topC: 'Top artistas', topI: 'Top músicas' },
-  podcast: { creators: 'Programas', items: 'Episódios', topC: 'Top podcasts', topI: 'Top episódios' },
+  all: {
+    creators: 'Artistas e programas',
+    items: 'Músicas e episódios',
+    topC: 'Os artistas e podcasts que mais tocaram',
+    topI: 'As músicas e episódios que mais tocaram',
+  },
+  music: { creators: 'Artistas', items: 'Músicas', topC: 'Os artistas que mais tocaram', topI: 'As músicas que mais tocaram' },
+  podcast: { creators: 'Programas', items: 'Episódios', topC: 'Os podcasts que mais tocaram', topI: 'Os episódios que mais tocaram' },
 }
 
 export function Resumo({ data, filter, theme }: Props) {
   const s = useMemo(() => summarize(data, filter), [data, filter])
-  const c = CHART_COLORS[theme]
+  const c = chartColors(theme, 'green')
   const nouns = NOUNS[filter.kind]
 
   const monthlyOption = useMemo<ChartOption>(() => {
@@ -84,64 +89,76 @@ export function Resumo({ data, filter, theme }: Props) {
   const daysNonStop = s.totalMs / 8.64e7
   const delta = s.previousYearMs ? (s.totalMs - s.previousYearMs) / s.previousYearMs : null
   const best = s.monthly.reduce((a, b) => (b.hours > a.hours ? b : a), s.monthly[0])
+  const creators: RankItem[] = s.topCreators.map((r) => ({
+    ...toItem(r),
+    href: artistHref(r.id),
+    image: artistRef(data, r.id),
+    detail: `${num(r.plays)} reproduções · ${pct(r.ms / s.totalMs)} de tudo o que você ouviu`,
+  }))
+  const items: RankItem[] = s.topItems.map((r) => ({ ...toItem(r), name: cleanTitle(r.name), image: itemRef(data, r.id) }))
+  const period = filter.year ? `em ${filter.year}` : 'desde o começo'
 
   return (
     <main className="page">
-      <section className="hero">
-        <p className="eyebrow">
-          {filter.year ? `Em ${filter.year}` : 'Desde o começo'} · {s.first !== null && date(s.first)} a{' '}
-          {s.last !== null && date(s.last)}
-        </p>
-        <h1>
-          Você ouviu <span className="accent">{num(totalHours)} horas</span>
-        </h1>
-        <p className="sub">
-          Isso é {num(daysNonStop)} {Math.round(daysNonStop) === 1 ? 'dia' : 'dias'} sem parar.
-          {delta !== null && (
-            <>
-              {' '}
-              {delta >= 0 ? `${num(delta * 100)}% a mais` : `${num(-delta * 100)}% a menos`} que em {filter.year! - 1}.
-            </>
-          )}
-        </p>
-      </section>
-
-      <section className="tiles">
-        <Tile label="Reproduções" value={num(s.plays)} hint="com 30 s ou mais" />
-        <Tile label={nouns.creators} value={num(s.creators)} />
-        <Tile label={nouns.items} value={num(s.items)} />
-        <Tile label="Dias ouvindo" value={num(s.activeDays)} />
-      </section>
-
-      <section className="card">
-        <header>
-          <h2>Horas por mês</h2>
-          <p>
-            Seu mês recorde foi <strong>{monthLabel(best.month)}</strong>, com {num(best.hours)} h.
+      <section className="hero hero-split">
+        <div className="hero-text">
+          <p className="eyebrow">
+            {filter.year ? `Em ${filter.year}` : 'Desde o começo'} · {s.first !== null && date(s.first)} a{' '}
+            {s.last !== null && date(s.last)}
           </p>
-        </header>
-        <Chart option={monthlyOption} height={260} label={`Horas ouvidas por mês. Recorde em ${monthLabel(best.month)}.`} />
+          <h1>
+            Você ouviu <span className="accent">{num(totalHours)} horas</span>
+          </h1>
+          <p className="sub">
+            Isso é {num(daysNonStop)} {Math.round(daysNonStop) === 1 ? 'dia' : 'dias'} sem parar.
+            {delta !== null && (
+              <>
+                {' '}
+                {delta >= 0 ? `${num(delta * 100)}% a mais` : `${num(-delta * 100)}% a menos`} que em {filter.year! - 1}.
+              </>
+            )}
+          </p>
+        </div>
+        <PhotoStack items={creators} />
       </section>
 
-      <div className="two">
-        <BarList
-          title={nouns.topC}
-          rows={toBars(s.topCreators).map((r) => ({ ...r, href: artistHref(r.key), image: artistRef(data, r.key) }))}
-        />
-        <BarList title={nouns.topI} rows={toBars(s.topItems).map((r) => ({ ...r, image: itemRef(data, r.key) }))} />
-      </div>
+      <StatStrip
+        items={[
+          { label: 'Reproduções', value: num(s.plays), hint: 'com 30 s ou mais' },
+          { label: nouns.creators, value: num(s.creators) },
+          { label: nouns.items, value: num(s.items) },
+          { label: 'Dias ouvindo', value: num(s.activeDays) },
+        ]}
+      />
+
+      <Section kicker={`Top ${creators.length}`} title={nouns.topC} note={`Por horas ouvidas, ${period}. Toque num nome para ver a história completa.`}>
+        <Podium items={creators} />
+      </Section>
+
+      <Section kicker="Parede de capas" title={nouns.topI} note={`Por horas ouvidas, ${period}.`}>
+        <CoverWall items={items} />
+      </Section>
+
+      <Section kicker="Mês a mês" title="Quando você mais ouviu">
+        <div className="card chart-card">
+          <p className="callout">
+            <span>Mês recorde</span>
+            <strong>{monthLabel(best.month)}</strong>
+            <span>{num(best.hours)} horas</span>
+          </p>
+          <Chart option={monthlyOption} height={260} label={`Horas ouvidas por mês. Recorde em ${monthLabel(best.month)}.`} />
+        </div>
+      </Section>
     </main>
   )
 }
 
-function toBars(rows: Ranked[]) {
-  const max = rows[0]?.ms ?? 1
-  return rows.map((r) => ({
+function toItem(r: Ranked): RankItem {
+  return {
     key: r.id,
     name: r.name,
-    sub: r.sub,
+    sub: r.sub || undefined,
     value: hours(r.ms),
-    share: r.ms / max,
     title: `${r.name}: ${hours(r.ms)}, ${num(r.plays)} reproduções`,
-  }))
+  }
 }

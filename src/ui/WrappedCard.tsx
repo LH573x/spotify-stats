@@ -2,7 +2,8 @@ import type { ReactNode } from 'react'
 import type { WrappedYear } from '../data/wrapped'
 import { useImagesData } from '../data/images'
 import { CARD_FONT, ellipsize, fitText } from './svgText'
-import { capitalize, cleanTitle, minutes, peakMonth, type CardInfo } from './wrappedDeck'
+import { capitalize, minutes, peakMonth, type CardInfo } from './wrappedDeck'
+import { cleanTitle } from './format'
 import { dayMonth, keyToMs, longHours, monthName, num, pct, weekdayName } from './format'
 
 /*

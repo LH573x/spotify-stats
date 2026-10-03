@@ -63,3 +63,9 @@ export function keyToMs(key: string): number {
   const [y, m, d] = key.split('-').map(Number)
   return new Date(y, m - 1, d).getTime()
 }
+
+/** Tira o "- Remastered 2011" e o "(feat. Fulano)" do nome da música, que só ocupam espaço no cartão. */
+export const cleanTitle = (name: string) =>
+  name
+    .replace(/\s+(?:-\s+|\()(?:\d{4}\s+)?(?:remaster(?:ed)?|remasterizad[ao])(?:\s+\d{4})?(?:\s+version)?\)?$/i, '')
+    .replace(/\s+[([]feat\.?\s[^)\]]*[)\]]/i, '') || name

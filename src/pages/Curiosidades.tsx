@@ -3,9 +3,10 @@ import type { Dataset } from '../data/types'
 import type { Filter } from '../data/stats'
 import { dayParts, habits } from '../data/habits'
 import { Chart, type ChartOption } from '../ui/Chart'
-import { CHART_COLORS, type ThemeName } from '../ui/theme'
+import { chartColors, type ThemeName } from '../ui/theme'
 import { hours, num, pct } from '../ui/format'
-import { BarList, Tile } from '../ui/parts'
+import { BarList } from '../ui/parts'
+import { Section, StatStrip } from '../ui/blocks'
 import { itemRef } from '../data/refs'
 
 interface Props {
@@ -40,9 +41,9 @@ function useNarrow(px = 720) {
   return narrow
 }
 
-export function Habitos({ data, filter, theme, lastYear }: Props) {
+export function Curiosidades({ data, filter, theme, lastYear }: Props) {
   const h = useMemo(() => habits(data, filter, lastYear), [data, filter, lastYear])
-  const c = CHART_COLORS[theme]
+  const c = chartColors(theme, 'coral')
   const narrow = useNarrow()
 
   const calendarOption = useMemo<ChartOption>(
@@ -149,6 +150,16 @@ export function Habitos({ data, filter, theme, lastYear }: Props) {
   const topPart = partHours.reduce((a, b) => (b.hours > a.hours ? b : a))
   const platformTotal = h.platforms.reduce((a, p) => a + p.ms, 0)
   const maxSkips = h.topSkipped[0]?.skips ?? 1
+  const stats = [
+    h.streak && {
+      label: 'Sequência recorde',
+      value: `${num(h.streak.days)} ${h.streak.days === 1 ? 'dia' : 'dias'}`,
+      hint: `seguidos, de ${dayLabel(h.streak.from, false)} a ${dayLabel(h.streak.to, false)}`,
+    },
+    { label: 'Dia recorde', value: hours(h.bestDay.ms), hint: dayLabel(h.bestDay.day) },
+    h.shuffleShare !== null && { label: 'No aleatório', value: pct(h.shuffleShare), hint: 'das reproduções' },
+    h.skipShare !== null && { label: 'Puladas', value: pct(h.skipShare), hint: 'das faixas, apertando próxima' },
+  ].filter((x) => !!x)
 
   return (
     <main className="page">
@@ -166,80 +177,71 @@ export function Habitos({ data, filter, theme, lastYear }: Props) {
             </>
           )}
         </p>
-      </section>
-
-      <section className="tiles">
-        {h.streak && (
-          <Tile
-            label="Sequência recorde"
-            value={`${num(h.streak.days)} ${h.streak.days === 1 ? 'dia' : 'dias'}`}
-            hint={`seguidos, de ${dayLabel(h.streak.from, false)} a ${dayLabel(h.streak.to, false)}`}
-          />
-        )}
-        <Tile label="Dia recorde" value={hours(h.bestDay.ms)} hint={dayLabel(h.bestDay.day)} />
-        {h.shuffleShare !== null && <Tile label="No aleatório" value={pct(h.shuffleShare)} hint="das reproduções" />}
-        {h.skipShare !== null && <Tile label="Puladas" value={pct(h.skipShare)} hint="das faixas, apertando próxima" />}
-      </section>
-
-      <section className="card">
-        <header>
-          <h2>Calendário de {h.calendarYear}</h2>
-          <p>
-            Cada quadrado é um dia; quanto mais forte, mais você ouviu.
-            {filter.year === null && ' Escolha um ano no topo para ver outro.'}
-          </p>
-        </header>
-        <div className="scroll-x">
-          <div style={{ minWidth: 720 }}>
-            <Chart option={calendarOption} height={200} label={`Calendário de escuta de ${h.calendarYear}, horas por dia`} />
-          </div>
-        </div>
-      </section>
-
-      <section className="card">
-        <header>
-          <h2>Relógio de escuta</h2>
-          <p>Dia da semana e hora do dia em que você mais dá play.</p>
-        </header>
-        <Chart option={clockOption} height={300} label="Horas ouvidas por dia da semana e hora do dia" />
-        <div className="parts">
+        <div className="daybar" role="img" aria-label={partHours.map((p) => `${p.name}: ${pct(p.hours / totalHours)}`).join(', ')}>
           {partHours.map((p) => (
-            <div key={p.name} className={p === topPart ? 'on' : ''}>
-              <span>{p.name}</span>
+            <div key={p.name} className={p === topPart ? 'on' : ''} style={{ flexGrow: Math.max(p.hours / totalHours, 0.0001) }}>
               <strong>{pct(p.hours / totalHours)}</strong>
+              <span>{p.name}</span>
+              <small>
+                {p.from}h a {p.to}h
+              </small>
             </div>
           ))}
         </div>
       </section>
 
+      <StatStrip items={stats} />
+
+      <Section kicker="Relógio" title="A que horas você dá play" note="Cada quadrado é uma hora da semana. Quanto mais forte, mais você ouviu.">
+        <div className="card">
+          <Chart option={clockOption} height={300} label="Horas ouvidas por dia da semana e hora do dia" />
+        </div>
+      </Section>
+
+      <Section
+        kicker="Calendário"
+        title={`Seu ${h.calendarYear}, dia por dia`}
+        note={<>Cada quadrado é um dia.{filter.year === null && ' Escolha um ano no topo para ver outro.'}</>}
+      >
+        <div className="card">
+          <div className="scroll-x">
+            <div style={{ minWidth: 720 }}>
+              <Chart option={calendarOption} height={200} label={`Calendário de escuta de ${h.calendarYear}, horas por dia`} />
+            </div>
+          </div>
+        </div>
+      </Section>
+
       <div className="two">
         {h.platforms.length > 0 && (
-          <BarList
-            title="Onde você ouve"
-            numbered={false}
-            rows={h.platforms.map((p) => ({
-              key: p.name,
-              name: p.name,
-              value: pct(p.ms / platformTotal),
-              share: p.ms / platformTotal,
-              title: `${p.name}: ${hours(p.ms)}`,
-            }))}
-          />
+          <Section kicker="Aparelhos" title="Onde você ouve">
+            <ul className="card shares">
+              {h.platforms.map((p) => (
+                <li key={p.name} title={`${p.name}: ${hours(p.ms)}`}>
+                  <strong>{pct(p.ms / platformTotal)}</strong>
+                  <span>{p.name}</span>
+                  <i>
+                    <b style={{ width: `${(p.ms / platformTotal) * 100}%` }} />
+                  </i>
+                </li>
+              ))}
+            </ul>
+          </Section>
         )}
         {h.topSkipped.length > 0 && (
-          <BarList
-            title="O que você mais pula"
-            note="Quantas vezes você apertou próxima, entre faixas que tocaram 5 vezes ou mais."
-            rows={h.topSkipped.map((s) => ({
-              key: s.id,
-              name: s.name,
-              sub: s.sub,
-              image: itemRef(data, s.id),
-              value: `${num(s.skips)} de ${num(s.starts)}`,
-              share: s.skips / maxSkips,
-              title: `${s.name}: pulada ${num(s.skips)} de ${num(s.starts)} vezes (${pct(s.skips / s.starts)})`,
-            }))}
-          />
+          <Section kicker="Botão de pular" title="O que você mais pula" note="Vezes que você apertou próxima, entre as faixas que tocaram 5 vezes ou mais.">
+            <BarList
+              rows={h.topSkipped.map((s) => ({
+                key: s.id,
+                name: s.name,
+                sub: s.sub,
+                image: itemRef(data, s.id),
+                value: `${num(s.skips)} de ${num(s.starts)}`,
+                share: s.skips / maxSkips,
+                title: `${s.name}: pulada ${num(s.skips)} de ${num(s.starts)} vezes (${pct(s.skips / s.starts)})`,
+              }))}
+            />
+          </Section>
         )}
       </div>
     </main>

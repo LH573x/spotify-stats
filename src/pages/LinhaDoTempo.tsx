@@ -3,9 +3,11 @@ import type { Dataset } from '../data/types'
 import type { KindFilter } from '../data/stats'
 import { timeline } from '../data/timeline'
 import { Chart, type ChartOption } from '../ui/Chart'
-import { CHART_COLORS, type ThemeName } from '../ui/theme'
+import { chartColors, type ThemeName } from '../ui/theme'
 import { date, hours, monthLabel, num, pct } from '../ui/format'
 import { BarList } from '../ui/parts'
+import { Section } from '../ui/blocks'
+import { Art } from '../ui/Thumb'
 import { artistHref } from '../ui/links'
 import { artistRef } from '../data/refs'
 
@@ -23,7 +25,7 @@ const WHO = {
 
 export function LinhaDoTempo({ data, kind, theme }: Props) {
   const t = useMemo(() => timeline(data, kind), [data, kind])
-  const c = CHART_COLORS[theme]
+  const c = chartColors(theme, 'amber')
   const who = WHO[kind]
   const [hover, setHover] = useState<number | null>(null)
   const [query, setQuery] = useState('')
@@ -138,107 +140,89 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
         </datalist>
       </form>
 
-      <section className="card">
-        <header>
-          <h2>Seu top {rows} de cada ano</h2>
-          <p>Passe o mouse num nome para ver em que outros anos ele aparece. Clique ou toque para abrir a página.</p>
-        </header>
-        <div className="scroll-x">
-          <table className="years-grid" style={{ minWidth: 40 + t.years.length * 96 }} onMouseLeave={() => setHover(null)}>
-            <thead>
-              <tr>
-                <th scope="col" aria-label="Posição" />
-                {t.years.map((y) => (
-                  <th key={y.year} scope="col">
-                    {y.year}
-                    <small>{hours(y.totalMs)}</small>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {Array.from({ length: rows }, (_, r) => (
-                <tr key={r}>
-                  <th scope="row">{r + 1}º</th>
-                  {t.years.map((y) => {
-                    const a = y.top[r]
-                    if (!a) return <td key={y.year} />
-                    return (
-                      <td key={y.year} className={hover === a.id ? 'on' : hover !== null ? 'dim' : ''}>
-                        <a
-                          href={artistHref(a.id)}
-                          onMouseEnter={() => setHover(a.id)}
-                          onFocus={() => setHover(a.id)}
-                          title={`${a.name}: ${hours(a.ms)} em ${y.year}`}
-                        >
-                          <span>{a.name}</span>
-                          <small>{hours(a.ms)}</small>
-                        </a>
-                      </td>
-                    )
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section className="card">
-        <header>
-          <h2>Descobertas por mês</h2>
-          <p>
-            Quantos {who.many} você ouviu pela primeira vez em cada mês.
-          </p>
-        </header>
-        <Chart option={newOption} height={240} label={`${who.many} novos por mês`} />
-      </section>
-
-      <div className="two">
-        <section className="card">
-          <header>
-            <h2>A melhor descoberta de cada ano</h2>
-            <p>Quem você conheceu naquele ano e mais ouviu desde então.</p>
-          </header>
+      <Section
+        kicker="Ano a ano"
+        title={`Seu top ${rows} de cada ano`}
+        note="Passe o mouse num nome para ver em que outros anos ele aparece. Clique ou toque para abrir a página."
+      >
+        <div className="card">
           <div className="scroll-x">
-            <table className="table">
+            <table className="years-grid" style={{ minWidth: 40 + t.years.length * 100 }} onMouseLeave={() => setHover(null)}>
               <thead>
                 <tr>
-                  <th scope="col">Ano</th>
-                  <th scope="col">{who.one[0].toUpperCase() + who.one.slice(1)}</th>
-                  <th scope="col" className="num">
-                    Horas
-                  </th>
-                  <th scope="col" className="num">
-                    Novos
-                  </th>
+                  <th scope="col" aria-label="Posição" />
+                  {t.years.map((y) => (
+                    <th key={y.year} scope="col">
+                      {y.year}
+                      <small>{hours(y.totalMs)}</small>
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {t.discoveries.map((d) => (
-                  <tr key={d.year}>
-                    <td>{d.year}</td>
-                    <td>
-                      {d.best && (
-                        <>
-                          <a href={artistHref(d.best.id)}>{d.best.name}</a>
-                          <small>desde {date(d.best.first)}</small>
-                        </>
-                      )}
-                    </td>
-                    <td className="num">{d.best && hours(d.best.ms)}</td>
-                    <td className="num">{num(d.count)}</td>
+                {Array.from({ length: rows }, (_, r) => (
+                  <tr key={r}>
+                    <th scope="row">{r + 1}º</th>
+                    {t.years.map((y) => {
+                      const a = y.top[r]
+                      if (!a) return <td key={y.year} />
+                      return (
+                        <td key={y.year} className={hover === a.id ? 'on' : hover !== null ? 'dim' : ''}>
+                          <a
+                            href={artistHref(a.id)}
+                            onMouseEnter={() => setHover(a.id)}
+                            onFocus={() => setHover(a.id)}
+                            title={`${a.name}: ${hours(a.ms)} em ${y.year}`}
+                          >
+                            <Art image={artistRef(data, a.id)} label={a.name} size={r === 0 ? 48 : 30} />
+                            <span>{a.name}</span>
+                            <small>{hours(a.ms)}</small>
+                          </a>
+                        </td>
+                      )
+                    })}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </section>
+        </div>
+      </Section>
 
-        {t.phases.length > 0 && (
+      <Section kicker="Melhores descobertas" title="Quem chegou para ficar" note="Em cada ano, quem você ouviu pela primeira vez e mais ouviu desde então.">
+        <div className="scroll-x">
+          <ol className="finds">
+            {t.discoveries.map((d) => (
+              <li key={d.year}>
+                <span className="find-year">{d.year}</span>
+                {d.best ? (
+                  <a href={artistHref(d.best.id)} className="find-card">
+                    <Art image={artistRef(data, d.best.id)} label={d.best.name} size={88} />
+                    <strong>{d.best.name}</strong>
+                    <small>desde {date(d.best.first)}</small>
+                    <span>{hours(d.best.ms)} até hoje</span>
+                  </a>
+                ) : (
+                  <span className="find-card" />
+                )}
+                <small className="find-count">
+                  {num(d.count)} {d.count === 1 ? who.one + ' novo' : who.many + ' novos'}
+                </small>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </Section>
+
+      <Section kicker="Descobertas" title={`${who.many[0].toUpperCase() + who.many.slice(1)} novos a cada mês`} note={`Quantos ${who.many} você ouviu pela primeira vez em cada mês.`}>
+        <div className="card">
+          <Chart option={newOption} height={240} label={`${who.many} novos por mês`} />
+        </div>
+      </Section>
+
+      {t.phases.length > 0 && (
+        <Section kicker="Fases" title="Fases e obsessões" note="Quem você ouviu muito num mês só: mais da metade de tudo o que ouviu dele.">
           <BarList
-            title="Fases e obsessões"
-            note="Quem você ouviu muito num mês só: mais da metade de tudo o que ouviu dele."
             rows={t.phases.map((p) => ({
               key: p.id,
               name: p.name,
@@ -250,8 +234,8 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
               title: `${p.name}: ${hours(p.peakMs)} em ${monthLabel(p.month)}`,
             }))}
           />
-        )}
-      </div>
+        </Section>
+      )}
     </main>
   )
 }
