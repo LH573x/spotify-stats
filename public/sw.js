@@ -1,4 +1,4 @@
-// Recebe o arquivo que o Android manda pelo "Compartilhar → Meu Spotify" (share_target do manifest)
+// Recebe o arquivo que o Android manda pelo "Compartilhar → Lyra" (share_target do manifest)
 // e o guarda para a página, que abre em seguida com ?compartilhado e lê o arquivo daqui.
 // Nada sai do aparelho: o arquivo fica só no cache do navegador até a página pegar.
 const CACHE = 'compartilhado'

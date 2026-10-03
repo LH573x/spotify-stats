@@ -32,7 +32,7 @@ export function deck(w: WrappedYear): CardInfo[] {
   const add = (id: CardId, title: string, alt: string) => cards.push({ id, title, alt })
   const pm = peakMonth(w)
 
-  add('capa', 'Capa', `Meu Spotify, ${w.year}.`)
+  add('capa', 'Capa', `Lyra, ${w.year}.`)
   add('minutos', 'Minutos', `Em ${w.year}, você ouviu ${num(minutes(w))} minutos, ou ${longHours(w.totalMs)}.`)
   if (w.topArtist) {
     add('artista', 'Artista do ano', `Seu artista do ano: ${w.topArtist.name}, com ${longHours(w.topArtist.ms)}.`)

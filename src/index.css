@@ -106,24 +106,12 @@ a {
 }
 .logo {
   display: inline-flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 20px;
+  color: var(--accent);
+  transition: color 0.3s;
 }
-.logo i {
-  width: 5px;
-  border-radius: 2px;
-  background: var(--accent);
-  transition: background 0.3s;
-}
-.logo i:nth-child(1) {
-  height: 10px;
-}
-.logo i:nth-child(2) {
-  height: 20px;
-}
-.logo i:nth-child(3) {
-  height: 14px;
+.logo svg {
+  width: 16px;
+  height: 30px;
 }
 .nav {
   display: flex;
@@ -1985,6 +1973,17 @@ a.find-card:hover {
   color: var(--muted);
   font-size: 12px;
   text-align: center;
+}
+.foot p {
+  margin: 0;
+}
+.foot .credit {
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.foot strong {
+  color: var(--ink-2);
+  font-weight: 600;
 }
 
 /* Wrapped */
