@@ -40,15 +40,11 @@ export function Wrapped({ data, year }: Props) {
   return (
     <main className="page wrapped">
       <section className="hero">
-        <p className="eyebrow">Para postar</p>
         <h1>Seus stories</h1>
-        <p className="sub">
-          Cada cartão sai no tamanho do story do Instagram (1080 × 1920). Toque nos lados do cartão para passar e baixe um ou todos.
-        </p>
       </section>
 
       <div className="wgrid">
-        <Section kicker="Top 5" title="Seus Top 5" note="O último mês, o último ano e desde sempre, até o fim do seu histórico.">
+        <Section title="Seus Top 5">
           {tops.length > 0 ? (
             <StoryViewer
               stories={tops}
@@ -62,7 +58,7 @@ export function Wrapped({ data, year }: Props) {
           )}
         </Section>
 
-        <Section kicker="Retrospectiva" title={`Seu ${year}`} note="Para ver outro ano, escolha o ano lá em cima.">
+        <Section title={`Seu ${year}`}>
           {cards.length > 0 ? (
             <StoryViewer
               key={year}

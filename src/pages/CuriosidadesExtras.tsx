@@ -7,7 +7,7 @@ import { Art, Thumb } from '../ui/Thumb'
 import { artistHref, songHref } from '../ui/links'
 import { PlayButton } from '../ui/player'
 import { trackOf } from '../ui/playerStore'
-import { cleanTitle, clock, date, duration, hours, keyToMs, monthLabel, num } from '../ui/format'
+import { cleanTitle, clock, date, duration, hours, keyToMs, monthLabel, num, shortDate } from '../ui/format'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 const monthOf = (ms: number) => {
@@ -32,8 +32,7 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
           <p className="rec-label">Maior maratona</p>
           <p className="rec-big">{duration(r.marathon.end - r.marathon.start)}</p>
           <p className="rec-text">
-            sem pausa maior que 10 minutos, em {date(r.marathon.start)}, das {clock(r.marathon.start)} às {clock(r.marathon.end)}.{' '}
-            Foram {num(r.marathon.tracks)} faixas.
+            {shortDate(r.marathon.start)} · {clock(r.marathon.start)}–{clock(r.marathon.end)} · {num(r.marathon.tracks)} faixas
           </p>
         </article>
       )}
@@ -44,7 +43,7 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
           <p className="rec-label">Repetiu no mesmo dia</p>
           <p className="rec-big">{num(r.repeatDay.count)} vezes</p>
           <p className="rec-text">
-            {link(r.repeatDay.item)}, de {song(r.repeatDay.item).artist}, em {date(keyToMs(r.repeatDay.day))}.
+            {link(r.repeatDay.item)} · {song(r.repeatDay.item).artist} · {shortDate(keyToMs(r.repeatDay.day))}
           </p>
         </article>
       )}
@@ -52,7 +51,7 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
         <article className="rec rec-night">
           <p className="rec-label">Madrugada mais longa</p>
           <p className="rec-big">{hours(r.lateNight.ms)}</p>
-          <p className="rec-text">ouvindo entre meia-noite e 6h, em {date(keyToMs(r.lateNight.day))}.</p>
+          <p className="rec-text">{shortDate(keyToMs(r.lateNight.day))}</p>
         </article>
       )}
       {r.artistRun && (
@@ -61,7 +60,7 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
           <p className="rec-label">Sem trocar de artista</p>
           <p className="rec-big">{num(r.artistRun.count)} seguidas</p>
           <p className="rec-text">
-            de <a href={artistHref(r.artistRun.creator)}>{data.creators[r.artistRun.creator]}</a>, em {date(r.artistRun.start)}.
+            <a href={artistHref(r.artistRun.creator)}>{data.creators[r.artistRun.creator]}</a> · {shortDate(r.artistRun.start)}
           </p>
         </article>
       )}
@@ -72,7 +71,7 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
           <p className="rec-label">A mais fiel</p>
           <p className="rec-big">{num(r.loyal.days)} dias</p>
           <p className="rec-text">
-            diferentes com {link(r.loyal.item)}, de {song(r.loyal.item).artist}.
+            {link(r.loyal.item)} · {song(r.loyal.item).artist}
           </p>
         </article>
       )}
@@ -86,7 +85,7 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
               <a href={songHref(r.first.item)}>{song(r.first.item).name}</a>
             </p>
             <p className="rec-text">
-              de {song(r.first.item).artist}, em {date(r.first.t)} às {clock(r.first.t)}.
+              {song(r.first.item).artist} · {shortDate(r.first.t)}, {clock(r.first.t)}
             </p>
           </div>
         </article>
@@ -95,7 +94,7 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
         <article className="rec">
           <p className="rec-label">Dia mais variado</p>
           <p className="rec-big">{num(r.variety.artists)} artistas</p>
-          <p className="rec-text">diferentes em {date(keyToMs(r.variety.day))}.</p>
+          <p className="rec-text">{shortDate(keyToMs(r.variety.day))}</p>
         </article>
       )}
     </div>
@@ -122,7 +121,7 @@ export function Esquecidas({ data, filter }: { data: Dataset; filter: Filter }) 
             </a>
             <span className="wall-sub">{data.creators[it.creator]}</span>
             <span className="wall-value">
-              {num(f.plays)} vezes, mais em {f.peakYear}
+              {num(f.plays)} vezes{filter.year === null && `, mais em ${f.peakYear}`}
             </span>
             <span className="faded-last">última vez em {monthOf(f.last)}</span>
           </li>
@@ -161,7 +160,6 @@ export function Comparar({ data, years, filter }: { data: Dataset; years: number
     { label: words.fresh, a: pa.newCreators, b: pb.newCreators, fmt: num, skip: pa.firstYear || pb.firstYear },
   ]
   const shared = new Set(pa.top.map((x) => x.id).filter((id) => pb.top.some((y) => y.id === id)))
-  const delta = pa.totalMs > 0 ? (pb.totalMs - pa.totalMs) / pa.totalMs : null
 
   const picker = (value: number, other: number, set: (y: number) => void, label: string, p: YearProfile) => (
     <label className="vs-pick">
@@ -245,26 +243,13 @@ export function Comparar({ data, years, filter }: { data: Dataset; years: number
                 <a href={songHref(p.topItem.id)}>
                   <b>{cleanTitle(p.topItem.name)}</b>
                 </a>
-                , de {p.topItem.sub}
+                {' · '}
+                {p.topItem.sub}
               </p>
             )}
           </div>
         ))}
       </div>
-
-      <p className="vs-verdict">
-        {delta !== null && (
-          <>
-            Em {b} você ouviu {delta >= 0 ? `${num(delta * 100)}% a mais` : `${num(-delta * 100)}% a menos`} que em {a}
-            {pb.partial ? `, e ${b} ainda não acabou nos seus dados` : ''}.{' '}
-          </>
-        )}
-        {shared.size === 0
-          ? 'Nenhum nome se repete nos dois top 5.'
-          : shared.size === 1
-            ? 'Um nome está no top 5 dos dois anos (marcado).'
-            : `${shared.size} nomes estão no top 5 dos dois anos (marcados).`}
-      </p>
     </div>
   )
 }

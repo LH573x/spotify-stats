@@ -154,11 +154,7 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
         </datalist>
       </form>
 
-      <Section
-        kicker="Ano a ano"
-        title={`Seu top ${rows} de cada ano`}
-        note="Passe o mouse num nome para ver em que outros anos ele aparece. Clique ou toque para abrir a página."
-      >
+      <Section title={`Seu top ${rows} de cada ano`}>
         <div className="segmented view-switch" role="group" aria-label="Mostrar">
           <button
             className={songs ? '' : 'on'}
@@ -228,7 +224,7 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
         </div>
       </Section>
 
-      <Section kicker="Melhores descobertas" title="Quem chegou para ficar" note="Em cada ano, quem você ouviu pela primeira vez e mais ouviu desde então.">
+      <Section title="Quem chegou para ficar">
         <div className="scroll-x">
           <ol className="finds">
             {t.discoveries.map((d) => (
@@ -253,14 +249,14 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
         </div>
       </Section>
 
-      <Section kicker="Descobertas" title={`${who.many[0].toUpperCase() + who.many.slice(1)} novos a cada mês`} note={`Quantos ${who.many} você ouviu pela primeira vez em cada mês.`}>
+      <Section title={`${who.many[0].toUpperCase() + who.many.slice(1)} novos a cada mês`}>
         <div className="card">
           <Chart option={newOption} height={240} label={`${who.many} novos por mês`} />
         </div>
       </Section>
 
       {(t.phases.length > 0 || t.songPhases.length > 0) && (
-        <Section kicker="Fases" title="Fases e obsessões" note="O que você ouviu muito num mês só: mais da metade de tudo o que ouviu dele.">
+        <Section title="Fases e obsessões">
           <div className="two">
             {t.phases.length > 0 && (
               <BarList
@@ -270,7 +266,7 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
                   name: p.name,
                   href: artistHref(p.id),
                   image: artistRef(data, p.id),
-                  sub: `${monthLabel(p.month)} · ${pct(p.peakMs / p.totalMs)} do total de ${hours(p.totalMs)}`,
+                  sub: `${monthLabel(p.month)} · ${pct(p.peakMs / p.totalMs)} do total`,
                   value: hours(p.peakMs),
                   share: p.peakMs / maxPeak,
                   title: `${p.name}: ${hours(p.peakMs)} em ${monthLabel(p.month)}`,

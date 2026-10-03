@@ -8,7 +8,7 @@ import { trackOf } from '../ui/playerStore'
 import { artistRef, itemRef } from '../data/refs'
 import { Chart, type ChartOption } from '../ui/Chart'
 import { chartColors, type ThemeName } from '../ui/theme'
-import { cleanTitle, date, hours, monthLabel, num, pct } from '../ui/format'
+import { cleanTitle, hours, monthLabel, num, pct } from '../ui/format'
 
 interface Props {
   data: Dataset
@@ -108,7 +108,7 @@ export function Resumo({ data, filter, theme, onYear }: Props) {
     ...toItem(r),
     href: artistHref(r.id),
     image: artistRef(data, r.id),
-    detail: `${num(r.plays)} reproduções · ${pct(r.ms / s.totalMs)} de tudo o que você ouviu`,
+    detail: `${num(r.plays)} reproduções · ${pct(r.ms / s.totalMs)} do total`,
   }))
   const items: RankItem[] = s.topItems.map((r) => ({
     ...toItem(r),
@@ -117,50 +117,41 @@ export function Resumo({ data, filter, theme, onYear }: Props) {
     image: itemRef(data, r.id),
     track: trackOf(data, r.id),
   }))
-  const period = filter.year ? `em ${filter.year}` : 'desde o começo'
 
   return (
     <main className="page">
       <section className="hero hero-deck">
         {deck}
         <div className="hero-text">
-          <p className="eyebrow">
-            {filter.year ? `Em ${filter.year}` : 'Desde o começo'} · {s.first !== null && date(s.first)} a{' '}
-            {s.last !== null && date(s.last)}
-          </p>
           <h1>
             Você ouviu <span className="accent">{num(totalHours)} horas</span>
           </h1>
           <p className="sub">
-            Isso é {num(daysNonStop)} {Math.round(daysNonStop) === 1 ? 'dia' : 'dias'} sem parar.
-            {delta !== null && (
-              <>
-                {' '}
-                {delta >= 0 ? `${num(delta * 100)}% a mais` : `${num(-delta * 100)}% a menos`} que em {filter.year! - 1}.
-              </>
-            )}
+            {num(daysNonStop)} {Math.round(daysNonStop) === 1 ? 'dia' : 'dias'} sem parar
+            {delta !== null &&
+              ` · ${delta >= 0 ? `${num(delta * 100)}% a mais` : `${num(-delta * 100)}% a menos`} que ${filter.year! - 1}`}
           </p>
         </div>
       </section>
 
       <StatStrip
         items={[
-          { label: 'Reproduções', value: num(s.plays), hint: 'com 30 s ou mais' },
+          { label: 'Reproduções', value: num(s.plays) },
           { label: nouns.creators, value: num(s.creators) },
           { label: nouns.items, value: num(s.items) },
           { label: 'Dias ouvindo', value: num(s.activeDays) },
         ]}
       />
 
-      <Section kicker={`Top ${creators.length}`} title={nouns.topC} note={`Por horas ouvidas, ${period}. Toque num nome para ver a história completa.`}>
+      <Section title={nouns.topC}>
         <Podium items={creators} />
       </Section>
 
-      <Section kicker="Parede de capas" title={nouns.topI} note={`Por horas ouvidas, ${period}.`}>
+      <Section title={nouns.topI}>
         <CoverWall items={items} />
       </Section>
 
-      <Section kicker="Mês a mês" title="Quando você mais ouviu">
+      <Section title="Quando você mais ouviu">
         <div className="card chart-card">
           <p className="callout">
             <span>Mês recorde</span>
