@@ -32,6 +32,22 @@ export interface Habits {
 const pad = (n: number) => String(n).padStart(2, '0')
 export const dayKey = (dt: Date) => `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`
 
+/** Partes do dia usadas em "Você é da noite". */
+export const DAY_PARTS = [
+  { name: 'Madrugada', from: 0, to: 6 },
+  { name: 'Manhã', from: 6, to: 12 },
+  { name: 'Tarde', from: 12, to: 18 },
+  { name: 'Noite', from: 18, to: 24 },
+]
+
+/** Horas em cada parte do dia, a partir do relógio [dia da semana][hora]. */
+export function dayParts(clock: number[][]) {
+  return DAY_PARTS.map((p) => ({
+    ...p,
+    hours: clock.reduce((sum, row) => sum + row.slice(p.from, p.to).reduce((a, b) => a + b, 0), 0),
+  }))
+}
+
 /** Músicas com poucas reproduções não entram no ranking de pulos (1 de 1 = 100% não diz nada). */
 const MIN_STARTS_FOR_SKIP_RANK = 5
 

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { Dataset } from '../data/types'
 import type { Filter } from '../data/stats'
-import { habits } from '../data/habits'
+import { dayParts, habits } from '../data/habits'
 import { Chart, type ChartOption } from '../ui/Chart'
 import { CHART_COLORS, type ThemeName } from '../ui/theme'
 import { hours, num, pct } from '../ui/format'
@@ -17,12 +17,6 @@ interface Props {
 const WEEKDAYS = ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom']
 const WEEKDAYS_LONG = ['segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo']
 const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
-const PARTS = [
-  { name: 'Madrugada', from: 0, to: 6 },
-  { name: 'Manhã', from: 6, to: 12 },
-  { name: 'Tarde', from: 12, to: 18 },
-  { name: 'Noite', from: 18, to: 24 },
-]
 
 /** "2024-03-07" → "qui, 7 de mar. de 2024" (sem fuso: a data já é local). */
 function dayLabel(key: string, withWeekday = true): string {
@@ -149,10 +143,7 @@ export function Habitos({ data, filter, theme, lastYear }: Props) {
 
   if (!h.bestDay) return <p className="empty">Nada por aqui nesse período.</p>
 
-  const partHours = PARTS.map((p) => ({
-    ...p,
-    hours: h.clock.reduce((sum, row) => sum + row.slice(p.from, p.to).reduce((a, b) => a + b, 0), 0),
-  }))
+  const partHours = dayParts(h.clock)
   const totalHours = partHours.reduce((a, p) => a + p.hours, 0)
   const topPart = partHours.reduce((a, b) => (b.hours > a.hours ? b : a))
   const platformTotal = h.platforms.reduce((a, p) => a + p.ms, 0)
