@@ -4,13 +4,14 @@ import type { KindFilter } from '../data/stats'
 import { timeline } from '../data/timeline'
 import { Chart, type ChartOption } from '../ui/Chart'
 import { chartColors, type ThemeName } from '../ui/theme'
-import { cleanTitle, date, hours, monthLabel, num, pct } from '../ui/format'
+import { cleanTitle, date, hours, monthLabel, num, ordinal, pct } from '../ui/format'
 import { BarList } from '../ui/parts'
 import { Section } from '../ui/blocks'
 import { Art } from '../ui/Thumb'
 import { artistHref, songHref } from '../ui/links'
 import { trackOf } from '../ui/playerStore'
 import { artistRef, itemRef } from '../data/refs'
+import { t as tr } from '../i18n'
 
 interface Props {
   data: Dataset
@@ -19,15 +20,24 @@ interface Props {
 }
 
 const WHO = {
-  all: { one: 'artista ou podcast', many: 'artistas e podcasts' },
-  music: { one: 'artista', many: 'artistas' },
-  podcast: { one: 'podcast', many: 'podcasts' },
+  all: () => ({
+    one: tr('artista ou podcast', 'artist or podcast', 'artista o podcast'),
+    many: tr('artistas e podcasts', 'artists and podcasts', 'artistas y podcasts'),
+  }),
+  music: () => ({ one: tr('artista', 'artist', 'artista'), many: tr('artistas', 'artists', 'artistas') }),
+  podcast: () => ({ one: 'podcast', many: 'podcasts' }),
 }
+
+/** "artista novo" ou "artistas novos", conforme a quantidade. */
+const fresh = (who: { one: string; many: string }, n: number) =>
+  n === 1
+    ? tr(`${who.one} novo`, `new ${who.one}`, `${who.one} nuevo`)
+    : tr(`${who.many} novos`, `new ${who.many}`, `${who.many} nuevos`)
 
 export function LinhaDoTempo({ data, kind, theme }: Props) {
   const t = useMemo(() => timeline(data, kind), [data, kind])
   const c = chartColors(theme, 'amber')
-  const who = WHO[kind]
+  const who = WHO[kind]()
   const [hover, setHover] = useState<number | null>(null)
   const [query, setQuery] = useState('')
   const [view, setView] = useState<'artists' | 'songs'>('artists')
@@ -43,7 +53,7 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
         borderColor: c.axis,
         textStyle: { color: c.ink },
         formatter: (p: { name: string; value: number }[]) =>
-          `${monthLabel(p[0].name)}<br/><b>${num(p[0].value)}</b> ${p[0].value === 1 ? who.one + ' novo' : who.many + ' novos'}`,
+          `${monthLabel(p[0].name)}<br/><b>${num(p[0].value)}</b> ${fresh(who, p[0].value)}`,
       },
       xAxis: {
         type: 'category',
@@ -85,7 +95,7 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
     return list
   }, [t, data])
   const hrefs = useMemo(() => new Map(options.map((o) => [o.label.toLowerCase(), o.href])), [options])
-  if (t.years.length === 0) return <p className="empty">Nada por aqui.</p>
+  if (t.years.length === 0) return <p className="empty">{tr('Nada por aqui.', 'Nothing here.', 'Nada por aquí.')}</p>
 
   // Quem foi nº 1 em mais anos.
   const champions = new Map<number, number>()
@@ -102,18 +112,27 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
     <main className="page">
       <section className="hero">
         <p className="eyebrow">
-          {t.years[0].year} a {t.years[t.years.length - 1].year}
+          {tr(
+            `${t.years[0].year} a ${t.years[t.years.length - 1].year}`,
+            `${t.years[0].year} to ${t.years[t.years.length - 1].year}`,
+            `${t.years[0].year} a ${t.years[t.years.length - 1].year}`,
+          )}
         </p>
         <h1>
-          Sua história em <span className="accent">{t.years.length} anos</span>
+          {tr('Sua história em', 'Your story in', 'Tu historia en')}{' '}
+          <span className="accent">
+            {t.years.length}{' '}
+            {tr('anos', t.years.length === 1 ? 'year' : 'years', t.years.length === 1 ? 'año' : 'años')}
+          </span>
         </h1>
         <p className="sub">
-          Você conheceu {num(discovered)} {who.many}.
+          {tr('Você conheceu', 'You discovered', 'Descubriste')} {num(discovered)} {who.many}.
           {champId !== null && (
             <>
               {' '}
-              <a href={artistHref(champId)}>{data.creators[champId]}</a> foi o nº 1 em {champYears}{' '}
-              {champYears === 1 ? 'ano' : 'anos'}.
+              <a href={artistHref(champId)}>{data.creators[champId]}</a>{' '}
+              {tr('foi o nº 1 em', 'was #1 for', 'fue el n.º 1 en')} {champYears}{' '}
+              {champYears === 1 ? tr('ano', 'year', 'año') : tr('anos', 'years', 'años')}.
             </>
           )}
         </p>
@@ -127,12 +146,20 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
           if (found !== undefined) location.hash = found
         }}
       >
-        <label htmlFor="artist-search">Buscar {who.one} ou {kind === 'podcast' ? 'episódio' : 'música'}</label>
+        <label htmlFor="artist-search">
+          {kind === 'podcast'
+            ? tr(`Buscar ${who.one} ou episódio`, `Search ${who.one} or episode`, `Buscar ${who.one} o episodio`)
+            : tr(`Buscar ${who.one} ou música`, `Search ${who.one} or song`, `Buscar ${who.one} o canción`)}
+        </label>
         <div className="search-row">
           <input
             id="artist-search"
             list="artist-names"
-            placeholder={kind === 'podcast' ? 'Ex.: Flow Podcast' : 'Ex.: Arctic Monkeys'}
+            placeholder={
+              kind === 'podcast'
+                ? tr('Ex.: Flow Podcast', 'e.g. Flow Podcast', 'Ej.: Flow Podcast')
+                : tr('Ex.: Arctic Monkeys', 'e.g. Arctic Monkeys', 'Ej.: Arctic Monkeys')
+            }
             value={query}
             onChange={(e) => {
               setQuery(e.target.value)
@@ -144,7 +171,7 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
             autoComplete="off"
           />
           <button type="submit" disabled={found === undefined}>
-            Abrir
+            {tr('Abrir', 'Open', 'Abrir')}
           </button>
         </div>
         <datalist id="artist-names">
@@ -154,8 +181,8 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
         </datalist>
       </form>
 
-      <Section title={`Seu top ${rows} de cada ano`}>
-        <div className="segmented view-switch" role="group" aria-label="Mostrar">
+      <Section title={tr(`Seu top ${rows} de cada ano`, `Your top ${rows} each year`, `Tu top ${rows} de cada año`)}>
+        <div className="segmented view-switch" role="group" aria-label={tr('Mostrar', 'Show', 'Mostrar')}>
           <button
             className={songs ? '' : 'on'}
             aria-pressed={!songs}
@@ -164,7 +191,7 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
               setHover(null)
             }}
           >
-            {kind === 'podcast' ? 'Podcasts' : 'Artistas'}
+            {kind === 'podcast' ? 'Podcasts' : tr('Artistas', 'Artists', 'Artistas')}
           </button>
           <button
             className={songs ? 'on' : ''}
@@ -174,7 +201,7 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
               setHover(null)
             }}
           >
-            {kind === 'podcast' ? 'Episódios' : 'Músicas'}
+            {kind === 'podcast' ? tr('Episódios', 'Episodes', 'Episodios') : tr('Músicas', 'Songs', 'Canciones')}
           </button>
         </div>
         <div className="card">
@@ -186,7 +213,7 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
             >
               <thead>
                 <tr>
-                  <th scope="col" aria-label="Posição" />
+                  <th scope="col" aria-label={tr('Posição', 'Rank', 'Posición')} />
                   {t.years.map((y) => (
                     <th key={y.year} scope="col">
                       {y.year}
@@ -198,7 +225,7 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
               <tbody>
                 {Array.from({ length: rows }, (_, r) => (
                   <tr key={r}>
-                    <th scope="row">{r + 1}º</th>
+                    <th scope="row">{ordinal(r + 1)}</th>
                     {t.years.map((y) => {
                       const a = songs ? y.topItems[r] : y.top[r]
                       if (!a) return <td key={y.year} />
@@ -211,7 +238,11 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
                             href={songs ? songHref(a.id) : artistHref(a.id)}
                             onMouseEnter={() => setHover(a.id)}
                             onFocus={() => setHover(a.id)}
-                            title={`${name}${sub ? `, de ${sub}` : ''}: ${hours(a.ms)} em ${y.year}`}
+                            title={tr(
+                              `${name}${sub ? `, de ${sub}` : ''}: ${hours(a.ms)} em ${y.year}`,
+                              `${name}${sub ? `, by ${sub}` : ''}: ${hours(a.ms)} in ${y.year}`,
+                              `${name}${sub ? `, de ${sub}` : ''}: ${hours(a.ms)} en ${y.year}`,
+                            )}
                           >
                             <Art image={image} label={name} round={false} />
                             <span className="yg-text">
@@ -231,7 +262,7 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
         </div>
       </Section>
 
-      <Section title="Quem chegou para ficar">
+      <Section title={tr('Quem chegou para ficar', 'Here to stay', 'Llegaron para quedarse')}>
         <div className="scroll-x">
           <ol className="finds">
             {t.discoveries.map((d) => (
@@ -241,14 +272,18 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
                   <a href={artistHref(d.best.id)} className="find-card">
                     <Art image={artistRef(data, d.best.id)} label={d.best.name} size={88} />
                     <strong>{d.best.name}</strong>
-                    <small>desde {date(d.best.first)}</small>
-                    <span>{hours(d.best.ms)} até hoje</span>
+                    <small>
+                      {tr('desde', 'since', 'desde')} {date(d.best.first)}
+                    </small>
+                    <span>
+                      {hours(d.best.ms)} {tr('até hoje', 'so far', 'hasta hoy')}
+                    </span>
                   </a>
                 ) : (
                   <span className="find-card" />
                 )}
                 <small className="find-count">
-                  {num(d.count)} {d.count === 1 ? who.one + ' novo' : who.many + ' novos'}
+                  {num(d.count)} {fresh(who, d.count)}
                 </small>
               </li>
             ))}
@@ -256,33 +291,43 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
         </div>
       </Section>
 
-      <Section title={`${who.many[0].toUpperCase() + who.many.slice(1)} novos a cada mês`}>
+      <Section
+        title={tr(
+          `${who.many[0].toUpperCase() + who.many.slice(1)} novos a cada mês`,
+          `New ${who.many} each month`,
+          `${who.many[0].toUpperCase() + who.many.slice(1)} nuevos cada mes`,
+        )}
+      >
         <div className="card">
-          <Chart option={newOption} height={240} label={`${who.many} novos por mês`} />
+          <Chart
+            option={newOption}
+            height={240}
+            label={tr(`${who.many} novos por mês`, `New ${who.many} per month`, `${who.many} nuevos por mes`)}
+          />
         </div>
       </Section>
 
       {(t.phases.length > 0 || t.songPhases.length > 0) && (
-        <Section title="Fases e obsessões">
+        <Section title={tr('Fases e obsessões', 'Phases and obsessions', 'Fases y obsesiones')}>
           <div className="two">
             {t.phases.length > 0 && (
               <BarList
-                title={kind === 'podcast' ? 'Podcasts' : 'Artistas'}
+                title={kind === 'podcast' ? 'Podcasts' : tr('Artistas', 'Artists', 'Artistas')}
                 rows={t.phases.map((p) => ({
                   key: p.id,
                   name: p.name,
                   href: artistHref(p.id),
                   image: artistRef(data, p.id),
-                  sub: `${monthLabel(p.month)} · ${pct(p.peakMs / p.totalMs)} do total`,
+                  sub: `${monthLabel(p.month)} · ${pct(p.peakMs / p.totalMs)} ${tr('do total', 'of total', 'del total')}`,
                   value: hours(p.peakMs),
                   share: p.peakMs / maxPeak,
-                  title: `${p.name}: ${hours(p.peakMs)} em ${monthLabel(p.month)}`,
+                  title: `${p.name}: ${hours(p.peakMs)} ${tr('em', 'in', 'en')} ${monthLabel(p.month)}`,
                 }))}
               />
             )}
             {t.songPhases.length > 0 && (
               <BarList
-                title="Músicas"
+                title={tr('Músicas', 'Songs', 'Canciones')}
                 rows={t.songPhases.map((p) => {
                   const it = data.items[p.id]
                   const name = cleanTitle(it.name)
@@ -293,9 +338,13 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
                     image: itemRef(data, p.id),
                     track: trackOf(data, p.id),
                     sub: `${data.creators[it.creator]} · ${monthLabel(p.month)}`,
-                    value: `${num(p.peakPlays)} de ${num(p.totalPlays)}`,
+                    value: `${num(p.peakPlays)} ${tr('de', 'of', 'de')} ${num(p.totalPlays)}`,
                     share: p.peakPlays / maxSongPeak,
-                    title: `${name}: ${num(p.peakPlays)} das ${num(p.totalPlays)} vezes foram em ${monthLabel(p.month)}`,
+                    title: tr(
+                      `${name}: ${num(p.peakPlays)} das ${num(p.totalPlays)} vezes foram em ${monthLabel(p.month)}`,
+                      `${name}: ${num(p.peakPlays)} of ${num(p.totalPlays)} plays were in ${monthLabel(p.month)}`,
+                      `${name}: ${num(p.peakPlays)} de las ${num(p.totalPlays)} veces fueron en ${monthLabel(p.month)}`,
+                    ),
                   }
                 })}
               />

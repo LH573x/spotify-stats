@@ -2,6 +2,7 @@ import { zipSync } from 'fflate'
 import font600 from '@fontsource/barlow-condensed/files/barlow-condensed-latin-600-normal.woff2?url'
 import font700 from '@fontsource/barlow-condensed/files/barlow-condensed-latin-700-normal.woff2?url'
 import font800 from '@fontsource/barlow-condensed/files/barlow-condensed-latin-800-normal.woff2?url'
+import { t } from '../i18n'
 
 const FONTS: [number, string][] = [
   [600, font600],
@@ -59,14 +60,20 @@ export async function svgToPng(svg: SVGSVGElement): Promise<Blob> {
   canvas.width = width
   canvas.height = height
   const ctx = canvas.getContext('2d')
-  if (!ctx) throw new Error('Seu navegador não conseguiu gerar a imagem.')
+  if (!ctx) throw new Error(t('Seu navegador não conseguiu gerar a imagem.', "Your browser couldn't create the image.", 'Tu navegador no ha podido generar la imagen.'))
   ctx.drawImage(img, 0, 0, width, height)
   // O Safari às vezes desenha antes de a fonte embutida ficar pronta; a segunda vez sai certa.
   await wait(150)
   ctx.clearRect(0, 0, width, height)
   ctx.drawImage(img, 0, 0, width, height)
   return new Promise((resolve, reject) =>
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Seu navegador não conseguiu gerar a imagem.'))), 'image/png'),
+    canvas.toBlob(
+      (b) =>
+        b
+          ? resolve(b)
+          : reject(new Error(t('Seu navegador não conseguiu gerar a imagem.', "Your browser couldn't create the image.", 'Tu navegador no ha podido generar la imagen.'))),
+      'image/png',
+    ),
   )
 }
 

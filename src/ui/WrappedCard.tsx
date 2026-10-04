@@ -3,7 +3,8 @@ import type { TopPeriod, WrappedYear } from '../data/wrapped'
 import { useImagesData, type ImageRef } from '../data/images'
 import { CARD_FONT, DISPLAY_FONT, fitText } from './svgText'
 import { LyraShape } from './LyraMark'
-import { capitalize, minutes, monthKeyOf, peakMonth, PERIOD_TITLES, periodRange, type CardInfo } from './wrappedDeck'
+import { capitalize, enHour, minutes, monthKeyOf, partTitle, peakMonth, periodRange, periodTitle, type CardInfo } from './wrappedDeck'
+import { t as tr } from '../i18n'
 import { cleanTitle, dayMonth, hue, keyToMs, longHours, monthLabel, monthName, num, pct, weekdayName } from './format'
 
 /*
@@ -422,8 +423,19 @@ function Capa({ w, label }: CardProps) {
     .gap(36)
     .text(String(w.year), { size: 430, min: 260, display: true, fill: p.ink, lh: 0.85 })
     .gap(56)
-    .text(endsEarly ? 'Seu ano até aqui' : 'Seu ano em música', { size: 130, min: 84, display: true, fill: p.ink, lines: 2, width: 600 })
-  if (w.partial) s.gap(30).text(`De ${dayMonth(w.from)} a ${dayMonth(w.to)}`, { size: 46, weight: 600, fill: p.ink2, width: 600 })
+    .text(endsEarly ? tr('Seu ano até aqui', 'Your year so far', 'Tu año hasta ahora') : tr('Seu ano em música', 'Your year in music', 'Tu año en música'), {
+      size: 130,
+      min: 84,
+      display: true,
+      fill: p.ink,
+      lines: 2,
+      width: 600,
+    })
+  if (w.partial) {
+    const from = dayMonth(w.from)
+    const to = dayMonth(w.to)
+    s.gap(30).text(tr(`De ${from} a ${to}`, `${from} to ${to}`, `Del ${from} al ${to}`), { size: 46, min: 36, weight: 600, fill: p.ink2, width: 600 })
+  }
   const r = 430
   const cy = Math.min(1400, Math.max(1360, s.y + 60 + r))
   const deco = (
@@ -431,7 +443,7 @@ function Capa({ w, label }: CardProps) {
       <circle cx={W - 40} cy={TOP + 40} r={150} fill={p.pop} opacity={0.9} />
       <Disc cx={900} cy={cy} r={r} label={p.pop} hole={p.bg} spin>
         <text x={900} y={cy - 46} fontSize={36} fontWeight={700} fill={p.muted} textAnchor="middle" fontFamily={DISPLAY_FONT}>
-          LADO A
+          {tr('LADO A', 'SIDE A', 'CARA A')}
         </text>
         <text x={900} y={cy + 76} fontSize={92} fontWeight={800} fill={p.ink} textAnchor="middle" fontFamily={DISPLAY_FONT}>
           {w.year}
@@ -451,24 +463,45 @@ function Minutos({ w, label }: CardProps) {
   const p = PAL.night
   const days = Math.round(w.totalMs / 86.4e6)
   const s = makeStack(TOP + 190)
-    .text(`Em ${w.year}, você ouviu`, { size: 72, display: true, fill: p.accent, lines: 2 })
+    .text(tr(`Em ${w.year}, você ouviu`, `In ${w.year}, you listened for`, `En ${w.year}, escuchaste`), { size: 72, display: true, fill: p.accent, lines: 2 })
     .gap(30)
     .text(num(minutes(w)), { size: 340, min: 170, display: true, fill: p.ink, lh: 0.85 })
     .gap(18)
-    .text('minutos', { size: 170, display: true, fill: p.pop })
+    .text(tr('minutos', 'minutes', 'minutos'), { size: 170, min: 120, display: true, fill: p.pop })
     .gap(80)
-    .text(days >= 1 ? `São ${longHours(w.totalMs)}, ou ${num(days)} ${days === 1 ? 'dia' : 'dias'} sem parar.` : `São ${longHours(w.totalMs)}.`, {
-      size: 52,
-      fill: p.ink2,
-      lines: 3,
-    })
+    .text(
+      days >= 1
+        ? tr(
+            `São ${longHours(w.totalMs)}, ou ${num(days)} ${days === 1 ? 'dia' : 'dias'} sem parar.`,
+            `That's ${longHours(w.totalMs)}, or ${num(days)} ${days === 1 ? 'day' : 'days'} non-stop.`,
+            `Son ${longHours(w.totalMs)}, o ${num(days)} ${days === 1 ? 'día' : 'días'} sin parar.`,
+          )
+        : tr(`São ${longHours(w.totalMs)}.`, `That's ${longHours(w.totalMs)}.`, `En total, ${longHours(w.totalMs)}.`),
+      {
+        size: 52,
+        min: 42,
+        fill: p.ink2,
+        lines: 3,
+      },
+    )
   if (w.previousYearMs && !w.partial) {
     const r = w.totalMs / w.previousYearMs - 1
     const cmp =
-      Math.abs(r) < 0.03 ? `Quase o mesmo que em ${w.year - 1}.` : `${pct(Math.abs(r))} a ${r > 0 ? 'mais' : 'menos'} que em ${w.year - 1}.`
-    s.gap(34).text(cmp, { size: 52, weight: 700, fill: p.accent, lines: 2 })
+      Math.abs(r) < 0.03
+        ? tr(`Quase o mesmo que em ${w.year - 1}.`, `Almost the same as in ${w.year - 1}.`, `Casi lo mismo que en ${w.year - 1}.`)
+        : tr(
+            `${pct(Math.abs(r))} a ${r > 0 ? 'mais' : 'menos'} que em ${w.year - 1}.`,
+            `${pct(Math.abs(r))} ${r > 0 ? 'more' : 'less'} than in ${w.year - 1}.`,
+            `Un ${pct(Math.abs(r))} ${r > 0 ? 'más' : 'menos'} que en ${w.year - 1}.`,
+          )
+    s.gap(34).text(cmp, { size: 52, min: 42, weight: 700, fill: p.accent, lines: 2 })
   }
-  if (w.podcastMs >= 60_000) s.gap(34).text(`Contando ${longHours(w.podcastMs)} de podcasts.`, { size: 46, fill: p.muted, lines: 2 })
+  if (w.podcastMs >= 60_000) {
+    s.gap(34).text(
+      tr(`Contando ${longHours(w.podcastMs)} de podcasts.`, `Including ${longHours(w.podcastMs)} of podcasts.`, `Incluye ${longHours(w.podcastMs)} de podcasts.`),
+      { size: 46, min: 38, fill: p.muted, lines: 2 },
+    )
+  }
   const rings = [170, 290, 410, 530, 650]
   const deco = (
     <g>
@@ -548,17 +581,29 @@ function Artista({ w, label }: CardProps) {
   const a = w.topArtist!
   const [photo, cover] = useImagesData([a.image, a.topItem?.image], true)
   return (
-    <Spotlight p={p} label={label} year={w.year} uid="artista" photo={photo} name={a.name} kicker="Seu artista do ano">
+    <Spotlight p={p} label={label} year={w.year} uid="artista" photo={photo} name={a.name} kicker={tr('Seu artista do ano', 'Your artist of the year', 'Tu artista del año')}>
       {(s) => {
-        s.text(`${capitalize(longHours(a.ms))} e ${num(a.plays)} reproduções`, { size: 52, weight: 700, fill: p.ink, lines: 2 })
+        s.text(
+          tr(
+            `${capitalize(longHours(a.ms))} e ${num(a.plays)} reproduções`,
+            `${capitalize(longHours(a.ms))} and ${num(a.plays)} plays`,
+            `${capitalize(longHours(a.ms))} y ${num(a.plays)} reproducciones`,
+          ),
+          { size: 52, min: 42, weight: 700, fill: p.ink, lines: 2 },
+        )
         // No primeiro ano do export, "desde quando" é só o começo dos dados.
         if (a.since !== null && !w.firstYear) {
           const sinceYear = new Date(a.since).getFullYear()
-          s.gap(14).text(sinceYear < w.year ? `Você ouve desde ${sinceYear}.` : `Você conheceu em ${dayMonth(a.since)}.`, {
-            size: 46,
-            fill: p.ink2,
-            lines: 2,
-          })
+          s.gap(14).text(
+            sinceYear < w.year
+              ? tr(`Você ouve desde ${sinceYear}.`, `Listening since ${sinceYear}.`, `Juntos desde ${sinceYear}.`)
+              : tr(`Você conheceu em ${dayMonth(a.since)}.`, `First played on ${dayMonth(a.since)}.`, `Primera escucha: ${dayMonth(a.since)}.`),
+            {
+              size: 46,
+              fill: p.ink2,
+              lines: 2,
+            },
+          )
         }
         if (a.topItem) {
           const size = 170
@@ -567,11 +612,18 @@ function Artista({ w, label }: CardProps) {
           const tx = M + size + 36
           const width = W - M - tx
           s.draw(0, (y) => <Pic id="artista-capa" href={cover} name={a.topItem!.name} x={M} y={y} size={size} round={false} shadow />)
-          s.text('A preferida', { size: 46, display: true, fill: p.accent, x: tx, width })
+          s.text(tr('A preferida', 'Top song', 'La favorita'), { size: 46, display: true, fill: p.accent, x: tx, width })
             .gap(14)
             .text(cleanTitle(a.topItem.name), { size: 70, min: 46, display: true, fill: p.ink, x: tx, width })
             .gap(12)
-            .text(`tocou ${num(a.topItem.plays)} ${a.topItem.plays === 1 ? 'vez' : 'vezes'}`, { size: 42, fill: p.ink2, x: tx, width })
+            .text(
+              tr(
+                `tocou ${num(a.topItem.plays)} ${a.topItem.plays === 1 ? 'vez' : 'vezes'}`,
+                `played ${num(a.topItem.plays)} ${a.topItem.plays === 1 ? 'time' : 'times'}`,
+                `sonó ${num(a.topItem.plays)} ${a.topItem.plays === 1 ? 'vez' : 'veces'}`,
+              ),
+              { size: 42, min: 34, fill: p.ink2, x: tx, width },
+            )
           s.at(Math.max(s.y, top + size))
         }
       }}
@@ -657,9 +709,13 @@ function TopArtistas({ w, label }: CardProps) {
   const images = useImagesData(w.images.artists)
   const [lead, ...rest] = w.topArtists
   const s = makeStack(TOP)
-    .text(`Top ${w.topArtists.length} de ${w.year}`, { size: 60, display: true, fill: p.accent })
+    .text(tr(`Top ${w.topArtists.length} de ${w.year}`, `Top ${w.topArtists.length} of ${w.year}`, `Top ${w.topArtists.length} de ${w.year}`), {
+      size: 60,
+      display: true,
+      fill: p.accent,
+    })
     .gap(16)
-    .text('Seus artistas', { size: 180, min: 110, display: true, fill: p.ink })
+    .text(tr('Seus artistas', 'Your artists', 'Tus artistas'), { size: 180, min: 110, display: true, fill: p.ink })
   const top = s.y + 70
   const size = 420
   return (
@@ -682,7 +738,7 @@ function TopArtistas({ w, label }: CardProps) {
             .gap(20)
             .text(capitalize(longHours(lead.ms)), { size: 48, weight: 700, fill: p.ink2, x, width })
             .gap(8)
-            .text(`${num(lead.plays)} reproduções`, { size: 42, fill: p.muted, x, width })
+            .text(tr(`${num(lead.plays)} reproduções`, `${num(lead.plays)} plays`, `${num(lead.plays)} reproducciones`), { size: 42, min: 32, fill: p.muted, x, width })
         }
       </Lead>
       <Rows
@@ -702,10 +758,15 @@ function TopMusicas({ w, label }: CardProps) {
   const [big] = useImagesData(w.images.songs.slice(0, 1), true)
   const images = useImagesData(w.images.songs)
   const [lead, ...rest] = w.topSongs
+  const times = (n: number) => tr(`${num(n)} ${n === 1 ? 'vez' : 'vezes'}`, `${num(n)} ${n === 1 ? 'play' : 'plays'}`, `${num(n)} ${n === 1 ? 'vez' : 'veces'}`)
   const s = makeStack(TOP)
-    .text(`Top ${w.topSongs.length} de ${w.year}`, { size: 60, display: true, fill: p.accent })
+    .text(tr(`Top ${w.topSongs.length} de ${w.year}`, `Top ${w.topSongs.length} of ${w.year}`, `Top ${w.topSongs.length} de ${w.year}`), {
+      size: 60,
+      display: true,
+      fill: p.accent,
+    })
     .gap(16)
-    .text('Suas músicas', { size: 180, min: 110, display: true, fill: p.ink })
+    .text(tr('Suas músicas', 'Your songs', 'Tus canciones'), { size: 180, min: 110, display: true, fill: p.ink })
   const top = s.y + 70
   const size = 380
   const r = 172
@@ -727,17 +788,17 @@ function TopMusicas({ w, label }: CardProps) {
       >
         {(t, x, width) =>
           t
-            .text('nº 1', { size: 50, display: true, fill: p.accent, x, width })
+            .text(tr('nº 1', '#1', 'n.º 1'), { size: 50, display: true, fill: p.accent, x, width })
             .gap(12)
             .text(cleanTitle(lead.name), { size: 96, min: 54, display: true, fill: p.ink, lines: 3, x, width })
             .gap(18)
             .text(lead.sub, { size: 44, weight: 700, fill: p.ink2, lines: 2, x, width })
             .gap(8)
-            .text(`${num(lead.plays)} ${lead.plays === 1 ? 'vez' : 'vezes'}`, { size: 40, fill: p.muted, x, width })
+            .text(times(lead.plays), { size: 40, min: 32, fill: p.muted, x, width })
         }
       </Lead>
       <Rows
-        rows={rest.map((t, i) => ({ name: cleanTitle(t.name), sub: `${t.sub} · ${num(t.plays)} ${t.plays === 1 ? 'vez' : 'vezes'}`, image: images[i + 1] }))}
+        rows={rest.map((t, i) => ({ name: cleanTitle(t.name), sub: `${t.sub} · ${times(t.plays)}`, image: images[i + 1] }))}
         top={top + size + 80}
         p={p}
         uid="top-musicas"
@@ -748,19 +809,24 @@ function TopMusicas({ w, label }: CardProps) {
   )
 }
 
-const INITIALS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
-
 function Mes({ w, label }: CardProps) {
   const p = PAL.lime
   const m = peakMonth(w)
   const ms = w.months[m] * 3.6e6
   const days = new Date(w.year, m + 1, 0).getDate()
   const s = makeStack(TOP + 60)
-    .text(`Seu mês de ${w.year}`, { size: 68, display: true, fill: p.accent })
+    .text(tr(`Seu mês de ${w.year}`, `Your top month of ${w.year}`, `Tu mes de ${w.year}`), { size: 68, min: 52, display: true, fill: p.accent })
     .gap(24)
     .text(monthName(m), { size: 250, min: 140, display: true, fill: p.ink })
     .gap(48)
-    .text(`${capitalize(longHours(ms))} no mês, ou ${longHours(ms / days)} por dia.`, { size: 52, fill: p.ink2, lines: 3 })
+    .text(
+      tr(
+        `${capitalize(longHours(ms))} no mês, ou ${longHours(ms / days)} por dia.`,
+        `${capitalize(longHours(ms))} that month, or ${longHours(ms / days)} a day.`,
+        `${capitalize(longHours(ms))} en el mes, o ${longHours(ms / days)} al día.`,
+      ),
+      { size: 52, min: 42, fill: p.ink2, lines: 3 },
+    )
   return (
     <Frame uid="mes" p={p} label={label} right={String(w.year)} deco={<circle cx={W - 30} cy={TOP + 60} r={190} fill={p.pop} />}>
       {s.els}
@@ -769,7 +835,8 @@ function Mes({ w, label }: CardProps) {
         base={1600}
         maxH={Math.min(640, 1600 - s.y - 170)}
         on={(i) => i === m}
-        labels={INITIALS.map((text, i) => ({ i, text }))}
+        // A inicial de cada mês no idioma da tela (J F M A… ou E F M A…).
+        labels={Array.from({ length: 12 }, (_, i) => ({ i, text: monthName(i).charAt(0).toUpperCase() }))}
         p={p}
         onColor={p.accent}
         valueLabel={{ i: m, text: `${num(w.months[m])} h` }}
@@ -817,7 +884,7 @@ function Clock({ hours, from, to, cx, cy, R, p }: { hours: number[]; from: numbe
             textAnchor="middle"
             fontFamily={DISPLAY_FONT}
           >
-            {h}H
+            {tr(`${h}H`, String(h).padStart(2, '0'), `${h}H`)}
           </text>
         )
       })}
@@ -830,22 +897,43 @@ function Horario({ w, label }: CardProps) {
   const p = PAL.night
   const part = w.part!
   const s = makeStack(TOP + 20)
-    .text('Seu horário', { size: 64, display: true, fill: p.accent })
+    .text(tr('Seu horário', 'Your time of day', 'Tu horario'), { size: 64, display: true, fill: p.accent })
     .gap(20)
-    .text(`Você é da ${part.name.toLowerCase()}`, { size: 170, min: 100, display: true, fill: p.ink, lines: 2 })
+    .text(partTitle(part), { size: 170, min: 100, display: true, fill: p.ink, lines: 2 })
     .gap(40)
-    .text(`${pct(part.share)} do que você ouviu tocou entre ${part.from}h e ${part.to}h.`, { size: 50, fill: p.ink2, lines: 2 })
-  if (w.peak) s.gap(16).text(`Horário nobre: ${weekdayName(w.peak.weekday)} às ${w.peak.hour}h.`, { size: 46, weight: 700, fill: p.pop, lines: 2 })
+    .text(
+      tr(
+        `${pct(part.share)} do que você ouviu tocou entre ${part.from}h e ${part.to}h.`,
+        `${pct(part.share)} of your listening was between ${enHour(part.from)} and ${enHour(part.to)}.`,
+        `El ${pct(part.share)} de lo que escuchaste sonó entre las ${part.from} y las ${part.to}\u00a0h.`,
+      ),
+      { size: 50, min: 42, fill: p.ink2, lines: 2 },
+    )
+  if (w.peak) {
+    const day = weekdayName(w.peak.weekday)
+    const hour = w.peak.hour
+    s.gap(16).text(
+      tr(
+        `Horário nobre: ${day} às ${hour}h.`,
+        `Prime time: ${day}s at ${enHour(hour)}.`,
+        `Hora estrella: ${day} ${hour === 1 ? 'a la' : 'a las'} ${hour}\u00a0h.`,
+      ),
+      { size: 46, min: 38, weight: 700, fill: p.pop, lines: 2 },
+    )
+  }
   const room = 1730 - (s.y + 50)
   const R = Math.min(400, room / 2)
   const cy = s.y + 50 + R
+  // A hora no meio do relógio tem que caber no círculo de dentro ("21:00" em inglês é mais larga que "21H").
+  const peakText = w.peak ? tr(`${w.peak.hour}H`, `${String(w.peak.hour).padStart(2, '0')}:00`, `${w.peak.hour}H`) : ''
+  const peakSize = fitText(peakText, 2 * (R * 0.42 - 24) - 50, { max: R * 0.34, min: R * 0.2, weight: 800, maxLines: 1, family: DISPLAY_FONT }).size
   return (
     <Frame uid="horario" p={p} label={label} right={String(w.year)}>
       {s.els}
       <Clock hours={w.hours} from={part.from} to={part.to} cx={W / 2} cy={cy} R={R} p={p} />
       {w.peak && (
-        <text x={W / 2} y={cy + R * 0.12} fontSize={R * 0.34} fontWeight={800} fill={p.bg} textAnchor="middle" fontFamily={DISPLAY_FONT}>
-          {w.peak.hour}H
+        <text x={W / 2} y={cy + R * 0.12} fontSize={peakSize} fontWeight={800} fill={p.bg} textAnchor="middle" fontFamily={DISPLAY_FONT}>
+          {peakText}
         </text>
       )}
     </Frame>
@@ -856,13 +944,20 @@ function Sequencia({ w, label }: CardProps) {
   const p = PAL.pink
   const st = w.streak!
   const s = makeStack(TOP + 40)
-    .text('Sua maior sequência', { size: 68, display: true, fill: p.accent })
+    .text(tr('Sua maior sequência', 'Your longest streak', 'Tu mejor racha'), { size: 68, display: true, fill: p.accent })
     .gap(26)
     .text(num(st.days), { size: 400, min: 220, display: true, fill: p.ink, lh: 0.85 })
     .gap(20)
-    .text('dias seguidos', { size: 150, min: 100, display: true, fill: p.ink })
+    .text(tr('dias seguidos', 'days in a row', 'días seguidos'), { size: 150, min: 100, display: true, fill: p.ink })
     .gap(50)
-    .text(`De ${dayMonth(keyToMs(st.from))} a ${dayMonth(keyToMs(st.to))}, ouvindo algo todo dia.`, { size: 52, fill: p.ink2, lines: 3 })
+    .text(
+      tr(
+        `De ${dayMonth(keyToMs(st.from))} a ${dayMonth(keyToMs(st.to))}, ouvindo algo todo dia.`,
+        `From ${dayMonth(keyToMs(st.from))} to ${dayMonth(keyToMs(st.to))}, listening every day.`,
+        `Del ${dayMonth(keyToMs(st.from))} al ${dayMonth(keyToMs(st.to))}, escuchando algo cada día.`,
+      ),
+      { size: 52, min: 42, fill: p.ink2, lines: 3 },
+    )
   // Uma bolinha por dia da sequência (o que não couber vira "+N" na última).
   const cols = 15
   const cell = CW / cols
@@ -888,11 +983,18 @@ function Sequencia({ w, label }: CardProps) {
   if (w.bestDay) {
     s.at(Math.max(s.y + 90, 1330))
       .draw(70, (y) => <Divider p={p} y={y} />)
-      .text('Dia recorde', { size: 52, display: true, fill: p.accent })
+      .text(tr('Dia recorde', 'Record day', 'Día récord'), { size: 52, display: true, fill: p.accent })
       .gap(18)
       .text(`${dayMonth(keyToMs(w.bestDay.day))}: ${longHours(w.bestDay.ms)}`, { size: 96, min: 60, display: true, fill: p.ink })
       .gap(26)
-      .text(`Você ouviu algo em ${num(w.activeDays)} dias de ${w.year}.`, { size: 46, fill: p.ink2, lines: 2 })
+      .text(
+        tr(
+          `Você ouviu algo em ${num(w.activeDays)} dias de ${w.year}.`,
+          `You listened on ${num(w.activeDays)} days in ${w.year}.`,
+          `Escuchaste algo en ${num(w.activeDays)} días de ${w.year}.`,
+        ),
+        { size: 46, min: 38, fill: p.ink2, lines: 2 },
+      )
   }
   const deco = (
     <g>
@@ -914,18 +1016,32 @@ function Descoberta({ w, label }: CardProps) {
   const b = d.best!
   const [photo] = useImagesData([w.images.discovery], true)
   return (
-    <Spotlight p={p} label={label} year={w.year} uid="descoberta" photo={photo} name={b.name} kicker="Sua melhor descoberta">
+    <Spotlight p={p} label={label} year={w.year} uid="descoberta" photo={photo} name={b.name} kicker={tr('Sua melhor descoberta', 'Your best discovery', 'Tu mejor descubrimiento')}>
       {(s) => {
-        s.text(`Primeira vez em ${dayMonth(b.first)}. Desde então, foram ${longHours(b.ms)}.`, { size: 50, fill: p.ink2, lines: 3 })
+        s.text(
+          tr(
+            `Primeira vez em ${dayMonth(b.first)}. Desde então, foram ${longHours(b.ms)}.`,
+            `First played on ${dayMonth(b.first)}. Since then, ${longHours(b.ms)}.`,
+            `Primera escucha: ${dayMonth(b.first)}. Desde entonces, ${longHours(b.ms)}.`,
+          ),
+          { size: 50, min: 42, fill: p.ink2, lines: 3 },
+        )
         s.at(Math.max(s.y + 70, 1470))
           .draw(60, (y) => <Divider p={p} y={y} />)
-          .text(`${num(d.count)} ${d.count === 1 ? 'artista novo' : 'artistas novos'} em ${w.year}`, {
-            size: 96,
-            min: 56,
-            display: true,
-            fill: p.accent,
-            lines: 2,
-          })
+          .text(
+            tr(
+              `${num(d.count)} ${d.count === 1 ? 'artista novo' : 'artistas novos'} em ${w.year}`,
+              `${num(d.count)} new ${d.count === 1 ? 'artist' : 'artists'} in ${w.year}`,
+              `${num(d.count)} ${d.count === 1 ? 'artista nuevo' : 'artistas nuevos'} en ${w.year}`,
+            ),
+            {
+              size: 96,
+              min: 56,
+              display: true,
+              fill: p.accent,
+              lines: 2,
+            },
+          )
       }}
     </Spotlight>
   )
@@ -936,18 +1052,25 @@ function Podcast({ w, label }: CardProps) {
   const pc = w.topPodcast!
   const [photo] = useImagesData([pc.image], true)
   return (
-    <Spotlight p={p} label={label} year={w.year} uid="podcast" photo={photo} name={pc.name} square kicker="Seu podcast do ano">
+    <Spotlight p={p} label={label} year={w.year} uid="podcast" photo={photo} name={pc.name} square kicker={tr('Seu podcast do ano', 'Your podcast of the year', 'Tu podcast del año')}>
       {(s) => {
-        s.text(`${capitalize(longHours(pc.ms))} e ${num(pc.itemCount)} ${pc.itemCount === 1 ? 'episódio' : 'episódios'}`, {
-          size: 52,
-          weight: 700,
-          fill: p.ink,
-          lines: 2,
-        })
+        s.text(
+          tr(
+            `${capitalize(longHours(pc.ms))} e ${num(pc.itemCount)} ${pc.itemCount === 1 ? 'episódio' : 'episódios'}`,
+            `${capitalize(longHours(pc.ms))} and ${num(pc.itemCount)} ${pc.itemCount === 1 ? 'episode' : 'episodes'}`,
+            `${capitalize(longHours(pc.ms))} y ${num(pc.itemCount)} ${pc.itemCount === 1 ? 'episodio' : 'episodios'}`,
+          ),
+          {
+            size: 52,
+            weight: 700,
+            fill: p.ink,
+            lines: 2,
+          },
+        )
         if (pc.topItem) {
           s.at(Math.max(s.y + 70, 1450))
             .draw(60, (y) => <Divider p={p} y={y} />)
-            .text('O episódio mais ouvido', { size: 50, display: true, fill: p.accent })
+            .text(tr('O episódio mais ouvido', 'Most played episode', 'El episodio más escuchado'), { size: 50, display: true, fill: p.accent })
             .gap(16)
             .text(pc.topItem.name, { size: 56, min: 40, weight: 700, fill: p.ink, lines: 2 })
         }
@@ -1023,12 +1146,23 @@ function Resumo({ w, label }: CardProps) {
     .text('Lyra', { size: 60, display: true, fill: p.accent, x: tx, width: W - M - tx })
     .gap(20)
     .text(String(w.year), { size: 250, min: 150, display: true, fill: p.ink, x: tx, width: W - M - tx, lh: 0.85 })
-  if (lead) head.gap(30).text(`Artista do ano: ${lead.name}`, { size: 40, weight: 700, fill: p.ink2, x: tx, width: W - M - tx, lines: 3 })
+  if (lead) {
+    head
+      .gap(30)
+      .text(tr(`Artista do ano: ${lead.name}`, `Top artist: ${lead.name}`, `Artista del año: ${lead.name}`), {
+        size: 40,
+        weight: 700,
+        fill: p.ink2,
+        x: tx,
+        width: W - M - tx,
+        lines: 3,
+      })
+  }
   const listTop = TOP + 20 + size + 80
-  const stats: [string, string][] = [['Minutos ouvidos', num(minutes(w))]]
-  if (w.months[m] > 0) stats.push(['Mês favorito', monthName(m)])
-  if (w.part) stats.push(['Você é da', w.part.name])
-  if (w.streak && w.streak.days > 1) stats.push(['Maior sequência', `${num(w.streak.days)} dias`])
+  const stats: [string, string][] = [[tr('Minutos ouvidos', 'Minutes listened', 'Minutos escuchados'), num(minutes(w))]]
+  if (w.months[m] > 0) stats.push([tr('Mês favorito', 'Top month', 'Mes favorito'), monthName(m)])
+  if (w.part) stats.push([tr('Você é da', 'Time of day', 'Eres de'), w.part.name])
+  if (w.streak && w.streak.days > 1) stats.push([tr('Maior sequência', 'Longest streak', 'Mejor racha'), tr(`${num(w.streak.days)} dias`, `${num(w.streak.days)} days`, `${num(w.streak.days)} días`)])
   const statsTop = listTop + 76 + 5 * 104 + 60
   const colW = (CW - 44) / 2
   return (
@@ -1045,8 +1179,8 @@ function Resumo({ w, label }: CardProps) {
         top={listTop}
         p={p}
         uid="resumo"
-        left={{ title: 'Artistas', round: true, rows: w.topArtists.map((a, i) => ({ name: a.name, image: artists[i] })) }}
-        right={{ title: 'Músicas', round: false, rows: w.topSongs.map((t, i) => ({ name: cleanTitle(t.name), sub: t.sub, image: songs[i] })) }}
+        left={{ title: tr('Artistas', 'Artists', 'Artistas'), round: true, rows: w.topArtists.map((a, i) => ({ name: a.name, image: artists[i] })) }}
+        right={{ title: tr('Músicas', 'Songs', 'Canciones'), round: false, rows: w.topSongs.map((t, i) => ({ name: cleanTitle(t.name), sub: t.sub, image: songs[i] })) }}
       />
       <g className="wa" style={{ animationDelay: '450ms' }}>
         <Divider p={p} y={statsTop - 36} />
@@ -1090,16 +1224,23 @@ const PERIOD_PAL: Record<TopPeriod['id'], Palette> = { mes: PAL.pink, ano: PAL.o
 
 export function TopCard({ t, label }: { t: TopPeriod; label: string }) {
   const p = PERIOD_PAL[t.id]
-  const title = PERIOD_TITLES[t.id]
+  const title = periodTitle(t.id)
   const [bigArtist, bigSong] = useImagesData([t.images.artists[0], t.images.songs[0]], true)
   const artists = useImagesData(t.images.artists)
   const songs = useImagesData(t.images.songs)
   const s = makeStack(TOP)
-    .text('Meu Top 5', { size: 64, display: true, fill: p.accent })
+    .text(tr('Meu Top 5', 'My Top 5', 'Mi Top 5'), { size: 64, display: true, fill: p.accent })
     .gap(18)
     .text(title, { size: 220, min: 130, display: true, fill: p.ink })
     .gap(30)
-    .text(`${capitalize(periodRange(t))} · ${longHours(t.totalMs)} de música`, { size: 44, min: 32, weight: 600, fill: p.ink2 })
+    .text(
+      tr(
+        `${capitalize(periodRange(t))} · ${longHours(t.totalMs)} de música`,
+        `${capitalize(periodRange(t))} · ${longHours(t.totalMs)} of music`,
+        `${capitalize(periodRange(t))} · ${longHours(t.totalMs)} de música`,
+      ),
+      { size: 44, min: 32, weight: 600, fill: p.ink2 },
+    )
 
   // Capa da música nº 1 com o disco saindo, e a foto do artista nº 1 por cima, no canto.
   const top = s.y + 60
@@ -1127,14 +1268,14 @@ export function TopCard({ t, label }: { t: TopPeriod; label: string }) {
         {artist && (
           <Pic id={`top-${t.id}-artist`} href={bigArtist ?? artists[0]} name={artist.name} x={cx - 130} y={top + cover - photo + 70} size={photo} round ring={p.bg} ringWidth={14} shadow />
         )}
-        <Burst cx={cx + cover - 10} cy={top + 76} r={80} fill={p.pop} ink={p.ink} text="Nº1" />
+        <Burst cx={cx + cover - 10} cy={top + 76} r={80} fill={p.pop} ink={p.ink} text={tr('Nº1', '#1', 'N.º1')} />
       </g>
       <TwoLists
         top={listTop}
         p={p}
         uid={`top-${t.id}`}
-        left={{ title: 'Artistas', round: true, rows: t.artists.map((a, i) => ({ name: a.name, sub: longHours(a.ms), image: artists[i] })) }}
-        right={{ title: 'Músicas', round: false, rows: t.songs.map((x, i) => ({ name: cleanTitle(x.name), sub: x.sub, image: songs[i] })) }}
+        left={{ title: tr('Artistas', 'Artists', 'Artistas'), round: true, rows: t.artists.map((a, i) => ({ name: a.name, sub: longHours(a.ms), image: artists[i] })) }}
+        right={{ title: tr('Músicas', 'Songs', 'Canciones'), round: false, rows: t.songs.map((x, i) => ({ name: cleanTitle(x.name), sub: x.sub, image: songs[i] })) }}
       />
     </Frame>
   )
@@ -1160,7 +1301,7 @@ export function DayCard({ date, rows, heads, label }: { date: string; rows: DayR
   // Com muitos anos, a data fica numa linha só para sobrar espaço para a lista.
   const few = rows.length <= 5
   const s = makeStack(TOP)
-    .text('Meu', { size: 64, display: true, fill: p.accent })
+    .text(tr('Meu', 'My', 'Mi'), { size: 64, display: true, fill: p.accent })
     .gap(18)
     .text(date, few ? { size: 220, min: 130, display: true, fill: p.ink, lines: 2 } : { size: 180, min: 100, display: true, fill: p.ink })
   // A lista (títulos das colunas + linhas) fica entre a data e a marca LYRA do rodapé;

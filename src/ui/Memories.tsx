@@ -7,6 +7,7 @@ import { trackOf } from './playerStore'
 import { artistHref, songHref } from './links'
 import { cleanTitle } from './format'
 import { useTint } from './tint'
+import { t } from '../i18n'
 
 function Memory({ data, m }: { data: Dataset; m: DayMemory }) {
   const it = data.items[m.item]
@@ -16,21 +17,25 @@ function Memory({ data, m }: { data: Dataset; m: DayMemory }) {
   const tint = useTint(cover, it.name)
   return (
     <li className="memory tinted-card" style={tint}>
-      <p className="kicker">{m.yearsAgo === 1 ? 'Há 1 ano' : `Há ${m.yearsAgo} anos`}</p>
+      <p className="kicker">
+        {m.yearsAgo === 1
+          ? t('Há 1 ano', '1 year ago', 'Hace 1 año')
+          : t(`Há ${m.yearsAgo} anos`, `${m.yearsAgo} years ago`, `Hace ${m.yearsAgo} años`)}
+      </p>
       <div className="memory-row">
         <span className="thumb-wrap">
           <Art image={cover} label={it.name} size={56} round={false} />
           <PlayButton track={trackOf(data, m.item)} className="play-thumb" />
         </span>
         <span className="memory-text">
-          <small>{it.kind === 'podcast' ? 'Episódio' : 'Música'}</small>
+          <small>{it.kind === 'podcast' ? t('Episódio', 'Episode', 'Episodio') : t('Música', 'Song', 'Canción')}</small>
           <a href={songHref(m.item)}>{cleanTitle(it.name)}</a>
         </span>
       </div>
       <div className="memory-row">
         <Art image={photo} label={creator} size={56} />
         <span className="memory-text">
-          <small>{photo.kind === 'podcast' ? 'Podcast' : 'Artista'}</small>
+          <small>{photo.kind === 'podcast' ? t('Podcast', 'Podcast', 'Podcast') : t('Artista', 'Artist', 'Artista')}</small>
           <a href={artistHref(m.creator)}>{creator}</a>
         </span>
       </div>

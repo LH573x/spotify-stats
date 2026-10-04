@@ -6,6 +6,7 @@ import type { ImageRef } from '../data/images'
 import { Art, Thumb } from './Thumb'
 import { PlayButton } from './player'
 import type { Track } from './playerStore'
+import { t } from '../i18n'
 
 /** Um trecho da página: só o título grande (e, raramente, uma linha curta com um dado a mais). */
 export function Section({
@@ -94,7 +95,7 @@ export function Podium({ items }: { items: RankItem[] }) {
       <article className="podium-lead tinted-card" title={lead.title} style={tint}>
         <Art image={lead.image} label={lead.name} className="podium-lead-art" />
         <div className="podium-lead-text">
-          <p className="kicker">nº 1</p>
+          <p className="kicker">{t('nº 1', '#1', 'n.º 1')}</p>
           <Name item={lead} className="podium-lead-name" />
           {lead.sub && <p className="podium-sub">{lead.sub}</p>}
           <p className="podium-value">{lead.value}</p>

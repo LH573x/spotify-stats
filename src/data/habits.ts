@@ -1,5 +1,6 @@
 import { FLAG_SHUFFLE, FLAG_SKIPPED, type Dataset } from './types'
 import { MIN_PLAY_MS, kindMatches, type Filter } from './stats'
+import { t } from '../i18n'
 
 export interface SkipRow {
   id: number
@@ -34,10 +35,34 @@ export const dayKey = (dt: Date) => `${dt.getFullYear()}-${pad(dt.getMonth() + 1
 
 /** Partes do dia usadas em "Você é da noite". */
 export const DAY_PARTS = [
-  { name: 'Madrugada', from: 0, to: 6 },
-  { name: 'Manhã', from: 6, to: 12 },
-  { name: 'Tarde', from: 12, to: 18 },
-  { name: 'Noite', from: 18, to: 24 },
+  {
+    get name() {
+      return t('Madrugada', 'Late night', 'Madrugada')
+    },
+    from: 0,
+    to: 6,
+  },
+  {
+    get name() {
+      return t('Manhã', 'Morning', 'Mañana')
+    },
+    from: 6,
+    to: 12,
+  },
+  {
+    get name() {
+      return t('Tarde', 'Afternoon', 'Tarde')
+    },
+    from: 12,
+    to: 18,
+  },
+  {
+    get name() {
+      return t('Noite', 'Evening', 'Noche')
+    },
+    from: 18,
+    to: 24,
+  },
 ]
 
 /** Horas em cada parte do dia, a partir do relógio [dia da semana][hora]. */

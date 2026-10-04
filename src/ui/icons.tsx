@@ -1,3 +1,5 @@
+import { useId } from 'react'
+
 /** Ícones de traço, na cor do texto (currentColor). */
 const base = {
   viewBox: '0 0 24 24',
@@ -87,6 +89,55 @@ export function MicIcon() {
     <svg {...base}>
       <rect x="9" y="3" width="6" height="11" rx="3" />
       <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M9 21h6" />
+    </svg>
+  )
+}
+
+/* Bandeiras de traço, sem cor, no mesmo estilo dos ícones. */
+
+const flagBox = <rect x="2.5" y="5" width="19" height="14" rx="2" />
+
+export function FlagBR() {
+  const cut = useId()
+  return (
+    <svg {...base}>
+      {flagBox}
+      <path d="M12 7.4 19 12l-7 4.6L5 12Z" strokeWidth={1.4} />
+      {/* O círculo cheio com a faixa curva atravessando, como na bandeira. */}
+      <mask id={cut}>
+        <rect width="24" height="24" fill="#fff" />
+        <path d="M9 12.6q3-1.9 6 0" stroke="#000" strokeWidth={0.9} fill="none" />
+      </mask>
+      <circle cx="12" cy="12" r="2.7" fill="currentColor" stroke="none" mask={`url(#${cut})`} />
+    </svg>
+  )
+}
+
+export function FlagUK() {
+  return (
+    <svg {...base}>
+      {flagBox}
+      <path d="M4.2 6.3 19.8 17.7M19.8 6.3 4.2 17.7" strokeWidth={1.1} />
+      <path d="M12 5v14M2.5 12h19" strokeWidth={2.2} strokeLinecap="butt" />
+    </svg>
+  )
+}
+
+export function FlagES() {
+  return (
+    <svg {...base}>
+      {flagBox}
+      {/* As faixas de cima e de baixo cheias; o brasão na do meio. */}
+      <path d="M2.5 8.5V7a2 2 0 0 1 2-2h15a2 2 0 0 1 2 2v1.5ZM2.5 15.5V17a2 2 0 0 0 2 2h15a2 2 0 0 0 2-2v-1.5Z" fill="currentColor" stroke="none" />
+      <path d="M7 10.3h2.8v2.1a1.4 1.4 0 0 1-2.8 0Z" strokeWidth={1.2} />
+    </svg>
+  )
+}
+
+export function CheckIcon() {
+  return (
+    <svg {...base}>
+      <path d="m5 12.5 4.5 4.5L19 7.5" />
     </svg>
   )
 }

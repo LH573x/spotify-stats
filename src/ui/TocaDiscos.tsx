@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
 import type { YearTop } from '../data/stats'
+import { t } from '../i18n'
 
 /*
  * Escolha do ano como num toca-discos antigo: cada ano é um disco numa caixa embaixo.
@@ -116,7 +117,7 @@ export function TocaDiscos({ years, year, onPick }: Props) {
           <div className={`td-disc ${on ? 'td-turning' : ''} ${out ? 'td-out' : ''}`} style={vars(si)} aria-hidden>
             <span className="td-spin">
               <span className="td-lbl">
-                <b>{disc?.year ?? 'Todos'}</b>
+                <b>{disc?.year ?? t('Todos', 'All', 'Todos')}</b>
                 <i>{disc?.year === null ? range : '33⅓ rpm'}</i>
               </span>
             </span>
@@ -138,28 +139,34 @@ export function TocaDiscos({ years, year, onPick }: Props) {
         </svg>
         <div className={`td-knobs ${on ? 'td-lit' : ''}`}>
           <span className="td-led" aria-hidden />
-          <button type="button" className="td-knob" aria-pressed={playing} onClick={() => setPlaying(!playing)} title={playing ? 'Parar o disco' : 'Girar o disco'}>
-            {playing ? 'PARAR' : 'TOCAR'}
+          <button
+            type="button"
+            className="td-knob"
+            aria-pressed={playing}
+            onClick={() => setPlaying(!playing)}
+            title={playing ? t('Parar o disco', 'Stop the record', 'Parar el disco') : t('Girar o disco', 'Spin the record', 'Girar el disco')}
+          >
+            {playing ? t('PARAR', 'STOP', 'PARAR') : t('TOCAR', 'PLAY', 'GIRAR')}
           </button>
         </div>
       </div>
 
-      <div className="td-crate" ref={crate} role="group" aria-label="Escolher o ano" onKeyDown={onKeyDown}>
+      <div className="td-crate" ref={crate} role="group" aria-label={t('Escolher o ano', 'Pick a year', 'Elegir el año')} onKeyDown={onKeyDown}>
         {years.map((s, i) => (
           <button key={s.year ?? 'todos'} type="button" aria-pressed={s.year === year} onClick={() => onPick(s.year)}>
             <span className={`td-sleeve td-p-${look(i).p}`} style={vars(i)}>
-              <span className="td-who">{s.year === null ? 'Coletânea completa' : s.top}</span>
+              <span className="td-who">{s.year === null ? t('Coletânea completa', 'Box set', 'Colección completa') : s.top}</span>
               <span className="td-yr">
                 {s.year ?? (
                   <>
-                    Todos os anos
+                    {t('Todos os anos', 'All years', 'Todos los años')}
                     <br />
                     {range}
                   </>
                 )}
               </span>
             </span>
-            <span className="td-name">{s.year ?? 'Todos'}</span>
+            <span className="td-name">{s.year ?? t('Todos', 'All', 'Todos')}</span>
           </button>
         ))}
       </div>

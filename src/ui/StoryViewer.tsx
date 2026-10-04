@@ -1,6 +1,7 @@
 import { useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
 import { canShareImages, download, shareImage, svgToPng, zipFiles } from './exportImage'
 import { ShareIcon } from './icons'
+import { t } from '../i18n'
 
 export interface Story {
   id: string
@@ -56,7 +57,7 @@ export function StoryViewer({ stories, fileName, zipName, shareTitle, label }: P
     try {
       await job()
     } catch (e) {
-      setError((e as Error).message || 'Não deu para gerar a imagem.')
+      setError((e as Error).message || t('Não deu para gerar a imagem.', "Couldn't create the image.", 'No se ha podido generar la imagen.'))
     } finally {
       setBusy(null)
     }
@@ -64,10 +65,13 @@ export function StoryViewer({ stories, fileName, zipName, shareTitle, label }: P
 
   const pngAt = async (i: number) => {
     const svg = stage.current?.querySelectorAll<SVGSVGElement>('.wcard > svg')[i]
-    if (!svg) throw new Error('Não encontrei o cartão.')
+    if (!svg) throw new Error(t('Não encontrei o cartão.', "Couldn't find the card.", 'No he encontrado la tarjeta.'))
     return svgToPng(svg)
   }
   const file = (i: number) => `${fileName(i)}.png`
+  const preparing = t('Preparando…', 'Preparing…', 'Preparando…')
+  const making = t('Gerando…', 'Creating…', 'Generando…')
+  const zipping = t('Juntando…', 'Zipping…', 'Empaquetando…')
 
   // Toque: terço esquerdo volta, o resto avança. Arrastar para o lado também passa.
   const onPointerDown = (e: PointerEvent) => {
@@ -109,7 +113,15 @@ export function StoryViewer({ stories, fileName, zipName, shareTitle, label }: P
         className="wstage"
         ref={stage}
         tabIndex={0}
-        aria-label={single ? label : `${label}: toque nos lados ou use as setas para passar`}
+        aria-label={
+          single
+            ? label
+            : t(
+                `${label}: toque nos lados ou use as setas para passar`,
+                `${label}: tap the sides or use the arrow keys to browse`,
+                `${label}: toca los lados o usa las flechas para pasar`,
+              )
+        }
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         onPointerCancel={() => (pointer.current = null)}
@@ -124,13 +136,13 @@ export function StoryViewer({ stories, fileName, zipName, shareTitle, label }: P
 
       {!single && (
         <div className="wnav">
-          <button className="ghost icon" onClick={() => go(at - 1)} disabled={at === 0} aria-label="Cartão anterior">
+          <button className="ghost icon" onClick={() => go(at - 1)} disabled={at === 0} aria-label={t('Cartão anterior', 'Previous card', 'Tarjeta anterior')}>
             ←
           </button>
           <span>
-            {at + 1} de {stories.length} · {story.title}
+            {t(`${at + 1} de ${stories.length}`, `${at + 1} of ${stories.length}`, `${at + 1} de ${stories.length}`)} · {story.title}
           </span>
-          <button className="ghost icon" onClick={() => go(at + 1)} disabled={at === stories.length - 1} aria-label="Próximo cartão">
+          <button className="ghost icon" onClick={() => go(at + 1)} disabled={at === stories.length - 1} aria-label={t('Próximo cartão', 'Next card', 'Tarjeta siguiente')}>
             →
           </button>
         </div>
@@ -141,32 +153,32 @@ export function StoryViewer({ stories, fileName, zipName, shareTitle, label }: P
           <button
             className="primary"
             disabled={busy !== null}
-            onClick={() => run('Preparando…', async () => shareImage(await pngAt(at), file(at), shareTitle))}
+            onClick={() => run(preparing, async () => shareImage(await pngAt(at), file(at), shareTitle))}
           >
             <ShareIcon />
-            {busy === 'Preparando…' ? busy : 'Compartilhar'}
+            {busy === preparing ? busy : t('Compartilhar', 'Share', 'Compartir')}
           </button>
         )}
         <button
           className={canShare ? 'ghost' : 'primary'}
           disabled={busy !== null}
-          onClick={() => run('Gerando…', async () => download(await pngAt(at), file(at)))}
+          onClick={() => run(making, async () => download(await pngAt(at), file(at)))}
         >
-          {busy === 'Gerando…' ? busy : 'Baixar imagem'}
+          {busy === making ? busy : t('Baixar imagem', 'Download image', 'Descargar imagen')}
         </button>
         {stories.length > 1 && (
           <button
             className="ghost"
             disabled={busy !== null}
             onClick={() =>
-              run('Juntando…', async () => {
+              run(zipping, async () => {
                 const files = []
                 for (let i = 0; i < stories.length; i++) files.push({ name: file(i), blob: await pngAt(i) })
                 download(await zipFiles(files), zipName)
               })
             }
           >
-            {busy === 'Juntando…' ? busy : `Baixar todos (${stories.length})`}
+            {busy === zipping ? busy : t(`Baixar todos (${stories.length})`, `Download all (${stories.length})`, `Descargar todas (${stories.length})`)}
           </button>
         )}
       </div>
