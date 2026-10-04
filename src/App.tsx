@@ -15,6 +15,7 @@ import { Wrapped } from './pages/Wrapped'
 import { useTheme, type Tone } from './ui/theme'
 import { BulbIcon, CalendarIcon, DiscIcon, GiftIcon } from './ui/icons'
 import { ExitButton } from './ui/ExitButton'
+import { LyraMark } from './ui/LyraMark'
 
 /** As abas, cada uma com a sua cor e o seu ícone. */
 const PAGES = [
@@ -128,12 +129,10 @@ export default function App() {
     <div className="app">
       <header className="top">
         <div className="brand">
-          <span className="logo" aria-hidden>
-            <i />
-            <i />
-            <i />
+          <span className="logo">
+            <LyraMark />
           </span>
-          Meu Spotify
+          Lyra
         </div>
         {data && (
           <nav className="nav" aria-label="Páginas">
@@ -210,8 +209,13 @@ export default function App() {
       )}
 
       <footer className="foot">
-        Seus dados ficam só neste aparelho · Fotos: <a href="https://www.wikidata.org/">Wikidata</a> · Capas:{' '}
-        <a href="https://musicbrainz.org/">MusicBrainz</a>
+        <p className="credit">
+          Desenvolvido por <strong>Luiz Hong</strong>
+        </p>
+        <p>
+          Seus dados ficam só neste aparelho · Fotos: <a href="https://www.wikidata.org/">Wikidata</a> · Capas:{' '}
+          <a href="https://musicbrainz.org/">MusicBrainz</a>
+        </p>
       </footer>
       {data && <PlayerDock />}
     </div>

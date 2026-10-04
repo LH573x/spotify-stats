@@ -77,7 +77,7 @@ export function Upload({ busy, error, notice, onFiles }: Props) {
           <button className="primary" onClick={install}>
             Instalar o app
           </button>
-          <span>Com o app instalado, é só tocar em Compartilhar no zip e escolher Meu Spotify.</span>
+          <span>Com o app instalado, é só tocar em Compartilhar no zip e escolher Lyra.</span>
         </div>
       )}
 
@@ -124,7 +124,7 @@ export function Upload({ busy, error, notice, onFiles }: Props) {
           <li>
             No Android tem um atalho: instale o site como app (botão <strong>Instalar o app</strong> ou menu ⋮ do Chrome →{' '}
             <strong>Instalar app</strong>). Depois, em Downloads, segure o zip, toque em <strong>Compartilhar</strong> e
-            escolha <strong>Meu Spotify</strong>.
+            escolha <strong>Lyra</strong>.
           </li>
         </ol>
       </details>
