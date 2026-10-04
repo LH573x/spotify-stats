@@ -158,12 +158,13 @@ export function Curiosidades({ data, filter, theme, lastYear }: Props) {
   const stats = [
     h.streak && {
       label: 'Sequência recorde',
-      value: `${num(h.streak.days)} ${h.streak.days === 1 ? 'dia' : 'dias'}`,
+      count: h.streak.days,
+      format: (n: number) => `${num(n)} ${Math.round(n) === 1 ? 'dia' : 'dias'}`,
       hint: `${h.streak.from.slice(0, 4) === h.streak.to.slice(0, 4) ? dayMonth(keyToMs(h.streak.from)) : shortDate(keyToMs(h.streak.from))} – ${shortDate(keyToMs(h.streak.to))}`,
     },
-    { label: 'Dia recorde', value: hours(h.bestDay.ms), hint: shortDate(keyToMs(h.bestDay.day)) },
-    h.shuffleShare !== null && { label: 'No aleatório', value: pct(h.shuffleShare) },
-    h.skipShare !== null && { label: 'Puladas', value: pct(h.skipShare) },
+    { label: 'Dia recorde', count: h.bestDay.ms, format: hours, hint: shortDate(keyToMs(h.bestDay.day)) },
+    h.shuffleShare !== null && { label: 'No aleatório', count: h.shuffleShare, format: pct },
+    h.skipShare !== null && { label: 'Puladas', count: h.skipShare, format: pct },
   ].filter((x) => !!x)
 
   return (

@@ -10,6 +10,7 @@ import { Art } from '../ui/Thumb'
 import { artistHref } from '../ui/links'
 import { PlayButton } from '../ui/player'
 import { spotifyUrl, trackOf } from '../ui/playerStore'
+import { usePageTint, useTint } from '../ui/tint'
 
 interface Props {
   data: Dataset
@@ -25,6 +26,7 @@ function back() {
 export function Musica({ data, id, theme }: Props) {
   const t = useMemo(() => trackDetail(data, id), [data, id])
   const c = chartColors(theme, 'green')
+  usePageTint(useTint(t ? itemRef(data, id) : null, t?.name ?? ''))
 
   const option = useMemo<ChartOption | null>(() => {
     if (!t) return null
@@ -120,10 +122,10 @@ export function Musica({ data, id, theme }: Props) {
 
       <StatStrip
         items={[
-          { label: 'Reproduções', value: num(t.plays), hint: hours(t.totalMs) },
+          { label: 'Reproduções', count: t.plays, hint: hours(t.totalMs) },
           ...(t.first ? [{ label: 'Primeira vez', value: shortDate(t.first) }] : []),
           ...(t.last ? [{ label: 'Última vez', value: shortDate(t.last) }] : []),
-          { label: 'Dias diferentes', value: num(t.days), hint: t.bestDay ? `recorde: ${num(t.bestDay.plays)} ${t.bestDay.plays === 1 ? 'vez' : 'vezes'} em ${shortDate(keyToMs(t.bestDay.day))}` : undefined },
+          { label: 'Dias diferentes', count: t.days, hint: t.bestDay ? `recorde: ${num(t.bestDay.plays)} ${t.bestDay.plays === 1 ? 'vez' : 'vezes'} em ${shortDate(keyToMs(t.bestDay.day))}` : undefined },
         ]}
       />
 
@@ -144,7 +146,7 @@ export function Musica({ data, id, theme }: Props) {
         <div className="card hours24" role="img" aria-label={`Reproduções por hora do dia. Mais às ${topHour}h.`}>
           {t.byHour.map((v, h) => (
             <div key={h} className={h === topHour ? 'on' : ''} title={`${h}h: ${num(v)} ${v === 1 ? 'vez' : 'vezes'}`}>
-              <i style={{ '--v': v / maxHour } as CSSProperties} />
+              <i style={{ '--v': v / maxHour, '--i': h / 3 } as CSSProperties} />
               <span>{h % 3 === 0 ? `${h}h` : ''}</span>
             </div>
           ))}

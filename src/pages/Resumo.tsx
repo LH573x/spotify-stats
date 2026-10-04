@@ -9,6 +9,9 @@ import { artistRef, itemRef } from '../data/refs'
 import { Chart, type ChartOption } from '../ui/Chart'
 import { chartColors, type ThemeName } from '../ui/theme'
 import { cleanTitle, hours, monthLabel, num, pct } from '../ui/format'
+import { onThisDay } from '../data/onThisDay'
+import { Memories } from '../ui/Memories'
+import { CountUp } from '../ui/CountUp'
 
 interface Props {
   data: Dataset
@@ -31,6 +34,8 @@ const NOUNS = {
 export function Resumo({ data, filter, theme, onYear }: Props) {
   const s = useMemo(() => summarize(data, filter), [data, filter])
   const discs = useMemo(() => yearTops(data, filter.kind), [data, filter.kind])
+  // "Hoje na sua história" só no Resumo de todos os anos.
+  const memories = useMemo(() => (filter.year === null ? onThisDay(data, filter.kind) : []), [data, filter])
   const c = chartColors(theme, 'green')
   const nouns = NOUNS[filter.kind]
 
@@ -124,7 +129,10 @@ export function Resumo({ data, filter, theme, onYear }: Props) {
         {deck}
         <div className="hero-text">
           <h1>
-            Você ouviu <span className="accent">{num(totalHours)} horas</span>
+            Você ouviu{' '}
+            <span className="accent">
+              <CountUp value={totalHours} /> horas
+            </span>
           </h1>
           <p className="sub">
             {num(daysNonStop)} {Math.round(daysNonStop) === 1 ? 'dia' : 'dias'} sem parar
@@ -136,12 +144,18 @@ export function Resumo({ data, filter, theme, onYear }: Props) {
 
       <StatStrip
         items={[
-          { label: 'Reproduções', value: num(s.plays) },
-          { label: nouns.creators, value: num(s.creators) },
-          { label: nouns.items, value: num(s.items) },
-          { label: 'Dias ouvindo', value: num(s.activeDays) },
+          { label: 'Reproduções', count: s.plays },
+          { label: nouns.creators, count: s.creators },
+          { label: nouns.items, count: s.items },
+          { label: 'Dias ouvindo', count: s.activeDays },
         ]}
       />
+
+      {memories.length > 0 && (
+        <Section title="Hoje na sua história">
+          <Memories data={data} list={memories} />
+        </Section>
+      )}
 
       <Section title={nouns.topC}>
         <Podium items={creators} />

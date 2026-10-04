@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import type { ImageRef } from '../data/images'
 import { Thumb } from './Thumb'
 import { PlayButton } from './player'
@@ -26,7 +26,7 @@ export function BarList({ title, note, rows, numbered = true }: { title?: string
   const list = (
     <ol className={`rank ${numbered ? '' : 'plain'}`}>
       {rows.map((r, i) => (
-        <li key={r.key} title={r.title}>
+        <li key={r.key} title={r.title} style={{ '--i': i } as CSSProperties}>
           {numbered && <span className="rank-n">{i + 1}</span>}
           {r.image && (
             <span className="thumb-wrap">
