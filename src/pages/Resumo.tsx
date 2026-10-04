@@ -9,8 +9,6 @@ import { artistRef, itemRef } from '../data/refs'
 import { Chart, type ChartOption } from '../ui/Chart'
 import { chartColors, type ThemeName } from '../ui/theme'
 import { cleanTitle, hours, monthLabel, num, pct } from '../ui/format'
-import { onThisDay } from '../data/onThisDay'
-import { Memories } from '../ui/Memories'
 import { CountUp } from '../ui/CountUp'
 
 interface Props {
@@ -34,8 +32,6 @@ const NOUNS = {
 export function Resumo({ data, filter, theme, onYear }: Props) {
   const s = useMemo(() => summarize(data, filter), [data, filter])
   const discs = useMemo(() => yearTops(data, filter.kind), [data, filter.kind])
-  // "Hoje na sua história" só no Resumo de todos os anos.
-  const memories = useMemo(() => (filter.year === null ? onThisDay(data, filter.kind) : []), [data, filter])
   const c = chartColors(theme, 'green')
   const nouns = NOUNS[filter.kind]
 
@@ -150,12 +146,6 @@ export function Resumo({ data, filter, theme, onYear }: Props) {
           { label: 'Dias ouvindo', count: s.activeDays },
         ]}
       />
-
-      {memories.length > 0 && (
-        <Section title="Hoje na sua história">
-          <Memories data={data} list={memories} />
-        </Section>
-      )}
 
       <Section title={nouns.topC}>
         <Podium items={creators} />

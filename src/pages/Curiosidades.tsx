@@ -12,6 +12,8 @@ import { Comparar, Esquecidas, Recordes } from './CuriosidadesExtras'
 import { itemRef } from '../data/refs'
 import { songHref } from '../ui/links'
 import { trackOf } from '../ui/playerStore'
+import { onThisDay } from '../data/onThisDay'
+import { Memories } from '../ui/Memories'
 
 interface Props {
   data: Dataset
@@ -47,6 +49,8 @@ function useNarrow(px = 720) {
 
 export function Curiosidades({ data, filter, theme, lastYear }: Props) {
   const h = useMemo(() => habits(data, filter, lastYear), [data, filter, lastYear])
+  // "Hoje na sua história" só com todos os anos (com um ano escolhido, não faz sentido).
+  const memories = useMemo(() => (filter.year === null ? onThisDay(data, filter.kind) : []), [data, filter])
   const yearList = useMemo(() => years(data), [data])
   const c = chartColors(theme, 'coral')
   const narrow = useNarrow()
@@ -192,6 +196,12 @@ export function Curiosidades({ data, filter, theme, lastYear }: Props) {
       </section>
 
       <StatStrip items={stats} />
+
+      {memories.length > 0 && (
+        <Section title="Hoje na sua história">
+          <Memories data={data} list={memories} />
+        </Section>
+      )}
 
       <Section title={filter.year ? `Seus recordes de ${filter.year}` : 'Seus recordes'}>
         <Recordes data={data} filter={filter} />
