@@ -63,6 +63,7 @@ body {
   margin: 0;
   color: var(--ink);
   font-family: var(--body);
+  font-size: 15px;
   -webkit-font-smoothing: antialiased;
 }
 /* O fundo fica só no html, para a cor da capa (body::before) aparecer por baixo do conteúdo. */
@@ -144,7 +145,7 @@ a {
   display: flex;
   align-items: center;
   gap: 10px;
-  font: 800 22px/1 var(--display);
+  font: 800 18px/1 var(--display);
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
@@ -267,13 +268,13 @@ a {
 }
 .confirm h2 {
   margin: 0;
-  font: 800 26px/1 var(--display);
+  font: 800 20px/1 var(--display);
   text-transform: uppercase;
 }
 .confirm p {
   margin: 10px 0 22px;
   color: var(--ink-2);
-  font-size: 15px;
+  font-size: 14px;
 }
 .confirm-actions {
   display: grid;
@@ -323,7 +324,7 @@ a {
   padding: 6px 12px;
   white-space: nowrap;
   color: var(--ink-2);
-  font-size: 14px;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
 .chips button:hover,
@@ -341,7 +342,7 @@ a {
   margin: 0;
   flex: 1;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
 }
 .segmented {
   display: flex;
@@ -355,13 +356,13 @@ a {
   width: 100%;
 }
 .upload h1 {
-  font: 800 clamp(48px, 9vw, 84px) / 0.92 var(--display);
+  font: 800 clamp(32px, 6vw, 56px) / 0.92 var(--display);
   text-transform: uppercase;
   margin: 0 0 16px;
 }
 .lead {
   color: var(--ink-2);
-  font-size: 18px;
+  font-size: 15px;
   line-height: 1.5;
   margin: 0 0 32px;
 }
@@ -442,7 +443,7 @@ a {
 }
 .privacy {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
   margin: 16px 0;
 }
 .howto {
@@ -475,10 +476,10 @@ a {
 .eyebrow {
   color: var(--muted);
   margin: 0 0 10px;
-  font-size: 14px;
+  font-size: 13px;
 }
 .hero h1 {
-  font: 800 clamp(48px, 9vw, 104px) / 0.9 var(--display);
+  font: 800 clamp(28px, 4.6vw, 52px) / 0.95 var(--display);
   text-transform: uppercase;
   letter-spacing: -0.01em;
   margin: 0;
@@ -486,7 +487,7 @@ a {
 }
 .sub {
   color: var(--ink-2);
-  font-size: 18px;
+  font-size: 15px;
   line-height: 1.5;
   margin: 14px 0 0;
   max-width: 60ch;
@@ -507,7 +508,7 @@ a {
   grid-area: text;
 }
 .hero-deck h1 {
-  font-size: clamp(44px, 6.4vw, 88px);
+  font-size: clamp(28px, 3.6vw, 44px);
 }
 .empty {
   color: var(--muted);
@@ -532,19 +533,19 @@ a {
 }
 .stats dt {
   color: var(--muted);
-  font: 600 14px/1.2 var(--display);
+  font: 600 12px/1.2 var(--display);
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
 .stats dd {
   margin: 6px 0 2px;
-  font: 800 clamp(34px, 4.6vw, 48px) / 1 var(--display);
+  font: 800 clamp(22px, 2.6vw, 30px) / 1 var(--display);
   font-variant-numeric: tabular-nums;
 }
 .stats small {
   display: block;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
   overflow-wrap: anywhere;
 }
 
@@ -562,20 +563,20 @@ a {
 }
 .kicker {
   color: var(--accent);
-  font: 700 14px/1 var(--display);
+  font: 700 12px/1 var(--display);
   text-transform: uppercase;
   letter-spacing: 0.16em;
 }
 .sec-head h2 {
   margin: 0;
-  font: 800 clamp(30px, 4.4vw, 46px) / 0.95 var(--display);
+  font: 800 clamp(20px, 2.4vw, 28px) / 1 var(--display);
   text-transform: uppercase;
   text-wrap: balance;
 }
 .sec-note {
   margin: 8px 0 0;
   color: var(--ink-2);
-  font-size: 15px;
+  font-size: 13px;
   max-width: 70ch;
 }
 .card {
@@ -590,14 +591,14 @@ a {
 }
 .card-head h3 {
   margin: 0;
-  font: 700 22px/1 var(--display);
+  font: 700 16px/1 var(--display);
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
 .card-head p {
   margin: 6px 0 0;
   color: var(--ink-2);
-  font-size: 14px;
+  font-size: 13px;
 }
 .two {
   display: grid;
@@ -620,13 +621,13 @@ a {
 }
 .callout span:first-child {
   color: var(--muted);
-  font: 600 14px/1 var(--display);
+  font: 600 12px/1 var(--display);
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
 .callout strong {
   color: var(--accent);
-  font: 800 34px/1 var(--display);
+  font: 800 24px/1 var(--display);
   text-transform: uppercase;
 }
 
@@ -678,7 +679,7 @@ a {
   border-radius: 999px;
   background: var(--accent);
   color: var(--accent-ink);
-  font: 800 20px/1 var(--display);
+  font: 800 15px/1 var(--display);
   box-shadow: 0 0 0 3px var(--page);
 }
 
@@ -711,7 +712,7 @@ a {
   display: block;
   color: var(--ink);
   text-decoration: none;
-  font: 800 clamp(40px, 6vw, 76px) / 0.9 var(--display);
+  font: 800 clamp(24px, 3.4vw, 40px) / 0.95 var(--display);
   text-transform: uppercase;
   overflow-wrap: anywhere;
 }
@@ -725,12 +726,12 @@ a.podium-lead-name:hover {
 .podium-value {
   margin: 14px 0 0;
   color: var(--accent);
-  font: 800 36px/1 var(--display);
+  font: 800 22px/1 var(--display);
 }
 .podium-detail {
   margin: 6px 0 0;
   color: var(--ink-2);
-  font-size: 15px;
+  font-size: 13px;
 }
 .podium-runners {
   list-style: none;
@@ -759,7 +760,7 @@ a.podium-lead-name:hover {
 .podium-runner-name {
   color: var(--ink);
   text-decoration: none;
-  font: 700 22px/1.05 var(--display);
+  font: 700 16px/1.05 var(--display);
   text-transform: uppercase;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -773,7 +774,7 @@ a.podium-runner-name:hover {
 .podium-runner-sub,
 .podium-runner-value {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
 .podium-rest {
@@ -832,7 +833,7 @@ a.podium-runner-name:hover {
   color: var(--ink);
   text-decoration: none;
   font-weight: 600;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -842,14 +843,14 @@ a.podium-runner-name:hover {
 }
 .wall-sub {
   color: var(--ink-2);
-  font-size: 13px;
+  font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .wall-value {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -871,7 +872,7 @@ a.podium-runner-name:hover {
   min-width: 22px;
   text-align: right;
   color: var(--muted);
-  font: 700 18px/1.2 var(--display);
+  font: 700 15px/1.2 var(--display);
   font-variant-numeric: tabular-nums;
 }
 .rank-body {
@@ -909,7 +910,7 @@ a.rank-name:focus-visible {
 .rank-sub {
   display: block;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -993,7 +994,7 @@ a.rank-name:focus-visible {
 }
 .memory-text small {
   color: var(--ink-2);
-  font: 600 12px/1 var(--display);
+  font: 600 11px/1 var(--display);
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -1001,7 +1002,7 @@ a.rank-name:focus-visible {
   color: var(--ink);
   text-decoration: none;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.25;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1039,17 +1040,17 @@ a.rank-name:focus-visible {
   border-radius: 6px 18px 18px 6px;
 }
 .daybar strong {
-  font: 800 30px/1 var(--display);
+  font: 800 22px/1 var(--display);
   font-variant-numeric: tabular-nums;
 }
 .daybar span {
-  font: 700 16px/1.1 var(--display);
+  font: 700 13px/1.1 var(--display);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 .daybar small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
   white-space: nowrap;
 }
 .daybar .on {
@@ -1074,7 +1075,7 @@ a.rank-name:focus-visible {
   align-items: baseline;
 }
 .shares strong {
-  font: 800 38px/1 var(--display);
+  font: 800 26px/1 var(--display);
   color: var(--accent);
   min-width: 2.4em;
   font-variant-numeric: tabular-nums;
@@ -1121,20 +1122,20 @@ a.rank-name:focus-visible {
 .rec-label {
   margin: 0;
   color: var(--accent);
-  font: 700 14px/1.1 var(--display);
+  font: 700 12px/1.1 var(--display);
   text-transform: uppercase;
   letter-spacing: 0.14em;
 }
 .rec-big {
   margin: 6px 0 4px;
-  font: 800 clamp(38px, 4.6vw, 58px) / 0.95 var(--display);
+  font: 800 clamp(26px, 3vw, 36px) / 1 var(--display);
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
 }
 .rec-text {
   margin: 0;
   color: var(--ink-2);
-  font-size: 15px;
+  font-size: 13px;
   line-height: 1.45;
 }
 .rec-text b {
@@ -1162,7 +1163,7 @@ a.rank-name:focus-visible {
   opacity: 0.85;
 }
 .rec-hot .rec-big {
-  font-size: clamp(56px, 8vw, 104px);
+  font-size: clamp(36px, 5vw, 60px);
 }
 .rec-night {
   border-color: transparent;
@@ -1190,7 +1191,7 @@ a.rank-name:focus-visible {
   min-width: 0;
 }
 .rec-name {
-  font-size: clamp(30px, 3.6vw, 46px);
+  font-size: clamp(20px, 2.4vw, 28px);
   overflow-wrap: anywhere;
 }
 
@@ -1243,7 +1244,7 @@ a.rank-name:focus-visible {
   gap: 4px;
 }
 .vs-pick select {
-  font: 800 40px/1 var(--display);
+  font: 800 26px/1 var(--display);
   color: var(--ink);
   background: var(--surface-2);
   border: 1px solid var(--line);
@@ -1258,7 +1259,7 @@ a.rank-name:focus-visible {
 .vs-x {
   padding-top: 12px;
   color: var(--accent);
-  font: 800 30px/1 var(--display);
+  font: 800 20px/1 var(--display);
   text-transform: uppercase;
 }
 .vs-rows {
@@ -1283,7 +1284,7 @@ a.rank-name:focus-visible {
 }
 .vs-val {
   min-width: 72px;
-  font: 800 24px/1 var(--display);
+  font: 800 18px/1 var(--display);
   font-variant-numeric: tabular-nums;
   text-transform: uppercase;
 }
@@ -1316,7 +1317,7 @@ a.rank-name:focus-visible {
 .vs-label {
   text-align: center;
   color: var(--muted);
-  font: 700 13px/1.15 var(--display);
+  font: 700 12px/1.15 var(--display);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -1354,7 +1355,7 @@ a.rank-name:focus-visible {
 .vs-song {
   margin: 10px 0 0;
   color: var(--ink-2);
-  font-size: 14px;
+  font-size: 13px;
 }
 .vs-song b {
   color: var(--ink);
@@ -1690,7 +1691,7 @@ a.rank-name:focus-visible {
   align-items: center;
   gap: 6px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 .td-crate button:hover .td-sleeve {
@@ -1822,7 +1823,7 @@ a.rank-name:focus-visible {
   overflow-wrap: anywhere;
 }
 .hero h1.song-name {
-  font-size: clamp(40px, 7vw, 84px);
+  font-size: clamp(26px, 4vw, 44px);
 }
 .song-actions {
   display: flex;
@@ -1889,7 +1890,7 @@ a.wall-name:hover {
 }
 .search label {
   color: var(--ink-2);
-  font-size: 14px;
+  font-size: 13px;
 }
 .search-row {
   display: flex;
@@ -1929,7 +1930,7 @@ a.wall-name:hover {
 }
 .years-grid th {
   color: var(--ink);
-  font: 800 22px/1 var(--display);
+  font: 800 16px/1 var(--display);
   text-align: left;
   padding: 0 8px 6px;
 }
@@ -1945,7 +1946,7 @@ a.wall-name:hover {
   padding: 0 4px 0 0;
   text-align: right;
   color: var(--muted);
-  font-size: 16px;
+  font-size: 13px;
 }
 .years-grid td {
   background: var(--surface-2);
@@ -2015,7 +2016,7 @@ a.wall-name:hover {
   padding: 0 10px;
   background: var(--page);
   color: var(--accent);
-  font: 800 24px/1 var(--display);
+  font: 800 18px/1 var(--display);
 }
 .find-card {
   flex: 1;
@@ -2041,17 +2042,17 @@ a.find-card:hover {
   margin-bottom: 8px;
 }
 .find-card strong {
-  font: 700 20px/1.05 var(--display);
+  font: 700 15px/1.05 var(--display);
   text-transform: uppercase;
   overflow-wrap: anywhere;
 }
 .find-card small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
 }
 .find-card span {
   color: var(--ink-2);
-  font-size: 13px;
+  font-size: 12px;
 }
 .find-count {
   color: var(--muted);
@@ -2088,7 +2089,7 @@ a.find-card:hover {
   background: var(--surface-2);
   border-radius: 999px;
   padding: 4px 10px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--ink-2);
   font-variant-numeric: tabular-nums;
 }
@@ -2256,7 +2257,7 @@ a.find-card:hover {
   align-items: center;
   gap: 12px;
   color: var(--ink-2);
-  font-size: 14px;
+  font-size: 13px;
 }
 .wnav span {
   min-width: 170px;
@@ -2273,7 +2274,7 @@ a.find-card:hover {
 }
 .whint {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
   text-align: center;
   max-width: 420px;
   margin: 0;
@@ -2318,6 +2319,13 @@ a.find-card:hover {
 }
 
 @media (max-width: 760px) {
+  body {
+    font-size: 14px;
+  }
+  .sub,
+  .lead {
+    font-size: 14px;
+  }
   .wgrid {
     grid-template-columns: 1fr;
   }
@@ -2366,11 +2374,11 @@ a.find-card:hover {
     padding: 18px;
   }
   .podium-value {
-    font-size: 28px;
+    font-size: 20px;
     margin-top: 10px;
   }
   .podium-detail {
-    font-size: 14px;
+    font-size: 12px;
   }
   .podium-rest {
     grid-template-columns: 1fr;
@@ -2433,10 +2441,10 @@ a.find-card:hover {
     padding: 10px 8px;
   }
   .daybar strong {
-    font-size: 22px;
+    font-size: 18px;
   }
   .daybar span {
-    font-size: 13px;
+    font-size: 11px;
   }
   .daybar small {
     display: none;
@@ -2469,7 +2477,7 @@ a.find-card:hover {
   }
   .vs-val {
     min-width: 0;
-    font-size: 18px;
+    font-size: 15px;
   }
   .vs-label {
     font-size: 11px;
@@ -2482,7 +2490,7 @@ a.find-card:hover {
     grid-template-columns: 1fr;
   }
   .vs-pick select {
-    font-size: 32px;
+    font-size: 22px;
   }
   .versus {
     padding: 16px;
@@ -2499,7 +2507,7 @@ a.find-card:hover {
   .wall-art .badge {
     min-width: 28px;
     height: 28px;
-    font-size: 17px;
+    font-size: 14px;
     top: -8px;
     left: -6px;
   }
