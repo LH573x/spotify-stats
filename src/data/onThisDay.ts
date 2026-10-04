@@ -4,8 +4,6 @@ import { kindMatches, type KindFilter } from './stats'
 export interface DayMemory {
   yearsAgo: number
   year: number
-  /** Tempo ouvido no dia. */
-  ms: number
   /** A música (ou episódio) que mais tocou no dia. */
   item: number
   /** O artista que mais tocou no dia. */
@@ -49,7 +47,7 @@ export function onThisDay(d: Dataset, kind: KindFilter, today = new Date()): Day
     }
     if (total === 0) continue
     const best = (map: Map<number, number>) => [...map].reduce((a, b) => (b[1] > a[1] ? b : a))[0]
-    out.push({ yearsAgo: today.getFullYear() - year, year, ms: total, item: best(byItem), creator: best(byCreator) })
+    out.push({ yearsAgo: today.getFullYear() - year, year, item: best(byItem), creator: best(byCreator) })
   }
   return out
 }

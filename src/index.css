@@ -955,36 +955,53 @@ a.rank-name:focus-visible {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
 }
 .memory {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 12px;
   min-width: 0;
-  padding: 14px 14px 16px;
+  padding: 16px;
   border-radius: 18px;
   border: 1px solid var(--line);
-  background: linear-gradient(170deg, hsl(var(--tint-h) var(--tint-s) var(--tint-l)), var(--surface) 75%);
-}
-.memory-art {
-  position: relative;
-  margin-bottom: 14px;
-}
-.memory-art .art {
-  border-radius: 8px;
-  box-shadow: 0 10px 24px var(--shadow);
+  background: linear-gradient(160deg, hsl(var(--tint-h) var(--tint-s) var(--tint-l)), var(--surface) 80%);
 }
 .memory .kicker {
-  margin: 0 0 6px;
+  margin: 0 0 2px;
   color: var(--ink);
 }
-.memory-name {
+.memory-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.memory-row .art {
+  flex: none;
+  box-shadow: 0 6px 16px var(--shadow);
+}
+.memory-row .art:not(.round) {
+  border-radius: 6px;
+}
+.memory-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.memory-text small {
+  color: var(--ink-2);
+  font: 600 12px/1 var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.memory-text a {
   color: var(--ink);
   text-decoration: none;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.25;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -992,21 +1009,8 @@ a.rank-name:focus-visible {
   overflow: hidden;
   overflow-wrap: anywhere;
 }
-.memory-name:hover {
+.memory-text a:hover {
   text-decoration: underline;
-}
-.memory-sub {
-  color: var(--ink-2);
-  font-size: 13px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.memory-time {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
 }
 .rank.plain li {
   gap: 0;
@@ -1421,7 +1425,6 @@ a.rank-name:focus-visible {
   transform: translateY(6px);
 }
 .wall li:hover .play-over,
-.memory:hover .play-over,
 .play-over:focus-visible,
 .play-over.on {
   opacity: 1;
@@ -1447,6 +1450,7 @@ a.rank-name:focus-visible {
   transform: none;
 }
 .rank li:hover .play-thumb,
+.memory-row:hover .play-thumb,
 .play-thumb:focus-visible,
 .play-thumb.on {
   opacity: 1;
@@ -2415,7 +2419,7 @@ a.find-card:hover {
   }
   .memory {
     flex: none;
-    width: 168px;
+    width: 250px;
     scroll-snap-align: start;
   }
   .chips {
