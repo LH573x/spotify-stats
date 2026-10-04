@@ -1933,10 +1933,16 @@ a.wall-name:hover {
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
-/* Coluna da posição: só a largura do número. */
+/* Coluna da posição: só a largura do número, e fica parada quando os anos rolam para o lado. */
 .years-grid tr > :first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
   width: 24px;
   padding: 0;
+  background: var(--surface);
+  /* Cobre também as frestas dos lados, para nada aparecer passando por trás. */
+  box-shadow: -8px 0 0 var(--surface), 4px 0 0 var(--surface);
 }
 .years-grid tbody th {
   text-align: center;
@@ -2390,9 +2396,30 @@ a.find-card:hover {
 }
 
 @media (max-width: 760px) {
-  /* No celular as caixas ficam maiores e a tabela rola para o lado. */
+  /* No celular, do 1º ao 5º cabem juntos na tela com uns 90px de folga: a altura de cada caixa
+     é a tela menos filtros, abas, cabeçalho da tabela e folga, dividida por 5.
+     Foto ocupando a altura toda à esquerda, texto ao lado; os anos rolam para o lado. */
   .years-grid {
-    min-width: calc(28px + var(--years) * 124px);
+    --row: clamp(76px, calc((100svh - 290px - env(safe-area-inset-bottom, 0px)) / 5), 120px);
+    min-width: calc(28px + var(--years) * (var(--row) + 132px));
+  }
+  .card:has(> .scroll-x > .years-grid) {
+    padding: 12px;
+  }
+  .years-grid td a {
+    flex-direction: row;
+    height: var(--row);
+  }
+  .years-grid td a .art {
+    width: var(--row);
+    height: 100%;
+  }
+  .yg-text,
+  .with-sub .yg-text {
+    flex: 1;
+    justify-content: center;
+    min-height: 0;
+    padding: 6px 10px;
   }
   body {
     font-size: 14px;
