@@ -1100,43 +1100,90 @@ a.rank-name:focus-visible {
   border-radius: 4px;
 }
 
-/* Recordes */
+/* Recordes: imagem (ou ícone) na altura toda à esquerda, texto ao lado, play no canto */
 .bento {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 12px;
 }
 .rec {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 22px;
-  border-radius: 18px;
+  align-items: stretch;
+  min-height: 92px;
+  border-radius: 16px;
   background: var(--surface);
   border: 1px solid var(--line);
+  overflow: hidden;
   min-width: 0;
 }
-.rec-wide {
-  grid-column: span 2;
+.rec-media {
+  flex: none;
+  width: 92px;
+  display: flex;
+}
+.rec-media .art {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+.rec-icon {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface-2));
+  color: var(--accent);
+}
+.rec-icon svg {
+  width: 34px;
+  height: 34px;
+}
+.rec-icon.hot {
+  background: radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.28), transparent 60%), var(--accent);
+  color: var(--accent-ink);
+}
+.rec-icon.night {
+  color: #c9b8ff;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.9) 0 1px, transparent 1.6px) 0 0 / 23px 29px,
+    radial-gradient(circle at 70% 60%, rgba(255, 255, 255, 0.55) 0 1px, transparent 1.6px) 0 0 / 31px 27px,
+    linear-gradient(160deg, #10162e, #2b1d4f);
+}
+.rec-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  padding: 12px 14px;
 }
 .rec-label {
   margin: 0;
   color: var(--accent);
-  font: 700 12px/1.1 var(--display);
+  font: 700 11px/1.1 var(--display);
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
 }
 .rec-big {
-  margin: 6px 0 4px;
-  font: 800 clamp(26px, 3vw, 36px) / 1 var(--display);
+  margin: 0;
+  font: 800 21px/1.05 var(--display);
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.rec-big a {
+  color: inherit;
+  text-decoration: none;
+}
+.rec-big a:hover {
+  color: var(--accent);
 }
 .rec-text {
   margin: 0;
   color: var(--ink-2);
   font-size: 13px;
-  line-height: 1.45;
+  line-height: 1.4;
 }
 .rec-text b {
   color: var(--ink);
@@ -1147,52 +1194,12 @@ a.rank-name:focus-visible {
   text-decoration-color: var(--accent);
   text-underline-offset: 3px;
 }
-.rec-pic .art,
-.rec-first .art {
-  margin-bottom: 12px;
-  box-shadow: 0 10px 24px var(--shadow);
-}
-.rec-hot {
-  border-color: transparent;
-  background: radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.28), transparent 55%), var(--accent);
-  color: var(--accent-ink);
-}
-.rec-hot .rec-label,
-.rec-hot .rec-text {
-  color: inherit;
-  opacity: 0.85;
-}
-.rec-hot .rec-big {
-  font-size: clamp(36px, 5vw, 60px);
-}
-.rec-night {
-  border-color: transparent;
-  color: #ffffff;
-  background:
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.9) 0 1px, transparent 1.6px) 0 0 / 37px 41px,
-    radial-gradient(circle at 70% 60%, rgba(255, 255, 255, 0.55) 0 1px, transparent 1.6px) 0 0 / 53px 47px,
-    linear-gradient(160deg, #10162e, #2b1d4f);
-}
-.rec-night .rec-label {
-  color: #c9b8ff;
-}
-.rec-night .rec-text {
-  color: rgba(255, 255, 255, 0.78);
-}
-.rec-first {
-  flex-direction: row;
-  align-items: center;
-  gap: 24px;
-}
-.rec-first .art {
-  margin: 0;
-}
-.rec-first > div {
-  min-width: 0;
-}
-.rec-name {
-  font-size: clamp(20px, 2.4vw, 28px);
-  overflow-wrap: anywhere;
+.rec-play.play {
+  flex: none;
+  align-self: center;
+  width: 34px;
+  height: 34px;
+  margin-right: 14px;
 }
 
 /* Músicas esquecidas: capas desbotadas que voltam a ter cor ao passar o mouse */
@@ -1455,14 +1462,6 @@ a.rank-name:focus-visible {
 .play-thumb:focus-visible,
 .play-thumb.on {
   opacity: 1;
-}
-.play-corner {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-}
-.rec {
-  position: relative;
 }
 .play-big {
   width: 56px;
@@ -1872,13 +1871,6 @@ a.rank-name:focus-visible {
 a.wall-name:hover {
   color: var(--accent);
   text-decoration: underline;
-}
-.rec-name a {
-  color: inherit;
-  text-decoration: none;
-}
-.rec-name a:hover {
-  color: var(--accent);
 }
 
 /* Linha do tempo */
@@ -2366,9 +2358,6 @@ a.find-card:hover {
 }
 
 @media (max-width: 900px) {
-  .bento {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .podium-runners {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2511,22 +2500,6 @@ a.find-card:hover {
 }
 
 @media (max-width: 600px) {
-  .bento {
-    grid-template-columns: 1fr;
-  }
-  .rec-wide {
-    grid-column: auto;
-  }
-  .rec-first {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0;
-  }
-  .rec-first .art {
-    margin-bottom: 12px;
-    width: 88px !important;
-    height: 88px !important;
-  }
   .wall.faded {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

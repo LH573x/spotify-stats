@@ -72,3 +72,29 @@ export function CloseIcon() {
     </svg>
   )
 }
+
+export function TimerIcon() {
+  return (
+    <svg {...base}>
+      <circle cx="12" cy="13.5" r="7.5" />
+      <path d="M12 9.5v4l2.5 2M10 2.5h4M12 2.5V6" />
+    </svg>
+  )
+}
+
+export function MoonIcon() {
+  return (
+    <svg {...base}>
+      <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" />
+    </svg>
+  )
+}
+
+export function MicIcon() {
+  return (
+    <svg {...base}>
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M9 21h6" />
+    </svg>
+  )
+}

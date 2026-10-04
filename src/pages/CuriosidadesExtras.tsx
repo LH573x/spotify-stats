@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import type { Dataset } from '../data/types'
 import type { Filter, KindFilter } from '../data/stats'
 import { forgotten, records, yearProfile, type YearProfile } from '../data/curiosities'
@@ -7,6 +7,7 @@ import { Art, Thumb } from '../ui/Thumb'
 import { artistHref, songHref } from '../ui/links'
 import { PlayButton } from '../ui/player'
 import { trackOf } from '../ui/playerStore'
+import { MicIcon, MoonIcon, TimerIcon } from '../ui/icons'
 import { cleanTitle, clock, date, duration, hours, keyToMs, monthLabel, num, shortDate } from '../ui/format'
 
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -15,7 +16,22 @@ const monthOf = (ms: number) => {
   return monthLabel(`${d.getFullYear()}-${pad(d.getMonth() + 1)}`)
 }
 
-/** Recordes em cartões de tamanhos diferentes. */
+/** Um recorde: imagem (ou ícone) na altura toda à esquerda, texto ao lado e o play no canto. */
+function Rec({ media, label, big, text, play }: { media: ReactNode; label: string; big: ReactNode; text?: ReactNode; play?: ReactNode }) {
+  return (
+    <article className="rec">
+      <div className="rec-media">{media}</div>
+      <div className="rec-body">
+        <p className="rec-label">{label}</p>
+        <p className="rec-big">{big}</p>
+        {text && <p className="rec-text">{text}</p>}
+      </div>
+      {play}
+    </article>
+  )
+}
+
+/** Recordes em cartões iguais, um embaixo do outro no celular. */
 export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
   const r = useMemo(() => records(data, filter), [data, filter])
   const song = (id: number) => ({ name: cleanTitle(data.items[id].name), artist: data.creators[data.items[id].creator] })
@@ -24,78 +40,93 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
       <b>{song(id).name}</b>
     </a>
   )
+  const cover = (id: number) => <Art image={itemRef(data, id) ?? { kind: 'artist', name: song(id).artist }} label={song(id).name} round={false} />
+  const play = (id: number) => <PlayButton track={trackOf(data, id)} className="rec-play" />
 
   return (
     <div className="bento">
       {r.marathon && (
-        <article className="rec rec-wide rec-hot">
-          <p className="rec-label">Maior maratona</p>
-          <p className="rec-big">{duration(r.marathon.end - r.marathon.start)}</p>
-          <p className="rec-text">
-            {shortDate(r.marathon.start)} · {clock(r.marathon.start)}–{clock(r.marathon.end)} · {num(r.marathon.tracks)} faixas
-          </p>
-        </article>
+        <Rec
+          media={
+            <span className="rec-icon hot">
+              <TimerIcon />
+            </span>
+          }
+          label="Maior maratona"
+          big={duration(r.marathon.end - r.marathon.start)}
+          text={`${shortDate(r.marathon.start)} · ${clock(r.marathon.start)}–${clock(r.marathon.end)} · ${num(r.marathon.tracks)} faixas`}
+        />
       )}
       {r.repeatDay && (
-        <article className="rec rec-pic">
-          <Thumb image={itemRef(data, r.repeatDay.item) ?? { kind: 'artist', name: song(r.repeatDay.item).artist }} label={song(r.repeatDay.item).name} size={72} />
-          <PlayButton track={trackOf(data, r.repeatDay.item)} className="play-corner" />
-          <p className="rec-label">Repetiu no mesmo dia</p>
-          <p className="rec-big">{num(r.repeatDay.count)} vezes</p>
-          <p className="rec-text">
-            {link(r.repeatDay.item)} · {song(r.repeatDay.item).artist} · {shortDate(keyToMs(r.repeatDay.day))}
-          </p>
-        </article>
+        <Rec
+          media={cover(r.repeatDay.item)}
+          label="Repetiu no mesmo dia"
+          big={`${num(r.repeatDay.count)} vezes`}
+          text={
+            <>
+              {link(r.repeatDay.item)} · {song(r.repeatDay.item).artist} · {shortDate(keyToMs(r.repeatDay.day))}
+            </>
+          }
+          play={play(r.repeatDay.item)}
+        />
       )}
       {r.lateNight && (
-        <article className="rec rec-night">
-          <p className="rec-label">Madrugada mais longa</p>
-          <p className="rec-big">{hours(r.lateNight.ms)}</p>
-          <p className="rec-text">{shortDate(keyToMs(r.lateNight.day))}</p>
-        </article>
+        <Rec
+          media={
+            <span className="rec-icon night">
+              <MoonIcon />
+            </span>
+          }
+          label="Madrugada mais longa"
+          big={hours(r.lateNight.ms)}
+          text={shortDate(keyToMs(r.lateNight.day))}
+        />
       )}
       {r.artistRun && (
-        <article className="rec rec-pic">
-          <Thumb image={artistRef(data, r.artistRun.creator)} label={data.creators[r.artistRun.creator]} size={72} />
-          <p className="rec-label">Sem trocar de artista</p>
-          <p className="rec-big">{num(r.artistRun.count)} seguidas</p>
-          <p className="rec-text">
-            <a href={artistHref(r.artistRun.creator)}>{data.creators[r.artistRun.creator]}</a> · {shortDate(r.artistRun.start)}
-          </p>
-        </article>
+        <Rec
+          media={<Art image={artistRef(data, r.artistRun.creator)} label={data.creators[r.artistRun.creator]} round={false} />}
+          label="Sem trocar de artista"
+          big={`${num(r.artistRun.count)} seguidas`}
+          text={
+            <>
+              <a href={artistHref(r.artistRun.creator)}>{data.creators[r.artistRun.creator]}</a> · {shortDate(r.artistRun.start)}
+            </>
+          }
+        />
       )}
       {r.loyal && (
-        <article className="rec rec-pic">
-          <Thumb image={itemRef(data, r.loyal.item) ?? { kind: 'artist', name: song(r.loyal.item).artist }} label={song(r.loyal.item).name} size={72} />
-          <PlayButton track={trackOf(data, r.loyal.item)} className="play-corner" />
-          <p className="rec-label">A mais fiel</p>
-          <p className="rec-big">{num(r.loyal.days)} dias</p>
-          <p className="rec-text">
-            {link(r.loyal.item)} · {song(r.loyal.item).artist}
-          </p>
-        </article>
+        <Rec
+          media={cover(r.loyal.item)}
+          label="A mais fiel"
+          big={`${num(r.loyal.days)} dias`}
+          text={
+            <>
+              {link(r.loyal.item)} · {song(r.loyal.item).artist}
+            </>
+          }
+          play={play(r.loyal.item)}
+        />
       )}
       {r.first && (
-        <article className="rec rec-wide rec-first">
-          <PlayButton track={trackOf(data, r.first.item)} className="play-corner" />
-          <Art image={itemRef(data, r.first.item) ?? { kind: 'artist', name: song(r.first.item).artist }} label={song(r.first.item).name} size={120} />
-          <div>
-            <p className="rec-label">{filter.year ? `A primeira de ${filter.year}` : 'Onde tudo começou'}</p>
-            <p className="rec-big rec-name">
-              <a href={songHref(r.first.item)}>{song(r.first.item).name}</a>
-            </p>
-            <p className="rec-text">
-              {song(r.first.item).artist} · {shortDate(r.first.t)}, {clock(r.first.t)}
-            </p>
-          </div>
-        </article>
+        <Rec
+          media={cover(r.first.item)}
+          label={filter.year ? `A primeira de ${filter.year}` : 'Onde tudo começou'}
+          big={<a href={songHref(r.first.item)}>{song(r.first.item).name}</a>}
+          text={`${song(r.first.item).artist} · ${shortDate(r.first.t)}, ${clock(r.first.t)}`}
+          play={play(r.first.item)}
+        />
       )}
       {r.variety && (
-        <article className="rec">
-          <p className="rec-label">Dia mais variado</p>
-          <p className="rec-big">{num(r.variety.artists)} artistas</p>
-          <p className="rec-text">{shortDate(keyToMs(r.variety.day))}</p>
-        </article>
+        <Rec
+          media={
+            <span className="rec-icon">
+              <MicIcon />
+            </span>
+          }
+          label="Dia mais variado"
+          big={`${num(r.variety.artists)} artistas`}
+          text={shortDate(keyToMs(r.variety.day))}
+        />
       )}
     </div>
   )
