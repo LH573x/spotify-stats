@@ -21,6 +21,7 @@
   --bar-track: #2c2c2a;
   --danger: #e66767;
   --shadow: rgba(0, 0, 0, 0.45);
+  --tabbar: 58px;
   --display: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', system-ui, sans-serif;
   --body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
@@ -2237,11 +2238,34 @@ a.find-card:hover {
   .wall {
     gap: 22px 14px;
   }
+  /* No celular as abas ficam numa barra fixa embaixo, como no Instagram. */
   .nav {
-    order: 3;
-    flex-basis: 100%;
+    position: fixed;
+    z-index: 25;
+    left: 0;
+    right: 0;
+    bottom: 0;
     justify-content: space-around;
     gap: 0;
+    padding: 0 8px env(safe-area-inset-bottom, 0px);
+    background: var(--page);
+    border-top: 1px solid var(--line);
+  }
+  .nav button {
+    flex: 1;
+    padding: 8px 0 23px;
+  }
+  .nav button span {
+    bottom: 6px;
+  }
+  .app:has(.nav) {
+    padding-bottom: calc(var(--tabbar) + 24px + env(safe-area-inset-bottom, 0px));
+  }
+  .app:has(.nav):has(.dock:not([hidden])) {
+    padding-bottom: calc(var(--tabbar) + 130px + env(safe-area-inset-bottom, 0px));
+  }
+  .app:has(.nav) .dock {
+    bottom: calc(var(--tabbar) + 10px + env(safe-area-inset-bottom, 0px));
   }
   .chips {
     flex-basis: 100%;
