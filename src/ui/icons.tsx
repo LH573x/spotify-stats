@@ -90,3 +90,45 @@ export function MicIcon() {
     </svg>
   )
 }
+
+/* Bandeiras de traço, sem cor, no mesmo estilo dos ícones. */
+
+const flagBox = <rect x="2.5" y="5" width="19" height="14" rx="2" />
+
+export function FlagBR() {
+  return (
+    <svg {...base}>
+      {flagBox}
+      <path d="M12 7.6 18.6 12 12 16.4 5.4 12Z" strokeWidth={1.4} />
+      <circle cx="12" cy="12" r="2.3" strokeWidth={1.4} />
+    </svg>
+  )
+}
+
+export function FlagUK() {
+  return (
+    <svg {...base}>
+      {flagBox}
+      <path d="M4.2 6.3 19.8 17.7M19.8 6.3 4.2 17.7" strokeWidth={1.1} />
+      <path d="M12 5v14M2.5 12h19" strokeWidth={2.2} strokeLinecap="butt" />
+    </svg>
+  )
+}
+
+export function FlagES() {
+  return (
+    <svg {...base}>
+      {flagBox}
+      <path d="M2.5 8.5h19M2.5 15.5h19" strokeWidth={1.4} />
+      <path d="M7 10.3h2.8v2.1a1.4 1.4 0 0 1-2.8 0Z" strokeWidth={1.2} />
+    </svg>
+  )
+}
+
+export function CheckIcon() {
+  return (
+    <svg {...base}>
+      <path d="m5 12.5 4.5 4.5L19 7.5" />
+    </svg>
+  )
+}

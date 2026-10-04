@@ -285,6 +285,50 @@ a {
   padding: 10px 0;
   font-weight: 600;
 }
+/* Escolha do idioma */
+.lang-btn svg {
+  width: 20px;
+  height: 20px;
+}
+.lang-sheet {
+  width: min(280px, calc(100vw - 32px));
+}
+.lang-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+}
+.lang-list button {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--ink);
+  font: 600 15px/1 var(--body);
+  text-align: left;
+}
+.lang-list button:hover {
+  background: var(--surface-2);
+}
+.lang-list button.on {
+  color: var(--accent);
+}
+.lang-list svg {
+  flex: none;
+  width: 26px;
+  height: 26px;
+}
+.lang-list span {
+  flex: 1;
+}
+.lang-list button svg:last-child:not(:first-child) {
+  width: 18px;
+  height: 18px;
+}
 .danger {
   background: #e5484d;
   color: #fff;

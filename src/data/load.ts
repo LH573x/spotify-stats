@@ -1,5 +1,6 @@
 import type { Dataset } from './types'
 import type { WorkerResponse } from './worker'
+import { lang, t } from '../i18n'
 
 /** Lê o zip ou os JSONs do export num Web Worker, sem travar a tela. */
 export function loadFiles(files: File[], onProgress: (message: string) => void): Promise<Dataset> {
@@ -8,7 +9,7 @@ export function loadFiles(files: File[], onProgress: (message: string) => void):
     const fallback = () =>
       import('./process')
         .then((m) => m.processFiles(files, onProgress))
-        .then(resolve, (err: Error) => reject(new Error(`Não consegui ler os arquivos: ${err.message}`)))
+        .then(resolve, (err: Error) => reject(new Error(`${t('Não consegui ler os arquivos', "Couldn't read the files", 'No pude leer los archivos')}: ${err.message}`)))
 
     let worker: Worker
     try {
@@ -31,6 +32,7 @@ export function loadFiles(files: File[], onProgress: (message: string) => void):
       if (!started) fallback()
       else reject(new Error(e.message))
     }
-    worker.postMessage({ files })
+    // O worker não vê o idioma da página: vai junto com os arquivos.
+    worker.postMessage({ files, lang: lang() })
   })
 }
