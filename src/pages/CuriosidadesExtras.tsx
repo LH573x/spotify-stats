@@ -7,7 +7,8 @@ import { Art, Thumb } from '../ui/Thumb'
 import { artistHref, songHref } from '../ui/links'
 import { PlayButton } from '../ui/player'
 import { trackOf } from '../ui/playerStore'
-import { MicIcon, MoonIcon, TimerIcon } from '../ui/icons'
+import { MicIcon, TimerIcon } from '../ui/icons'
+import { LyraSky } from '../ui/LyraSky'
 import { cleanTitle, clock, date, duration, hours, keyToMs, monthLabel, num, shortDate } from '../ui/format'
 
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -72,11 +73,7 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
       )}
       {r.lateNight && (
         <Rec
-          media={
-            <span className="rec-icon night">
-              <MoonIcon />
-            </span>
-          }
+          media={<LyraSky className="rec-sky" />}
           label="Madrugada mais longa"
           big={hours(r.lateNight.ms)}
           text={shortDate(keyToMs(r.lateNight.day))}
