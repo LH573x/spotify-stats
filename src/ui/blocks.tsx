@@ -1,4 +1,7 @@
 import type { ReactNode } from 'react'
+import { CountUp } from './CountUp'
+import { useInView } from './motion'
+import { useTint } from './tint'
 import type { ImageRef } from '../data/images'
 import { Art, Thumb } from './Thumb'
 import { PlayButton } from './player'
@@ -16,8 +19,10 @@ export function Section({
   children: ReactNode
   className?: string
 }) {
+  // "in" quando aparece na tela: as barras crescem a partir daí.
+  const [ref, seen] = useInView<HTMLElement>()
   return (
-    <section className={`sec ${className}`}>
+    <section ref={ref} className={`sec ${seen ? 'in' : ''} ${className}`}>
       <header className="sec-head">
         <h2>{title}</h2>
         {note && <p className="sec-note">{note}</p>}
@@ -27,14 +32,24 @@ export function Section({
   )
 }
 
+export interface Stat {
+  label: string
+  /** Texto pronto (datas, nomes) ou… */
+  value?: string
+  /** …um número, que sobe até o valor quando aparece; `format` diz como escrever. */
+  count?: number
+  format?: (n: number) => string
+  hint?: string
+}
+
 /** Números grandes lado a lado, separados por linhas. */
-export function StatStrip({ items }: { items: { label: string; value: string; hint?: string }[] }) {
+export function StatStrip({ items }: { items: Stat[] }) {
   return (
     <dl className="stats">
       {items.map((s) => (
         <div key={s.label}>
           <dt>{s.label}</dt>
-          <dd>{s.value}</dd>
+          <dd>{s.count !== undefined ? <CountUp value={s.count} format={s.format} /> : s.value}</dd>
           {s.hint && <small>{s.hint}</small>}
         </div>
       ))}
@@ -70,12 +85,13 @@ function Name({ item, className }: { item: RankItem; className: string }) {
 /** Ranking em três alturas: o nº 1 em destaque, do 2º ao 5º em cartões, o resto em lista. */
 export function Podium({ items }: { items: RankItem[] }) {
   const [lead, ...others] = items
+  const tint = useTint(lead?.image, lead?.name ?? '')
   if (!lead) return null
   const runners = others.slice(0, 4)
   const rest = others.slice(4)
   return (
     <div className="podium">
-      <article className="podium-lead" title={lead.title}>
+      <article className="podium-lead tinted-card" title={lead.title} style={tint}>
         <Art image={lead.image} label={lead.name} className="podium-lead-art" />
         <div className="podium-lead-text">
           <p className="kicker">nº 1</p>

@@ -22,10 +22,12 @@
   --danger: #e66767;
   --shadow: rgba(0, 0, 0, 0.45);
   --tabbar: 58px;
+  --tint-l: 25%;
   --display: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', system-ui, sans-serif;
   --body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 :root[data-theme='light'] {
+  --tint-l: 84%;
   color-scheme: light;
   --page: #f6f6f3;
   --surface: #fcfcfb;
@@ -59,10 +61,51 @@
 html,
 body {
   margin: 0;
-  background: var(--page);
   color: var(--ink);
   font-family: var(--body);
   -webkit-font-smoothing: antialiased;
+}
+/* O fundo fica só no html, para a cor da capa (body::before) aparecer por baixo do conteúdo. */
+html {
+  background: var(--page);
+}
+
+/* Cor da capa ou da foto em destaque, como o fundo do player do Spotify */
+@property --tint-h {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+@property --tint-s {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 0%;
+}
+:root {
+  transition:
+    --tint-h 0.6s,
+    --tint-s 0.6s;
+}
+body::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: min(620px, 85vh);
+  pointer-events: none;
+  background: linear-gradient(hsl(var(--tint-h) var(--tint-s) var(--tint-l)), transparent);
+  opacity: 0;
+  transition: opacity 0.6s;
+}
+:root.tinted body::before {
+  opacity: 1;
+}
+.tinted-card {
+  transition:
+    --tint-h 0.6s,
+    --tint-s 0.6s;
 }
 button {
   font: inherit;
@@ -653,7 +696,7 @@ a {
   padding: 24px;
   border-radius: 22px;
   border: 1px solid var(--line);
-  background: radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 60%), var(--surface);
+  background: radial-gradient(120% 140% at 0% 0%, hsl(var(--tint-h) var(--tint-s) var(--tint-l) / 0.9), transparent 70%), var(--surface);
 }
 .podium-lead .art {
   box-shadow: 0 14px 36px var(--shadow);
@@ -882,6 +925,88 @@ a.rank-name:focus-visible {
   height: 100%;
   background: var(--accent);
   border-radius: 2px;
+}
+
+/* As barras crescem quando o trecho aparece na tela, uma depois da outra. */
+.sec .rank-bar span,
+.sec .hours24 i {
+  transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: calc(var(--i, 0) * 45ms);
+}
+.sec .rank-bar span {
+  transform-origin: left;
+}
+.sec .hours24 i {
+  transform-origin: bottom;
+}
+.sec:not(.in) .rank-bar span {
+  transform: scaleX(0);
+}
+.sec:not(.in) .hours24 i {
+  transform: scaleY(0);
+}
+.count {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hoje na sua história */
+.memories {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 16px;
+}
+.memory {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 14px 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: linear-gradient(170deg, hsl(var(--tint-h) var(--tint-s) var(--tint-l)), var(--surface) 75%);
+}
+.memory-art {
+  position: relative;
+  margin-bottom: 14px;
+}
+.memory-art .art {
+  border-radius: 8px;
+  box-shadow: 0 10px 24px var(--shadow);
+}
+.memory .kicker {
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+.memory-name {
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.memory-name:hover {
+  text-decoration: underline;
+}
+.memory-sub {
+  color: var(--ink-2);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.memory-time {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
 }
 .rank.plain li {
   gap: 0;
@@ -1296,6 +1421,7 @@ a.rank-name:focus-visible {
   transform: translateY(6px);
 }
 .wall li:hover .play-over,
+.memory:hover .play-over,
 .play-over:focus-visible,
 .play-over.on {
   opacity: 1;
@@ -2154,6 +2280,16 @@ a.find-card:hover {
   .art img {
     animation: none !important;
   }
+  .sec .rank-bar span,
+  .sec .hours24 i {
+    transform: none !important;
+    transition: none;
+  }
+  :root,
+  .tinted-card,
+  body::before {
+    transition: none;
+  }
   .wall-art .art,
   .find-card,
   .faded .art {
@@ -2266,6 +2402,21 @@ a.find-card:hover {
   }
   .app:has(.nav) .dock {
     bottom: calc(var(--tabbar) + 10px + env(safe-area-inset-bottom, 0px));
+  }
+  .memories {
+    display: flex;
+    gap: 12px;
+    margin: 0 -16px;
+    padding: 0 16px 4px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 16px;
+    scrollbar-width: none;
+  }
+  .memory {
+    flex: none;
+    width: 168px;
+    scroll-snap-align: start;
   }
   .chips {
     flex-basis: 100%;

@@ -10,6 +10,7 @@ import { Art } from '../ui/Thumb'
 import { artistRef, itemRef } from '../data/refs'
 import { songHref } from '../ui/links'
 import { trackOf } from '../ui/playerStore'
+import { usePageTint, useTint } from '../ui/tint'
 
 interface Props {
   data: Dataset
@@ -25,6 +26,7 @@ function back() {
 export function Artista({ data, id, theme }: Props) {
   const a = useMemo(() => artistDetail(data, id), [data, id])
   const c = chartColors(theme, 'green')
+  usePageTint(useTint(a ? artistRef(data, id) : null, a?.name ?? ''))
 
   const option = useMemo<ChartOption | null>(() => {
     if (!a) return null
