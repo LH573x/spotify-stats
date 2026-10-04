@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import type { Dataset } from '../data/types'
 import type { KindFilter } from '../data/stats'
 import { timeline } from '../data/timeline'
@@ -179,7 +179,11 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
         </div>
         <div className="card">
           <div className="scroll-x">
-            <table className="years-grid" style={{ minWidth: 40 + t.years.length * 100 }} onMouseLeave={() => setHover(null)}>
+            <table
+              className={songs ? 'years-grid with-sub' : 'years-grid'}
+              style={{ '--years': t.years.length } as CSSProperties}
+              onMouseLeave={() => setHover(null)}
+            >
               <thead>
                 <tr>
                   <th scope="col" aria-label="Posição" />
@@ -209,9 +213,12 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
                             onFocus={() => setHover(a.id)}
                             title={`${name}${sub ? `, de ${sub}` : ''}: ${hours(a.ms)} em ${y.year}`}
                           >
-                            {image ? <Art image={image} label={name} size={r === 0 ? 48 : 30} /> : <Art label={name} size={r === 0 ? 48 : 30} />}
-                            <span>{name}</span>
-                            <small>{sub ? `${sub} · ${hours(a.ms)}` : hours(a.ms)}</small>
+                            <Art image={image} label={name} round={false} />
+                            <span className="yg-text">
+                              <span className="yg-name">{name}</span>
+                              {sub && <small>{sub}</small>}
+                              <small>{hours(a.ms)}</small>
+                            </span>
                           </a>
                         </td>
                       )
