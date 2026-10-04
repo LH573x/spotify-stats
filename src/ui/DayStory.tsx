@@ -7,6 +7,7 @@ import { StoryViewer } from './StoryViewer'
 import { displayFontLoaded, loadDisplayFont } from './svgText'
 import { CloseIcon, ShareIcon } from './icons'
 import { cleanTitle, slug } from './format'
+import { t } from '../i18n'
 
 /** Cabem até 10 anos no story; os mais recentes ficam. */
 const MAX_ROWS = 10
@@ -31,13 +32,17 @@ function Story({ data, list, date }: { data: Dataset; list: DayMemory[]; date: s
       }
     })
     const podcasts = list.every((m) => data.items[m.item].kind === 'podcast')
-    const heads: [string, string] = podcasts ? ['Episódio', 'Podcast'] : ['Música', 'Artista']
-    const label = `Meu ${date}. ${rows.map((r) => `${r.year}: ${r.song}; ${r.artist}`).join('. ')}.`
-    return [{ id: 'dia', title: `Meu ${date}`, card: <DayCard date={date} rows={rows} heads={heads} label={label} /> }]
+    const heads: [string, string] = podcasts
+      ? [t('Episódio', 'Episode', 'Episodio'), t('Podcast', 'Podcast', 'Podcast')]
+      : [t('Música', 'Song', 'Canción'), t('Artista', 'Artist', 'Artista')]
+    const title = t(`Meu ${date}`, `My ${date}`, `Mi ${date}`)
+    const label = `${title}. ${rows.map((r) => `${r.year}: ${r.song}; ${r.artist}`).join('. ')}.`
+    return [{ id: 'dia', title, card: <DayCard date={date} rows={rows} heads={heads} label={label} /> }]
   }, [data, list, date])
 
-  if (!fontReady) return <p className="empty">Preparando o story…</p>
-  return <StoryViewer stories={stories} label={`Meu ${date}`} fileName={() => `lyra-${slug(date)}`} zipName="" shareTitle={`Meu ${date}`} />
+  if (!fontReady) return <p className="empty">{t('Preparando o story…', 'Preparing story…', 'Preparando la historia…')}</p>
+  const mine = t(`Meu ${date}`, `My ${date}`, `Mi ${date}`)
+  return <StoryViewer stories={stories} label={mine} fileName={() => `lyra-${slug(date)}`} zipName="" shareTitle={mine} />
 }
 
 /** Botão pequeno que abre o story de "Seu 4 de outubro", pronto para compartilhar. */
@@ -56,17 +61,17 @@ export function DayStory({ data, list, date }: { data: Dataset; list: DayMemory[
         }}
       >
         <ShareIcon />
-        Compartilhar
+        {t('Compartilhar', 'Share', 'Compartir')}
       </button>
       <dialog
         ref={dialog}
         className="story-sheet"
-        aria-label={`Story: seu ${date}`}
+        aria-label={t(`Story: seu ${date}`, `Story: your ${date}`, `Historia: tu ${date}`)}
         onClose={() => setOpen(false)}
         // Tocar fora da janela fecha, como no celular.
         onClick={(e) => e.target === e.currentTarget && close()}
       >
-        <button className="ghost icon sheet-close" onClick={close} aria-label="Fechar" title="Fechar">
+        <button className="ghost icon sheet-close" onClick={close} aria-label={t('Fechar', 'Close', 'Cerrar')} title={t('Fechar', 'Close', 'Cerrar')}>
           <CloseIcon />
         </button>
         {open && <Story data={data} list={list} date={date} />}

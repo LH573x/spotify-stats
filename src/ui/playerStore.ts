@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import type { Dataset } from '../data/types'
+import { t } from '../i18n'
 
 /*
  * Estado do player do Spotify no rodapé (a parte visual fica em player.tsx).
@@ -50,7 +51,7 @@ export function loadApi(): Promise<IFrameAPI> {
     s.async = true
     s.onerror = () => {
       api = null
-      reject(new Error('Não deu para abrir o player do Spotify.'))
+      reject(new Error(t('Não deu para abrir o player do Spotify.', "Couldn't open the Spotify player.", 'No se pudo abrir el reproductor de Spotify.')))
     }
     document.head.appendChild(s)
   })

@@ -27,7 +27,7 @@ export function ellipsize(text: string, width: number, size: number, weight: num
 
 /** Quebra em linhas por palavra; `fits` diz se coube sem cortar nada. */
 function wrap(text: string, width: number, size: number, weight: number, maxLines: number, family: string) {
-  const words = text.split(/\s+/).filter(Boolean)
+  const words = text.split(/[ \t\n]+/).filter(Boolean)
   const lines: string[] = []
   let cur = ''
   for (const w of words) {

@@ -11,12 +11,16 @@ import { artistRef, itemRef } from '../data/refs'
 import { songHref } from '../ui/links'
 import { trackOf } from '../ui/playerStore'
 import { usePageTint, useTint } from '../ui/tint'
+import { t } from '../i18n'
 
 interface Props {
   data: Dataset
   id: number
   theme: ThemeName
 }
+
+/** Posição no ranking: "nº 3". */
+const rankLabel = (n: number) => t(`nº ${num(n)}`, `#${num(n)}`, `n.º ${num(n)}`)
 
 function back() {
   if (history.length > 1) history.back()
@@ -83,7 +87,8 @@ export function Artista({ data, id, theme }: Props) {
     return (
       <main className="page">
         <p className="empty">
-          Não encontrei esse artista nos seus dados. <a href="#linha">Voltar para a linha do tempo</a>
+          {t('Não encontrei esse artista nos seus dados.', "This artist isn't in your data.", 'Este artista no está en tus datos.')}{' '}
+          <a href="#linha">{t('Voltar para a linha do tempo', 'Back to Timeline', 'Volver a la línea de tiempo')}</a>
         </p>
       </main>
     )
@@ -97,45 +102,61 @@ export function Artista({ data, id, theme }: Props) {
   return (
     <main className="page">
       <button className="ghost back" onClick={back}>
-        ← Voltar
+        ← {t('Voltar', 'Back', 'Volver')}
       </button>
       <section className="hero artist-hero">
         <Art image={artistRef(data, id)} label={a.name} className="artist-photo" />
         <div>
           <p className="eyebrow">
-            {podcast ? 'Podcast' : 'Artista'} · nº {num(a.rank)}
+            {podcast ? 'Podcast' : t('Artista', 'Artist', 'Artista')} · {rankLabel(a.rank)}
           </p>
           <h1 className="artist-name">{a.name}</h1>
           <p className="sub">
-            <span className="accent">{hours(a.totalMs)}</span> · {num(a.plays)} reproduções · {num(a.itemCount)}{' '}
-            {podcast ? 'episódios' : a.itemCount === 1 ? 'música' : 'músicas'}
+            <span className="accent">{hours(a.totalMs)}</span> · {num(a.plays)}{' '}
+            {t('reproduções', a.plays === 1 ? 'play' : 'plays', a.plays === 1 ? 'reproducción' : 'reproducciones')} ·{' '}
+            {num(a.itemCount)}{' '}
+            {podcast
+              ? t('episódios', a.itemCount === 1 ? 'episode' : 'episodes', a.itemCount === 1 ? 'episodio' : 'episodios')
+              : a.itemCount === 1
+                ? t('música', 'song', 'canción')
+                : t('músicas', 'songs', 'canciones')}
           </p>
         </div>
       </section>
 
       <StatStrip
         items={[
-          ...(a.first ? [{ label: 'Primeira vez', value: shortDate(a.first.t), hint: a.first.item }] : []),
-          ...(a.last ? [{ label: 'Última vez', value: shortDate(a.last.t), hint: a.last.item }] : []),
-          { label: 'Ano favorito', value: String(bestYear.year), hint: hours(bestYear.ms) },
-          { label: 'Mês recorde', value: monthLabel(peak.month), hint: hours(peak.hours * 3.6e6) },
+          ...(a.first ? [{ label: t('Primeira vez', 'First play', 'Primera vez'), value: shortDate(a.first.t), hint: a.first.item }] : []),
+          ...(a.last ? [{ label: t('Última vez', 'Last play', 'Última vez'), value: shortDate(a.last.t), hint: a.last.item }] : []),
+          { label: t('Ano favorito', 'Top year', 'Año favorito'), value: String(bestYear.year), hint: hours(bestYear.ms) },
+          { label: t('Mês recorde', 'Peak month', 'Mes récord'), value: monthLabel(peak.month), hint: hours(peak.hours * 3.6e6) },
         ]}
       />
 
-      <Section title={`Sua história com ${a.name}`}>
+      <Section title={t(`Sua história com ${a.name}`, `Your story with ${a.name}`, `Tu historia con ${a.name}`)}>
         <div className="card">
-          <Chart option={option} height={240} label={`Horas por mês ouvindo ${a.name}`} />
-          <div className="year-chips" aria-label="Posição em cada ano">
+          <Chart
+            option={option}
+            height={240}
+            label={t(`Horas por mês ouvindo ${a.name}`, `Hours a month listening to ${a.name}`, `Horas al mes escuchando a ${a.name}`)}
+          />
+          <div className="year-chips" aria-label={t('Posição em cada ano', 'Rank each year', 'Posición cada año')}>
             {a.yearly.map((y) => (
               <span key={y.year} className={y === bestYear ? 'on' : ''}>
-                <strong>{y.year}</strong> nº {num(y.rank)} · {hours(y.ms)}
+                <strong>{y.year}</strong> {rankLabel(y.rank)} · {hours(y.ms)}
               </span>
             ))}
           </div>
         </div>
       </Section>
 
-      <Section title={podcast ? 'Episódios mais ouvidos' : 'Músicas mais ouvidas'}>
+      <Section
+        title={
+          podcast
+            ? t('Episódios mais ouvidos', 'Top episodes', 'Episodios más escuchados')
+            : t('Músicas mais ouvidas', 'Top songs', 'Canciones más escuchadas')
+        }
+      >
         <BarList
           rows={a.topItems.map((it) => ({
             key: it.id,
@@ -146,7 +167,7 @@ export function Artista({ data, id, theme }: Props) {
             track: trackOf(data, it.id),
             value: hours(it.ms),
             share: it.ms / maxItem,
-            title: `${it.name}: ${hours(it.ms)}, ${num(it.plays)} reproduções`,
+            title: `${it.name}: ${hours(it.ms)}, ${num(it.plays)} ${t('reproduções', it.plays === 1 ? 'play' : 'plays', it.plays === 1 ? 'reproducción' : 'reproducciones')}`,
           }))}
         />
       </Section>

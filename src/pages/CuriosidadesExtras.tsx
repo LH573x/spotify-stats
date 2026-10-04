@@ -10,6 +10,7 @@ import { trackOf } from '../ui/playerStore'
 import { MicIcon, TimerIcon } from '../ui/icons'
 import { LyraSky } from '../ui/LyraSky'
 import { cleanTitle, clock, date, duration, hours, keyToMs, monthLabel, num, shortDate } from '../ui/format'
+import { t } from '../i18n'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 const monthOf = (ms: number) => {
@@ -53,16 +54,16 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
               <TimerIcon />
             </span>
           }
-          label="Maior maratona"
+          label={t('Maior maratona', 'Longest marathon', 'Mayor maratón')}
           big={duration(r.marathon.end - r.marathon.start)}
-          text={`${shortDate(r.marathon.start)} · ${clock(r.marathon.start)}–${clock(r.marathon.end)} · ${num(r.marathon.tracks)} faixas`}
+          text={`${shortDate(r.marathon.start)} · ${clock(r.marathon.start)}–${clock(r.marathon.end)} · ${num(r.marathon.tracks)} ${t('faixas', 'tracks', 'pistas')}`}
         />
       )}
       {r.repeatDay && (
         <Rec
           media={cover(r.repeatDay.item)}
-          label="Repetiu no mesmo dia"
-          big={`${num(r.repeatDay.count)} vezes`}
+          label={t('Repetiu no mesmo dia', 'On repeat in one day', 'En bucle en un día')}
+          big={`${num(r.repeatDay.count)} ${t('vezes', 'times', 'veces')}`}
           text={
             <>
               {link(r.repeatDay.item)} · {song(r.repeatDay.item).artist} · {shortDate(keyToMs(r.repeatDay.day))}
@@ -74,7 +75,7 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
       {r.lateNight && (
         <Rec
           media={<LyraSky className="rec-sky" />}
-          label="Madrugada mais longa"
+          label={t('Madrugada mais longa', 'Longest late night', 'Madrugada más larga')}
           big={hours(r.lateNight.ms)}
           text={shortDate(keyToMs(r.lateNight.day))}
         />
@@ -82,8 +83,8 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
       {r.artistRun && (
         <Rec
           media={<Art image={artistRef(data, r.artistRun.creator)} label={data.creators[r.artistRun.creator]} round={false} />}
-          label="Sem trocar de artista"
-          big={`${num(r.artistRun.count)} seguidas`}
+          label={t('Sem trocar de artista', 'One artist, non-stop', 'Sin cambiar de artista')}
+          big={t(`${num(r.artistRun.count)} seguidas`, `${num(r.artistRun.count)} in a row`, `${num(r.artistRun.count)} seguidas`)}
           text={
             <>
               <a href={artistHref(r.artistRun.creator)}>{data.creators[r.artistRun.creator]}</a> · {shortDate(r.artistRun.start)}
@@ -94,8 +95,8 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
       {r.loyal && (
         <Rec
           media={cover(r.loyal.item)}
-          label="A mais fiel"
-          big={`${num(r.loyal.days)} dias`}
+          label={t('A mais fiel', 'Most loyal', 'La más fiel')}
+          big={`${num(r.loyal.days)} ${t('dias', 'days', 'días')}`}
           text={
             <>
               {link(r.loyal.item)} · {song(r.loyal.item).artist}
@@ -107,7 +108,11 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
       {r.first && (
         <Rec
           media={cover(r.first.item)}
-          label={filter.year ? `A primeira de ${filter.year}` : 'Onde tudo começou'}
+          label={
+            filter.year
+              ? t(`A primeira de ${filter.year}`, `First of ${filter.year}`, `La primera de ${filter.year}`)
+              : t('Onde tudo começou', 'Where it all began', 'Donde empezó todo')
+          }
           big={<a href={songHref(r.first.item)}>{song(r.first.item).name}</a>}
           text={`${song(r.first.item).artist} · ${shortDate(r.first.t)}, ${clock(r.first.t)}`}
           play={play(r.first.item)}
@@ -120,8 +125,8 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
               <MicIcon />
             </span>
           }
-          label="Dia mais variado"
-          big={`${num(r.variety.artists)} artistas`}
+          label={t('Dia mais variado', 'Most varied day', 'Día más variado')}
+          big={`${num(r.variety.artists)} ${t('artistas', 'artists', 'artistas')}`}
           text={shortDate(keyToMs(r.variety.day))}
         />
       )}
@@ -132,14 +137,30 @@ export function Recordes({ data, filter }: { data: Dataset; filter: Filter }) {
 /** Músicas muito ouvidas que não tocam há mais de um ano, com a capa desbotada. */
 export function Esquecidas({ data, filter }: { data: Dataset; filter: Filter }) {
   const list = useMemo(() => forgotten(data, filter, 8), [data, filter])
-  if (list.length === 0) return <p className="empty-note">Nenhuma música esquecida nesse período: você continua ouvindo tudo o que mais ouviu.</p>
+  if (list.length === 0)
+    return (
+      <p className="empty-note">
+        {t(
+          'Nenhuma música esquecida nesse período: você continua ouvindo tudo o que mais ouviu.',
+          'No forgotten songs here: you still play all your favourites.',
+          'Sin canciones olvidadas: sigues escuchando tus favoritas.',
+        )}
+      </p>
+    )
   return (
     <ol className="wall faded">
       {list.map((f) => {
         const it = data.items[f.id]
         const name = cleanTitle(it.name)
         return (
-          <li key={f.id} title={`${name}: ${num(f.plays)} reproduções, a última em ${date(f.last)}`}>
+          <li
+            key={f.id}
+            title={t(
+              `${name}: ${num(f.plays)} reproduções, a última em ${date(f.last)}`,
+              `${name}: ${num(f.plays)} plays, last on ${date(f.last)}`,
+              `${name}: ${num(f.plays)} reproducciones, la última el ${date(f.last)}`,
+            )}
+          >
             <div className="wall-art">
               <Art image={itemRef(data, f.id)} label={name} round={false} />
               <PlayButton track={trackOf(data, f.id)} className="play-over" />
@@ -149,9 +170,12 @@ export function Esquecidas({ data, filter }: { data: Dataset; filter: Filter }) 
             </a>
             <span className="wall-sub">{data.creators[it.creator]}</span>
             <span className="wall-value">
-              {num(f.plays)} vezes{filter.year === null && `, mais em ${f.peakYear}`}
+              {num(f.plays)} {t('vezes', 'times', 'veces')}
+              {filter.year === null && t(`, mais em ${f.peakYear}`, `, mostly in ${f.peakYear}`, `, más en ${f.peakYear}`)}
             </span>
-            <span className="faded-last">última vez em {monthOf(f.last)}</span>
+            <span className="faded-last">
+              {t(`última vez em ${monthOf(f.last)}`, `last played ${monthOf(f.last)}`, `última vez en ${monthOf(f.last)}`)}
+            </span>
           </li>
         )
       })}
@@ -159,11 +183,26 @@ export function Esquecidas({ data, filter }: { data: Dataset; filter: Filter }) 
   )
 }
 
-const KIND_WORDS: Record<KindFilter, { creators: string; items: string; fresh: string; top: string }> = {
-  all: { creators: 'Artistas e podcasts', items: 'Músicas e episódios', fresh: 'Artistas e podcasts novos', top: 'Faixa mais ouvida' },
-  music: { creators: 'Artistas', items: 'Músicas', fresh: 'Artistas novos', top: 'Música mais ouvida' },
-  podcast: { creators: 'Podcasts', items: 'Episódios', fresh: 'Podcasts novos', top: 'Episódio mais ouvido' },
-}
+const KIND_WORDS = (): Record<KindFilter, { creators: string; items: string; fresh: string; top: string }> => ({
+  all: {
+    creators: t('Artistas e podcasts', 'Artists and podcasts', 'Artistas y podcasts'),
+    items: t('Músicas e episódios', 'Songs and episodes', 'Canciones y episodios'),
+    fresh: t('Artistas e podcasts novos', 'New artists and podcasts', 'Artistas y podcasts nuevos'),
+    top: t('Faixa mais ouvida', 'Top track', 'Lo más escuchado'),
+  },
+  music: {
+    creators: t('Artistas', 'Artists', 'Artistas'),
+    items: t('Músicas', 'Songs', 'Canciones'),
+    fresh: t('Artistas novos', 'New artists', 'Artistas nuevos'),
+    top: t('Música mais ouvida', 'Top song', 'Canción más escuchada'),
+  },
+  podcast: {
+    creators: t('Podcasts', 'Podcasts', 'Podcasts'),
+    items: t('Episódios', 'Episodes', 'Episodios'),
+    fresh: t('Podcasts novos', 'New podcasts', 'Podcasts nuevos'),
+    top: t('Episódio mais ouvido', 'Top episode', 'Episodio más escuchado'),
+  },
+})
 
 /** Dois anos lado a lado, com barras que crescem a partir do meio. */
 export function Comparar({ data, years, filter }: { data: Dataset; years: number[]; filter: Filter }) {
@@ -176,13 +215,22 @@ export function Comparar({ data, years, filter }: { data: Dataset; years: number
   const [[a, b], setPair] = useState(initial)
   const pa = useMemo(() => yearProfile(data, a, filter.kind), [data, a, filter.kind])
   const pb = useMemo(() => yearProfile(data, b, filter.kind), [data, b, filter.kind])
-  const words = KIND_WORDS[filter.kind]
+  const words = KIND_WORDS()[filter.kind]
 
-  if (years.length < 2) return <p className="empty-note">Seu histórico tem um ano só, então ainda não dá para comparar.</p>
+  if (years.length < 2)
+    return (
+      <p className="empty-note">
+        {t(
+          'Seu histórico tem um ano só, então ainda não dá para comparar.',
+          'Your history has just one year, so nothing to compare yet.',
+          'Tu historial tiene un solo año, así que aún no se puede comparar.',
+        )}
+      </p>
+    )
 
   const rows: { label: string; a: number; b: number; fmt: (v: number) => string; skip?: boolean }[] = [
-    { label: 'Horas', a: pa.totalMs, b: pb.totalMs, fmt: hours },
-    { label: 'Reproduções', a: pa.plays, b: pb.plays, fmt: num },
+    { label: t('Horas', 'Hours', 'Horas'), a: pa.totalMs, b: pb.totalMs, fmt: hours },
+    { label: t('Reproduções', 'Plays', 'Reproducciones'), a: pa.plays, b: pb.plays, fmt: num },
     { label: words.creators, a: pa.creators, b: pb.creators, fmt: num },
     { label: words.items, a: pa.items, b: pb.items, fmt: num },
     { label: words.fresh, a: pa.newCreators, b: pb.newCreators, fmt: num, skip: pa.firstYear || pb.firstYear },
@@ -199,18 +247,18 @@ export function Comparar({ data, years, filter }: { data: Dataset; years: number
           </option>
         ))}
       </select>
-      {p.partial && p.last !== null && <small>até {monthOf(p.last)}</small>}
+      {p.partial && p.last !== null && <small>{t(`até ${monthOf(p.last)}`, `until ${monthOf(p.last)}`, `hasta ${monthOf(p.last)}`)}</small>}
     </label>
   )
 
   return (
     <div className="versus card">
       <div className="vs-head">
-        {picker(a, b, (y) => setPair([y, b]), 'Primeiro ano', pa)}
+        {picker(a, b, (y) => setPair([y, b]), t('Primeiro ano', 'First year', 'Primer año'), pa)}
         <span className="vs-x" aria-hidden>
           vs
         </span>
-        {picker(b, a, (y) => setPair([a, y]), 'Segundo ano', pb)}
+        {picker(b, a, (y) => setPair([a, y]), t('Segundo ano', 'Second year', 'Segundo año'), pb)}
       </div>
 
       <div className="vs-rows">
@@ -241,7 +289,7 @@ export function Comparar({ data, years, filter }: { data: Dataset; years: number
             <div className="vs-side left">
               <span className="vs-val">{pa.part ?? '—'}</span>
             </div>
-            <span className="vs-label">Parte do dia</span>
+            <span className="vs-label">{t('Parte do dia', 'Time of day', 'Momento del día')}</span>
             <div className="vs-side right">
               <span className="vs-val">{pb.part ?? '—'}</span>
             </div>
@@ -252,7 +300,7 @@ export function Comparar({ data, years, filter }: { data: Dataset; years: number
       <div className="vs-tops">
         {[pa, pb].map((p) => (
           <div key={p.year}>
-            <p className="kicker">Top 5 de {p.year}</p>
+            <p className="kicker">{t(`Top 5 de ${p.year}`, `Top 5 of ${p.year}`, `Top 5 de ${p.year}`)}</p>
             <ol>
               {p.top.map((x, i) => (
                 <li key={x.id} className={shared.has(x.id) ? 'shared' : ''}>

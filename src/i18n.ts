@@ -24,16 +24,16 @@ function saved(): Lang {
 let current: Lang = saved()
 const listeners = new Set<() => void>()
 
-function apply() {
-  if (typeof document !== 'undefined') document.documentElement.lang = locale()
-}
-apply()
-
 /** O idioma atual, para código fora dos componentes. */
 export const lang = () => current
 
 /** "pt-BR", "en-GB" ou "es-ES", para números e datas. */
 export const locale = () => LANGS.find((l) => l.id === current)!.locale
+
+function apply() {
+  if (typeof document !== 'undefined') document.documentElement.lang = locale()
+}
+apply()
 
 export function setLang(l: Lang, remember = true) {
   if (l === current) return
@@ -59,3 +59,6 @@ export const useLang = () => useSyncExternalStore(subscribe, lang)
 
 /** O mesmo texto nos três idiomas: t('Músicas', 'Songs', 'Canciones'). */
 export const t = (pt: string, en: string, es: string) => (current === 'en' ? en : current === 'es' ? es : pt)
+
+/** Como t(), mas para qualquer coisa (por exemplo, trechos com links e negrito). */
+export const pick = <T,>(pt: T, en: T, es: T): T => (current === 'en' ? en : current === 'es' ? es : pt)

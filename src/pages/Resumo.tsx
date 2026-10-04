@@ -10,6 +10,7 @@ import { Chart, type ChartOption } from '../ui/Chart'
 import { chartColors, type ThemeName } from '../ui/theme'
 import { cleanTitle, hours, monthLabel, num, pct } from '../ui/format'
 import { CountUp } from '../ui/CountUp'
+import { t } from '../i18n'
 
 interface Props {
   data: Dataset
@@ -18,22 +19,32 @@ interface Props {
   onYear: (year: number | null) => void
 }
 
-const NOUNS = {
+const NOUNS = () => ({
   all: {
-    creators: 'Artistas e programas',
-    items: 'Músicas e episódios',
-    topC: 'Os artistas e podcasts que mais tocaram',
-    topI: 'As músicas e episódios que mais tocaram',
+    creators: t('Artistas e programas', 'Artists and shows', 'Artistas y programas'),
+    items: t('Músicas e episódios', 'Songs and episodes', 'Canciones y episodios'),
+    topC: t('Os artistas e podcasts que mais tocaram', 'Top artists and podcasts', 'Los artistas y podcasts que más sonaron'),
+    topI: t('As músicas e episódios que mais tocaram', 'Top songs and episodes', 'Las canciones y episodios que más sonaron'),
   },
-  music: { creators: 'Artistas', items: 'Músicas', topC: 'Os artistas que mais tocaram', topI: 'As músicas que mais tocaram' },
-  podcast: { creators: 'Programas', items: 'Episódios', topC: 'Os podcasts que mais tocaram', topI: 'Os episódios que mais tocaram' },
-}
+  music: {
+    creators: t('Artistas', 'Artists', 'Artistas'),
+    items: t('Músicas', 'Songs', 'Canciones'),
+    topC: t('Os artistas que mais tocaram', 'Top artists', 'Los artistas que más sonaron'),
+    topI: t('As músicas que mais tocaram', 'Top songs', 'Las canciones que más sonaron'),
+  },
+  podcast: {
+    creators: t('Programas', 'Shows', 'Programas'),
+    items: t('Episódios', 'Episodes', 'Episodios'),
+    topC: t('Os podcasts que mais tocaram', 'Top podcasts', 'Los podcasts que más sonaron'),
+    topI: t('Os episódios que mais tocaram', 'Top episodes', 'Los episodios que más sonaron'),
+  },
+})
 
 export function Resumo({ data, filter, theme, onYear }: Props) {
   const s = useMemo(() => summarize(data, filter), [data, filter])
   const discs = useMemo(() => yearTops(data, filter.kind), [data, filter.kind])
   const c = chartColors(theme, 'green')
-  const nouns = NOUNS[filter.kind]
+  const nouns = NOUNS()[filter.kind]
 
   const monthlyOption = useMemo<ChartOption>(() => {
     const single = filter.year !== null
@@ -94,7 +105,7 @@ export function Resumo({ data, filter, theme, onYear }: Props) {
         <section className="hero hero-deck">
           {deck}
           <div className="hero-text">
-            <p className="empty">Nada por aqui nesse período.</p>
+            <p className="empty">{t('Nada por aqui nesse período.', 'Nothing here for this period.', 'Nada por aquí en este periodo.')}</p>
           </div>
         </section>
       </main>
@@ -109,7 +120,11 @@ export function Resumo({ data, filter, theme, onYear }: Props) {
     ...toItem(r),
     href: artistHref(r.id),
     image: artistRef(data, r.id),
-    detail: `${num(r.plays)} reproduções · ${pct(r.ms / s.totalMs)} do total`,
+    detail: t(
+      `${num(r.plays)} reproduções · ${pct(r.ms / s.totalMs)} do total`,
+      `${num(r.plays)} plays · ${pct(r.ms / s.totalMs)} of total`,
+      `${num(r.plays)} reproducciones · ${pct(r.ms / s.totalMs)} del total`,
+    ),
   }))
   const items: RankItem[] = s.topItems.map((r) => ({
     ...toItem(r),
@@ -125,25 +140,37 @@ export function Resumo({ data, filter, theme, onYear }: Props) {
         {deck}
         <div className="hero-text">
           <h1>
-            Você ouviu{' '}
+            {t('Você ouviu', 'You listened to', 'Escuchaste')}{' '}
             <span className="accent">
-              <CountUp value={totalHours} /> horas
+              <CountUp value={totalHours} /> {t('horas', 'hours', 'horas')}
             </span>
           </h1>
           <p className="sub">
-            {num(daysNonStop)} {Math.round(daysNonStop) === 1 ? 'dia' : 'dias'} sem parar
+            {Math.round(daysNonStop) === 1
+              ? t(`${num(daysNonStop)} dia sem parar`, `${num(daysNonStop)} day non-stop`, `${num(daysNonStop)} día sin parar`)
+              : t(`${num(daysNonStop)} dias sem parar`, `${num(daysNonStop)} days non-stop`, `${num(daysNonStop)} días sin parar`)}
             {delta !== null &&
-              ` · ${delta >= 0 ? `${num(delta * 100)}% a mais` : `${num(-delta * 100)}% a menos`} que ${filter.year! - 1}`}
+              (delta >= 0
+                ? t(
+                    ` · ${num(delta * 100)}% a mais que ${filter.year! - 1}`,
+                    ` · ${num(delta * 100)}% more than ${filter.year! - 1}`,
+                    ` · ${num(delta * 100)}% más que ${filter.year! - 1}`,
+                  )
+                : t(
+                    ` · ${num(-delta * 100)}% a menos que ${filter.year! - 1}`,
+                    ` · ${num(-delta * 100)}% less than ${filter.year! - 1}`,
+                    ` · ${num(-delta * 100)}% menos que ${filter.year! - 1}`,
+                  ))}
           </p>
         </div>
       </section>
 
       <StatStrip
         items={[
-          { label: 'Reproduções', count: s.plays },
+          { label: t('Reproduções', 'Plays', 'Reproducciones'), count: s.plays },
           { label: nouns.creators, count: s.creators },
           { label: nouns.items, count: s.items },
-          { label: 'Dias ouvindo', count: s.activeDays },
+          { label: t('Dias ouvindo', 'Days listening', 'Días escuchando'), count: s.activeDays },
         ]}
       />
 
@@ -155,14 +182,24 @@ export function Resumo({ data, filter, theme, onYear }: Props) {
         <CoverWall items={items} />
       </Section>
 
-      <Section title="Quando você mais ouviu">
+      <Section title={t('Quando você mais ouviu', 'When you listened most', 'Cuándo más escuchaste')}>
         <div className="card chart-card">
           <p className="callout">
-            <span>Mês recorde</span>
+            <span>{t('Mês recorde', 'Top month', 'Mes récord')}</span>
             <strong>{monthLabel(best.month)}</strong>
-            <span>{num(best.hours)} horas</span>
+            <span>
+              {num(best.hours)} {t('horas', 'hours', 'horas')}
+            </span>
           </p>
-          <Chart option={monthlyOption} height={260} label={`Horas ouvidas por mês. Recorde em ${monthLabel(best.month)}.`} />
+          <Chart
+            option={monthlyOption}
+            height={260}
+            label={t(
+              `Horas ouvidas por mês. Recorde em ${monthLabel(best.month)}.`,
+              `Hours listened per month. Peak in ${monthLabel(best.month)}.`,
+              `Horas escuchadas por mes. Récord en ${monthLabel(best.month)}.`,
+            )}
+          />
         </div>
       </Section>
     </main>
@@ -175,6 +212,10 @@ function toItem(r: Ranked): RankItem {
     name: r.name,
     sub: r.sub || undefined,
     value: hours(r.ms),
-    title: `${r.name}: ${hours(r.ms)}, ${num(r.plays)} reproduções`,
+    title: t(
+      `${r.name}: ${hours(r.ms)}, ${num(r.plays)} reproduções`,
+      `${r.name}: ${hours(r.ms)}, ${num(r.plays)} plays`,
+      `${r.name}: ${hours(r.ms)}, ${num(r.plays)} reproducciones`,
+    ),
   }
 }

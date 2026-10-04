@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { closePlayer, currentTrack, getController, loadApi, play, setController, setPlaying, usePlayer, type Track } from './playerStore'
+import { t, useLang } from '../i18n'
 
 /** Botão redondo de tocar. Some quando a faixa não tem endereço no Spotify (histórico básico). */
 export function PlayButton({ track, className = '' }: { track: Track | null; className?: string }) {
@@ -10,8 +11,12 @@ export function PlayButton({ track, className = '' }: { track: Track | null; cla
     <button
       type="button"
       className={`play ${mine ? 'on' : ''} ${mine && playing ? 'live' : ''} ${className}`}
-      aria-label={`${mine && playing ? 'Pausar' : 'Tocar'} ${track.name}, de ${track.artist}`}
-      title={mine && playing ? 'Pausar' : 'Tocar no Spotify'}
+      aria-label={
+        mine && playing
+          ? t(`Pausar ${track.name}, de ${track.artist}`, `Pause ${track.name}, by ${track.artist}`, `Pausar ${track.name}, de ${track.artist}`)
+          : t(`Tocar ${track.name}, de ${track.artist}`, `Play ${track.name}, by ${track.artist}`, `Reproducir ${track.name}, de ${track.artist}`)
+      }
+      title={mine && playing ? t('Pausar', 'Pause', 'Pausar') : t('Tocar no Spotify', 'Play on Spotify', 'Reproducir en Spotify')}
       onClick={(e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -35,6 +40,8 @@ export function PlayButton({ track, className = '' }: { track: Track | null; cla
 
 /** O player do Spotify no rodapé. Fica escondido até a primeira faixa. */
 export function PlayerDock() {
+  // Fica fora da parte que remonta ao trocar o idioma (o player não pode recarregar): redesenha só os textos.
+  useLang()
   const { uri } = usePlayer()
   const host = useRef<HTMLDivElement>(null)
   const wantPlay = useRef(false)
@@ -83,9 +90,14 @@ export function PlayerDock() {
   }, [uri])
 
   return (
-    <div className="dock" hidden={!uri} aria-label="Player do Spotify">
+    <div className="dock" hidden={!uri} aria-label={t('Player do Spotify', 'Spotify player', 'Reproductor de Spotify')}>
       <div className="dock-frame" ref={host} />
-      <button type="button" className="ghost icon dock-close" onClick={closePlayer} aria-label="Fechar o player">
+      <button
+        type="button"
+        className="ghost icon dock-close"
+        onClick={closePlayer}
+        aria-label={t('Fechar o player', 'Close player', 'Cerrar reproductor')}
+      >
         ✕
       </button>
     </div>
@@ -95,5 +107,6 @@ export function PlayerDock() {
 function embed(uri: string) {
   const [, type, id] = uri.split(':')
   const src = `https://open.spotify.com/embed/${encodeURIComponent(type)}/${encodeURIComponent(id)}`
-  return `<iframe src="${src}" width="100%" height="80" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" title="Player do Spotify"></iframe>`
+  const title = t('Player do Spotify', 'Spotify player', 'Reproductor de Spotify')
+  return `<iframe src="${src}" width="100%" height="80" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" title="${title}"></iframe>`
 }

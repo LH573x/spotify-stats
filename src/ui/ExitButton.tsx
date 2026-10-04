@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { ExitIcon } from './icons'
+import { t } from '../i18n'
 
 /** O botão de sair do topo: pergunta antes de apagar os dados deste aparelho. */
 export function ExitButton({ onConfirm }: { onConfirm: () => void }) {
@@ -7,7 +8,12 @@ export function ExitButton({ onConfirm }: { onConfirm: () => void }) {
   const close = () => dialog.current?.close()
   return (
     <>
-      <button className="ghost icon" onClick={() => dialog.current?.showModal()} aria-label="Sair" title="Sair">
+      <button
+        className="ghost icon"
+        onClick={() => dialog.current?.showModal()}
+        aria-label={t('Sair', 'Leave', 'Salir')}
+        title={t('Sair', 'Leave', 'Salir')}
+      >
         <ExitIcon />
       </button>
       <dialog
@@ -18,11 +24,17 @@ export function ExitButton({ onConfirm }: { onConfirm: () => void }) {
         onClick={(e) => e.target === e.currentTarget && close()}
       >
         <div className="confirm-box">
-          <h2 id="sair-titulo">Sair?</h2>
-          <p>Seus dados serão apagados deste aparelho.</p>
+          <h2 id="sair-titulo">{t('Sair?', 'Leave?', '¿Salir?')}</h2>
+          <p>
+            {t(
+              'Seus dados serão apagados deste aparelho.',
+              'Your data will be deleted from this device.',
+              'Tus datos se borrarán de este dispositivo.',
+            )}
+          </p>
           <div className="confirm-actions">
             <button className="ghost" onClick={close} autoFocus>
-              Cancelar
+              {t('Cancelar', 'Cancel', 'Cancelar')}
             </button>
             <button
               className="danger"
@@ -31,7 +43,7 @@ export function ExitButton({ onConfirm }: { onConfirm: () => void }) {
                 onConfirm()
               }}
             >
-              Sair
+              {t('Sair', 'Leave', 'Salir')}
             </button>
           </div>
         </div>
