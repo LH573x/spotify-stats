@@ -1,5 +1,6 @@
 import { useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
 import { canShareImages, download, shareImage, svgToPng, zipFiles } from './exportImage'
+import { ShareIcon } from './icons'
 
 export interface Story {
   id: string
@@ -30,6 +31,8 @@ export function StoryViewer({ stories, fileName, zipName, shareTitle, label }: P
   if (stories.length === 0) return null
   const at = Math.min(index, stories.length - 1)
   const story = stories[at]
+  // Um cartão só: sem barra de progresso nem setas.
+  const single = stories.length === 1
 
   const go = (i: number) => {
     const next = Math.max(0, Math.min(stories.length - 1, i))
@@ -87,24 +90,26 @@ export function StoryViewer({ stories, fileName, zipName, shareTitle, label }: P
 
   return (
     <div className="wviewer" onKeyDown={onKeyDown}>
-      <div className="wprogress" role="group" aria-label={label}>
-        {stories.map((s, i) => (
-          <button
-            key={s.id}
-            className={i < at ? 'done' : i === at ? 'on' : ''}
-            aria-label={`${i + 1}. ${s.title}`}
-            aria-current={i === at ? 'step' : undefined}
-            title={s.title}
-            onClick={() => go(i)}
-          />
-        ))}
-      </div>
+      {!single && (
+        <div className="wprogress" role="group" aria-label={label}>
+          {stories.map((s, i) => (
+            <button
+              key={s.id}
+              className={i < at ? 'done' : i === at ? 'on' : ''}
+              aria-label={`${i + 1}. ${s.title}`}
+              aria-current={i === at ? 'step' : undefined}
+              title={s.title}
+              onClick={() => go(i)}
+            />
+          ))}
+        </div>
+      )}
 
       <div
         className="wstage"
         ref={stage}
         tabIndex={0}
-        aria-label={`${label}: toque nos lados ou use as setas para passar`}
+        aria-label={single ? label : `${label}: toque nos lados ou use as setas para passar`}
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         onPointerCancel={() => (pointer.current = null)}
@@ -117,17 +122,19 @@ export function StoryViewer({ stories, fileName, zipName, shareTitle, label }: P
         ))}
       </div>
 
-      <div className="wnav">
-        <button className="ghost icon" onClick={() => go(at - 1)} disabled={at === 0} aria-label="Cartão anterior">
-          ←
-        </button>
-        <span>
-          {at + 1} de {stories.length} · {story.title}
-        </span>
-        <button className="ghost icon" onClick={() => go(at + 1)} disabled={at === stories.length - 1} aria-label="Próximo cartão">
-          →
-        </button>
-      </div>
+      {!single && (
+        <div className="wnav">
+          <button className="ghost icon" onClick={() => go(at - 1)} disabled={at === 0} aria-label="Cartão anterior">
+            ←
+          </button>
+          <span>
+            {at + 1} de {stories.length} · {story.title}
+          </span>
+          <button className="ghost icon" onClick={() => go(at + 1)} disabled={at === stories.length - 1} aria-label="Próximo cartão">
+            →
+          </button>
+        </div>
+      )}
 
       <div className="wactions">
         {canShare && (
@@ -136,6 +143,7 @@ export function StoryViewer({ stories, fileName, zipName, shareTitle, label }: P
             disabled={busy !== null}
             onClick={() => run('Preparando…', async () => shareImage(await pngAt(at), file(at), shareTitle))}
           >
+            <ShareIcon />
             {busy === 'Preparando…' ? busy : 'Compartilhar'}
           </button>
         )}

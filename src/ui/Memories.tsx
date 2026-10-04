@@ -38,7 +38,7 @@ function Memory({ data, m }: { data: Dataset; m: DayMemory }) {
   )
 }
 
-/** "Hoje na sua história": um cartão por ano, com a música e o artista que mais tocaram nesta data. */
+/** "Seu 4 de outubro": um cartão por ano, com a música e o artista que mais tocaram nesta data. */
 export function Memories({ data, list }: { data: Dataset; list: DayMemory[] }) {
   return (
     <ol className="memories">

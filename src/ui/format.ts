@@ -15,6 +15,9 @@ const MONTHS_LONG = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
 /** 10 → "novembro" (mês de 0 a 11). */
 export const monthName = (m: number) => MONTHS_LONG[m]
 
+/** "4 de outubro", "1º de maio" (o primeiro dia do mês leva o º). */
+export const dayTitle = (d: Date) => `${d.getDate() === 1 ? '1º' : d.getDate()} de ${monthName(d.getMonth())}`
+
 /** "2024-03" → "mar 2024" (ou só "mar" quando o ano é óbvio). */
 export function monthLabel(key: string, withYear = true): string {
   const [y, m] = key.split('-')
@@ -88,3 +91,11 @@ export function hue(s: string) {
   for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) % 360
   return h
 }
+
+/** "4 de outubro" → "4-de-outubro" (para nomes de arquivo). */
+export const slug = (s: string) =>
+  s
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
