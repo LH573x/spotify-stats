@@ -2268,9 +2268,68 @@ a.find-card:hover {
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
+  width: max(var(--story-w), min(100%, 280px));
 }
 .wactions button {
   padding: 8px 16px;
+}
+/* O botão principal (compartilhar) ocupa a largura do story, para ninguém deixar passar. */
+.wactions .primary {
+  flex-basis: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 18px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.wactions .primary svg {
+  width: 18px;
+  height: 18px;
+}
+.wactions .ghost {
+  flex: 1;
+  white-space: nowrap;
+}
+
+/* Story de "Seu 4 de outubro", numa janela por cima da página */
+.share-btn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.share-btn svg {
+  width: 16px;
+  height: 16px;
+}
+.story-sheet {
+  margin: auto;
+  padding: 52px 16px 20px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--ink);
+  width: min(400px, calc(100vw - 24px));
+  max-height: calc(100svh - 24px);
+  overflow-y: auto;
+}
+.story-sheet::backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
+.story-sheet[open] {
+  animation: confirm-in 0.18s ease-out;
+}
+.story-sheet .wviewer {
+  --story-w: min(100%, 340px, calc((100svh - 190px) * 9 / 16));
+}
+.sheet-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }
 .whint {
   color: var(--muted);

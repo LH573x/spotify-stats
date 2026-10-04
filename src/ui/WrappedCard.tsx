@@ -1,6 +1,6 @@
 import { createContext, useContext, type ReactNode } from 'react'
 import type { TopPeriod, WrappedYear } from '../data/wrapped'
-import { useImagesData } from '../data/images'
+import { useImagesData, type ImageRef } from '../data/images'
 import { CARD_FONT, DISPLAY_FONT, fitText } from './svgText'
 import { LyraShape } from './LyraMark'
 import { capitalize, minutes, monthKeyOf, peakMonth, PERIOD_TITLES, periodRange, type CardInfo } from './wrappedDeck'
@@ -1136,6 +1136,76 @@ export function TopCard({ t, label }: { t: TopPeriod; label: string }) {
         left={{ title: 'Artistas', round: true, rows: t.artists.map((a, i) => ({ name: a.name, sub: longHours(a.ms), image: artists[i] })) }}
         right={{ title: 'Músicas', round: false, rows: t.songs.map((x, i) => ({ name: cleanTitle(x.name), sub: x.sub, image: songs[i] })) }}
       />
+    </Frame>
+  )
+}
+
+/* ---------- Seu dia, nos outros anos ---------- */
+
+export interface DayRow {
+  year: number
+  song: string
+  songImage: ImageRef | null
+  artist: string
+  artistImage: ImageRef | null
+  /** Foto redonda para artista; imagem quadrada para podcast. */
+  round: boolean
+}
+
+/** "Meu 4 de outubro": a música e o artista que mais tocaram nesta data, um ano por linha. */
+export function DayCard({ date, rows, heads, label }: { date: string; rows: DayRow[]; heads: [string, string]; label: string }) {
+  const p = PAL.violet
+  const songs = useImagesData(rows.map((r) => r.songImage))
+  const artists = useImagesData(rows.map((r) => r.artistImage))
+  // Com muitos anos, a data fica numa linha só para sobrar espaço para a lista.
+  const few = rows.length <= 5
+  const s = makeStack(TOP)
+    .text('Meu', { size: 64, display: true, fill: p.accent })
+    .gap(18)
+    .text(date, few ? { size: 220, min: 130, display: true, fill: p.ink, lines: 2 } : { size: 180, min: 100, display: true, fill: p.ink })
+  // A lista (títulos das colunas + linhas) fica entre a data e a marca LYRA do rodapé;
+  // com poucos anos, o conjunto fica centralizado nesse espaço.
+  const from = s.y + 80
+  const space = H - 210 - from
+  const rowH = Math.min(170, Math.floor((space - 84) / Math.max(1, rows.length)))
+  const head = from + Math.max(0, (space - 84 - rowH * rows.length) / 2)
+  const top = head + 84
+  const pic = Math.round(rowH * 0.64)
+  const yearW = 150
+  const gap = 36
+  // Nomes de música costumam ser mais compridos que os de artista: a coluna deles é mais larga.
+  const songW = Math.round((CW - yearW - gap) * 0.52)
+  const artistW = CW - yearW - gap - songW
+  const tx = pic + 22
+  // Um tamanho só para as duas colunas, para as linhas ficarem iguais.
+  const opts = { size: Math.min(50, Math.round(rowH * 0.38)), min: 30, weight: 700, condensed: true }
+  const nameSize = Math.min(commonSize(rows.map((r) => r.song), songW - tx, opts), commonSize(rows.map((r) => r.artist), artistW - tx, opts))
+  const yearSize = Math.min(72, Math.round(rowH * 0.52))
+  const x1 = M + yearW
+  const x2 = x1 + songW + gap
+  const last = rows[rows.length - 1]
+  const range = rows.length > 1 ? `${last.year}–${rows[0].year}` : String(rows[0]?.year ?? '')
+  return (
+    <Frame uid="dia" p={p} label={label} right={range}>
+      {s.els}
+      <g className="wa" style={{ animationDelay: '250ms' }}>
+        {textBlock(heads[0], head, { size: 46, display: true, tight: true, fill: p.muted, x: x1, width: songW }).el}
+        {textBlock(heads[1], head, { size: 46, display: true, tight: true, fill: p.muted, x: x2, width: artistW }).el}
+      </g>
+      {rows.map((r, i) => {
+        const y = top + i * rowH
+        return (
+          <g key={r.year} className="wa" style={{ animationDelay: `${300 + i * 70}ms` }}>
+            <text x={M} y={y + pic / 2 + yearSize * 0.36} fontSize={yearSize} fontWeight={800} fill={p.accent} fontFamily={DISPLAY_FONT}>
+              {r.year}
+            </text>
+            <Pic id={`dia-s-${i}`} href={songs[i]} name={r.song} x={x1} y={y} size={pic} round={false} />
+            {textBlock(r.song, y + (pic - nameSize) / 2, { size: nameSize, condensed: true, fill: p.ink, x: x1 + tx, width: songW - tx }).el}
+            <Pic id={`dia-a-${i}`} href={artists[i]} name={r.artist} x={x2} y={y} size={pic} round={r.round} />
+            {textBlock(r.artist, y + (pic - nameSize) / 2, { size: nameSize, condensed: true, fill: p.ink2, x: x2 + tx, width: artistW - tx }).el}
+          </g>
+        )
+      })}
     </Frame>
   )
 }

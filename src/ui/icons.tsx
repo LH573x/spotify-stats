@@ -55,3 +55,20 @@ export function ExitIcon() {
     </svg>
   )
 }
+
+export function ShareIcon() {
+  return (
+    <svg {...base}>
+      <path d="M12 14V3M8 7l4-4 4 4" />
+      <path d="M8 10H7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1" />
+    </svg>
+  )
+}
+
+export function CloseIcon() {
+  return (
+    <svg {...base}>
+      <path d="M6 6l12 12M18 6L6 18" />
+    </svg>
+  )
+}

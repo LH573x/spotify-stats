@@ -22,7 +22,7 @@ function lowerBound(a: Float64Array, t: number) {
   return lo
 }
 
-/** "Hoje na sua história": o que você ouviu nesta mesma data em cada ano que passou. */
+/** "Seu 4 de outubro": o que você ouviu nesta mesma data em cada ano que passou. */
 export function onThisDay(d: Dataset, kind: KindFilter, today = new Date()): DayMemory[] {
   const { start, ms, item, flags } = d.plays
   if (start.length === 0) return []

@@ -6,18 +6,12 @@ import { TopCard, WrappedCard } from '../ui/WrappedCard'
 import { StoryViewer, type Story } from '../ui/StoryViewer'
 import { Section } from '../ui/blocks'
 import { displayFontLoaded, loadDisplayFont } from '../ui/svgText'
+import { slug } from '../ui/format'
 
 interface Props {
   data: Dataset
   year: number
 }
-
-const slug = (s: string) =>
-  s
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
 
 export function Wrapped({ data, year }: Props) {
   // Os textos dos cartões são medidos na fonte dos títulos: espera ela carregar.

@@ -4,7 +4,7 @@ import type { Filter } from '../data/stats'
 import { dayParts, habits } from '../data/habits'
 import { Chart, type ChartOption } from '../ui/Chart'
 import { chartColors, type ThemeName } from '../ui/theme'
-import { dayMonth, hours, keyToMs, num, pct, shortDate } from '../ui/format'
+import { dayMonth, dayTitle, hours, keyToMs, num, pct, shortDate } from '../ui/format'
 import { BarList } from '../ui/parts'
 import { Section, StatStrip } from '../ui/blocks'
 import { years } from '../data/stats'
@@ -14,6 +14,7 @@ import { songHref } from '../ui/links'
 import { trackOf } from '../ui/playerStore'
 import { onThisDay } from '../data/onThisDay'
 import { Memories } from '../ui/Memories'
+import { DayStory } from '../ui/DayStory'
 
 interface Props {
   data: Dataset
@@ -49,8 +50,11 @@ function useNarrow(px = 720) {
 
 export function Curiosidades({ data, filter, theme, lastYear }: Props) {
   const h = useMemo(() => habits(data, filter, lastYear), [data, filter, lastYear])
-  // "Hoje na sua história" só com todos os anos (com um ano escolhido, não faz sentido).
-  const memories = useMemo(() => (filter.year === null ? onThisDay(data, filter.kind) : []), [data, filter])
+  // "Seu 4 de outubro" só com todos os anos (com um ano escolhido, não faz sentido).
+  // A data é a de quando a página abriu.
+  const [now] = useState(() => new Date())
+  const memories = useMemo(() => (filter.year === null ? onThisDay(data, filter.kind, now) : []), [data, filter, now])
+  const today = dayTitle(now)
   const yearList = useMemo(() => years(data), [data])
   const c = chartColors(theme, 'coral')
   const narrow = useNarrow()
@@ -198,8 +202,9 @@ export function Curiosidades({ data, filter, theme, lastYear }: Props) {
       <StatStrip items={stats} />
 
       {memories.length > 0 && (
-        <Section title="Hoje na sua história">
+        <Section title={`Seu ${today}`}>
           <Memories data={data} list={memories} />
+          <DayStory data={data} list={memories} date={today} />
         </Section>
       )}
 
