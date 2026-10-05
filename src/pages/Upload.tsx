@@ -112,9 +112,9 @@ export function Upload({ busy, error, notice, onFiles }: Props) {
 
       <p className="privacy">
         {t(
-          'Seu histórico não sai deste aparelho: tudo é lido aqui mesmo no navegador. Para mostrar fotos e capas, o site só procura os nomes dos artistas e álbuns que aparecem na tela no Wikidata e no MusicBrainz.',
-          'Your history never leaves this device: everything is read right here in the browser. To show photos and covers, the site only looks up the names of the artists and albums on screen in Wikidata and MusicBrainz.',
-          'Tu historial no sale de este dispositivo: todo se lee aquí mismo, en el navegador. Para mostrar fotos y portadas, el sitio solo busca en Wikidata y MusicBrainz los nombres de los artistas y álbumes que aparecen en pantalla.',
+          'Seu histórico não sai deste aparelho: tudo é lido aqui mesmo no navegador. Para mostrar fotos, capas e descobertas, o site só procura nomes de artistas e álbuns no Wikidata, no MusicBrainz e no Deezer.',
+          'Your history never leaves this device: everything is read right here in the browser. To show photos, covers and discoveries, the site only looks up artist and album names in Wikidata, MusicBrainz and Deezer.',
+          'Tu historial no sale de este dispositivo: todo se lee aquí mismo, en el navegador. Para mostrar fotos, portadas y descubrimientos, el sitio solo busca nombres de artistas y álbumes en Wikidata, MusicBrainz y Deezer.',
         )}
       </p>
 

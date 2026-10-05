@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { closePlayer, currentTrack, getController, loadApi, play, setController, setPlaying, usePlayer, type Track } from './playerStore'
+import { stopPreview } from './preview'
 import { t, useLang } from '../i18n'
 
 /** Botão redondo de tocar. Some quando a faixa não tem endereço no Spotify (histórico básico). */
@@ -20,6 +21,7 @@ export function PlayButton({ track, className = '' }: { track: Track | null; cla
       onClick={(e) => {
         e.preventDefault()
         e.stopPropagation()
+        stopPreview()
         play(track)
       }}
     >
