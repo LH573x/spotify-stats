@@ -1,7 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import type { Dataset } from './types'
 import { norm } from './search'
-import { cleanTitle } from '../ui/format'
 import { findArtist, previewOf, related, topTracks, type DzArtist, type DzTrack } from './deezer'
 
 /*
@@ -9,8 +8,17 @@ import { findArtist, previewOf, related, topTracks, type DzArtist, type DzTrack 
  * Tudo o que já está no seu histórico (artistas e músicas) fica de fora.
  */
 
-/** Nome de música comparável: sem acento, pontuação, "(feat. …)" nem "- Remastered". */
-const titleKey = (s: string) => norm(cleanTitle(s))
+/**
+ * Nome de música comparável, sem a versão: tudo entre parênteses ou colchetes e tudo depois de " - " sai.
+ * "Enemy (with JID) - from the series Arcane League of Legends", "Enemy (Live)" e "Enemy" viram "enemy".
+ */
+const titleKey = (s: string) => norm(s.replace(/\s*[([][^)\]]*[)\]]/g, ' ').replace(/\s+[-–—]\s.*$/, '')) || norm(s)
+
+// "(feat. JID)", "(with JID)", "(com Anitta)": quem aparece de convidado também conta como artista que você já ouviu.
+const GUESTS = /[([](?:feat\.?|ft\.?|featuring|with|com|con)\s+([^)\]]+)[)\]]/gi
+const SPLIT = /\s*(?:,|&|\+|\band\b|\bx\b|\be\b|\by\b)\s*/i
+/** Nome de artista comparável, sem espaços: "J.I.D" e "JID", "AC/DC" e "ACDC" batem. */
+const artistKey = (s: string) => norm(s).replace(/ /g, '')
 
 interface Known {
   artists: Set<string>
@@ -25,8 +33,12 @@ function known(d: Dataset): Known {
   k = { artists: new Set(), songs: new Map() }
   for (const it of d.items) {
     if (it.kind !== 'music') continue
-    const a = norm(d.creators[it.creator])
+    const a = artistKey(d.creators[it.creator])
     k.artists.add(a)
+    for (const [, guests] of it.name.matchAll(GUESTS)) {
+      k.artists.add(artistKey(guests))
+      for (const g of guests.split(SPLIT)) if (g) k.artists.add(artistKey(g))
+    }
     let set = k.songs.get(a)
     if (!set) k.songs.set(a, (set = new Set()))
     set.add(titleKey(it.name))
@@ -35,8 +47,8 @@ function known(d: Dataset): Known {
   return k
 }
 
-const knowsArtist = (k: Known, name: string) => k.artists.has(norm(name))
-const knowsSong = (k: Known, t: DzTrack, artist = t.artist) => k.songs.get(norm(artist))?.has(titleKey(t.title)) ?? false
+const knowsArtist = (k: Known, name: string) => k.artists.has(artistKey(name))
+const knowsSong = (k: Known, t: DzTrack, artist = t.artist) => k.songs.get(artistKey(artist))?.has(titleKey(t.title)) ?? false
 
 /** Seus artistas de música mais ouvidos (a partir de `since`, em ms). */
 export function topArtists(d: Dataset, n: number, since = -Infinity): { id: number; name: string }[] {
@@ -104,6 +116,8 @@ export interface Pick {
 }
 
 const WEEK_KEY = 'spotify-stats-explore-week'
+// Sobe quando o filtro muda, para refazer a lista da semana com as regras novas.
+const WEEK_VERSION = 2
 
 /**
  * 10 músicas novas por semana: artistas parecidos com os seus 10 mais ouvidos nos últimos 3 meses
@@ -111,8 +125,8 @@ const WEEK_KEY = 'spotify-stats-explore-week'
  */
 export async function weekly(d: Dataset): Promise<Pick[]> {
   const week = weekKey()
-  const saved = read<{ week: string; data: number; picks: Pick[] }>(WEEK_KEY)
-  if (saved && saved.week === week && saved.data === d.importedAt && saved.picks.length > 0) return saved.picks
+  const saved = read<{ v?: number; week: string; data: number; picks: Pick[] }>(WEEK_KEY)
+  if (saved && saved.v === WEEK_VERSION && saved.week === week && saved.data === d.importedAt && saved.picks.length > 0) return saved.picks
 
   const k = known(d)
   const rnd = rng(`${week}:${d.importedAt}`)
@@ -155,7 +169,7 @@ export async function weekly(d: Dataset): Promise<Pick[]> {
     })
   }
   if (picks.length === 0 && failed) throw new Error('deezer')
-  if (picks.length > 0) write(WEEK_KEY, { week, data: d.importedAt, picks })
+  if (picks.length > 0) write(WEEK_KEY, { v: WEEK_VERSION, week, data: d.importedAt, picks })
   return picks
 }
 
