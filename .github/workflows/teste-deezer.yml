@@ -7,14 +7,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          set -x
-          H='-H Origin:https://lh573x.github.io -H Referer:https://lh573x.github.io/spotify-stats/'
-          curl -s -D - $H "https://api.deezer.com/search/artist?q=Arctic%20Monkeys&limit=2&output=jsonp&callback=__dz0" | head -c 1200; echo
-          curl -s -D - $H "https://api.deezer.com/artist/404/related?limit=2&output=jsonp&callback=__dz1" | head -c 900; echo
-          curl -s $H "https://api.deezer.com/artist/404/top?limit=2&output=jsonp&callback=__dz2" | head -c 2500; echo
+          note() { python3 -c 'import sys; s=sys.stdin.read()[:3000]; print("::notice title='"$1"'::" + s.replace("%","%25").replace("\r","").replace("\n","%0A"))'; }
+          O='Origin: https://lh573x.github.io'
+          curl -s -D - -H "$O" "https://api.deezer.com/search/artist?q=Arctic%20Monkeys&limit=2&output=jsonp&callback=__dz0" | note search
+          curl -s -D - -H "$O" "https://api.deezer.com/artist/404/related?limit=2&output=jsonp&callback=__dz1" | note related
+          curl -s -H "$O" "https://api.deezer.com/artist/404/top?limit=1&output=jsonp&callback=__dz2" | note top
           ID=$(curl -s "https://api.deezer.com/artist/404/top?limit=1" | python3 -c 'import json,sys; print(json.load(sys.stdin)["data"][0]["id"])')
-          curl -s "https://api.deezer.com/track/$ID?output=jsonp&callback=__dz3" | head -c 600; echo
+          curl -s "https://api.deezer.com/track/$ID?output=jsonp&callback=__dz3" | note track
           P=$(curl -s "https://api.deezer.com/track/$ID" | python3 -c 'import json,sys; print(json.load(sys.stdin)["preview"])')
-          echo "PREVIEW $P"
-          curl -s -o /dev/null -D - "$P" | head -12
-          curl -s "https://api.deezer.com/track/99999999999?output=jsonp&callback=__dz4"; echo
+          (echo "$P"; curl -s -o /dev/null -D - "$P") | note preview
+          curl -s "https://api.deezer.com/track/99999999999?output=jsonp&callback=__dz4" | note missing
+          curl -s -D - -H "$O" "https://api.deezer.com/artist/404/related?limit=1" | head -20 | note cors
