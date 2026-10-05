@@ -151,3 +151,32 @@ export function CheckIcon() {
     </svg>
   )
 }
+
+/** Aba Explorar: uma bússola. */
+export function CompassIcon() {
+  return (
+    <svg {...base}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="m15.6 8.4-2.1 5.1-5.1 2.1 2.1-5.1Z" />
+    </svg>
+  )
+}
+
+/** Coração do "Gostei"; cheio quando marcado. */
+export function HeartIcon({ filled = false }: { filled?: boolean }) {
+  return (
+    <svg {...base} fill={filled ? 'currentColor' : 'none'}>
+      <path d="M12 20s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 7.5 2.7C19.5 15.4 12 20 12 20Z" />
+    </svg>
+  )
+}
+
+/** Seta para fora: abre em outro app ou site. */
+export function ExternalIcon() {
+  return (
+    <svg {...base}>
+      <path d="M14 4.5h5.5V10M19.5 4.5 11 13" />
+      <path d="M17.5 13.5v4a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h4" />
+    </svg>
+  )
+}

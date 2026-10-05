@@ -6,6 +6,7 @@ import { chartColors, type ThemeName } from '../ui/theme'
 import { hours, monthLabel, num, shortDate } from '../ui/format'
 import { BarList } from '../ui/parts'
 import { Section, StatStrip } from '../ui/blocks'
+import { SimilarSection } from '../ui/ExploreParts'
 import { Art } from '../ui/Thumb'
 import { artistRef, itemRef } from '../data/refs'
 import { songHref } from '../ui/links'
@@ -171,6 +172,8 @@ export function Artista({ data, id, theme }: Props) {
           }))}
         />
       </Section>
+
+      {!podcast && <SimilarSection data={data} name={a.name} />}
     </main>
   )
 }

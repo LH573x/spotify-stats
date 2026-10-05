@@ -39,7 +39,7 @@ export const CHART_COLORS: Record<ThemeName, ChartColors> = {
 }
 
 /** Cor de destaque de cada aba: cada parte do site tem a sua. */
-export type Tone = 'green' | 'coral' | 'amber' | 'pink'
+export type Tone = 'green' | 'coral' | 'amber' | 'pink' | 'violet'
 
 const TONES: Record<Tone, Record<ThemeName, Pick<ChartColors, 'accent' | 'ramp'>>> = {
   green: { dark: CHART_COLORS.dark, light: CHART_COLORS.light },
@@ -54,6 +54,10 @@ const TONES: Record<Tone, Record<ThemeName, Pick<ChartColors, 'accent' | 'ramp'>
   pink: {
     dark: { accent: '#ff6fae', ramp: ['#2a1d23', '#4d2338', '#7a2c53', '#b23a74', '#ff6fae', '#ffb3d4'] },
     light: { accent: '#c0266d', ramp: ['#f3edf0', '#f8d0e2', '#f19cc2', '#e0609a', '#c0266d', '#8f1650'] },
+  },
+  violet: {
+    dark: { accent: '#a78bfa', ramp: ['#211f2a', '#2f2850', '#40357a', '#5b4aa8', '#a78bfa', '#d4c8ff'] },
+    light: { accent: '#6d4fd8', ramp: ['#efedf5', '#ddd6fb', '#bcaef5', '#9682ea', '#6d4fd8', '#4c33a8'] },
   },
 }
 

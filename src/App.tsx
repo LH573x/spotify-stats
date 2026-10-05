@@ -12,8 +12,9 @@ import { Artista } from './pages/Artista'
 import { Musica } from './pages/Musica'
 import { PlayerDock } from './ui/player'
 import { Wrapped } from './pages/Wrapped'
+import { Explorar } from './pages/Explorar'
 import { useTheme, type Tone } from './ui/theme'
-import { BulbIcon, CalendarIcon, DiscIcon, GiftIcon } from './ui/icons'
+import { BulbIcon, CalendarIcon, CompassIcon, DiscIcon, GiftIcon } from './ui/icons'
 import { ExitButton } from './ui/ExitButton'
 import { LyraMark } from './ui/LyraMark'
 import { LangPicker } from './ui/LangPicker'
@@ -25,6 +26,7 @@ const PAGES = [
   { id: 'curiosidades', label: () => t('Curiosidades', 'Fun facts', 'Curiosidades'), tone: 'coral', Icon: BulbIcon },
   { id: 'linha', label: () => t('Linha do tempo', 'Timeline', 'Línea de tiempo'), tone: 'amber', Icon: CalendarIcon },
   { id: 'wrapped', label: () => 'Wrapped', tone: 'pink', Icon: GiftIcon },
+  { id: 'explorar', label: () => t('Explorar', 'Explore', 'Explorar'), tone: 'violet', Icon: CompassIcon },
 ] as const satisfies readonly { id: string; label: () => string; tone: Tone; Icon: () => ReactElement }[]
 
 type PageId = (typeof PAGES)[number]['id']
@@ -183,7 +185,7 @@ export default function App() {
           </div>
         </header>
 
-        {data && page !== 'artista' && page !== 'musica' && ((page !== 'resumo' && page !== 'linha') || podcasts) && (
+        {data && page !== 'artista' && page !== 'musica' && page !== 'explorar' && ((page !== 'resumo' && page !== 'linha') || podcasts) && (
           <div className="filters">
             {page === 'linha' || page === 'resumo' ? null : (
               <div className="chips" role="group" aria-label={t('Período', 'Period', 'Período')}>
@@ -219,6 +221,8 @@ export default function App() {
             <Artista data={data} id={route.artist} theme={theme} />
           ) : route.page === 'musica' ? (
             <Musica data={data} id={route.item} theme={theme} />
+          ) : page === 'explorar' ? (
+            <Explorar data={data} />
           ) : page === 'wrapped' ? (
             <Wrapped data={data} year={wrappedYear} />
           ) : page === 'linha' ? (
@@ -239,7 +243,8 @@ export default function App() {
           <p>
             {t('Seus dados ficam só neste aparelho', 'Your data stays on this device', 'Tus datos se quedan en este dispositivo')} ·{' '}
             {t('Fotos', 'Photos', 'Fotos')}: <a href="https://www.wikidata.org/">Wikidata</a> · {t('Capas', 'Covers', 'Portadas')}:{' '}
-            <a href="https://musicbrainz.org/">MusicBrainz</a>
+            <a href="https://musicbrainz.org/">MusicBrainz</a> · {t('Prévias', 'Previews', 'Avances')}:{' '}
+            <a href="https://www.deezer.com/">Deezer</a>
           </p>
         </footer>
       </Fragment>
