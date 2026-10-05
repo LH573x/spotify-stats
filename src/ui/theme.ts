@@ -76,6 +76,8 @@ export function useTheme(): [ThemeName, () => void] {
   const [theme, setTheme] = useState<ThemeName>(initial)
   useEffect(() => {
     document.documentElement.dataset.theme = theme
+    // A barra de status do app instalado (iPhone) e a do Chrome (Android) pegam esta cor: igual ao fundo da página.
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#121212' : '#f6f6f3')
     try {
       localStorage.setItem(KEY, theme)
     } catch {
