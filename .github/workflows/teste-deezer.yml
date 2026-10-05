@@ -1,0 +1,20 @@
+# Teste temporário: confere se a API do Deezer responde por JSONP (o site chama direto do navegador).
+on:
+  push:
+    branches: [teste-deezer]
+jobs:
+  deezer:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          set -x
+          H='-H Origin:https://lh573x.github.io -H Referer:https://lh573x.github.io/spotify-stats/'
+          curl -s -D - $H "https://api.deezer.com/search/artist?q=Arctic%20Monkeys&limit=2&output=jsonp&callback=__dz0" | head -c 1200; echo
+          curl -s -D - $H "https://api.deezer.com/artist/404/related?limit=2&output=jsonp&callback=__dz1" | head -c 900; echo
+          curl -s $H "https://api.deezer.com/artist/404/top?limit=2&output=jsonp&callback=__dz2" | head -c 2500; echo
+          ID=$(curl -s "https://api.deezer.com/artist/404/top?limit=1" | python3 -c 'import json,sys; print(json.load(sys.stdin)["data"][0]["id"])')
+          curl -s "https://api.deezer.com/track/$ID?output=jsonp&callback=__dz3" | head -c 600; echo
+          P=$(curl -s "https://api.deezer.com/track/$ID" | python3 -c 'import json,sys; print(json.load(sys.stdin)["preview"])')
+          echo "PREVIEW $P"
+          curl -s -o /dev/null -D - "$P" | head -12
+          curl -s "https://api.deezer.com/track/99999999999?output=jsonp&callback=__dz4"; echo
