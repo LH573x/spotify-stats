@@ -11,6 +11,7 @@ import { Art } from '../ui/Thumb'
 import { artistHref, songHref } from '../ui/links'
 import { trackOf } from '../ui/playerStore'
 import { artistRef, itemRef } from '../data/refs'
+import { Search } from '../ui/Search'
 import { t as tr } from '../i18n'
 
 interface Props {
@@ -39,7 +40,6 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
   const c = chartColors(theme, 'amber')
   const who = WHO[kind]()
   const [hover, setHover] = useState<number | null>(null)
-  const [query, setQuery] = useState('')
   const [view, setView] = useState<'artists' | 'songs'>('artists')
   const songs = view === 'songs'
 
@@ -84,17 +84,6 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
     [t, c, who],
   )
 
-  // Busca: artistas pelo nome e músicas como "Nome — Artista".
-  const options = useMemo(() => {
-    const list: { label: string; href: string }[] = []
-    for (const r of t.ranking.slice(0, 1500)) list.push({ label: r.name, href: artistHref(r.id) })
-    for (const r of t.songRanking.slice(0, 1500)) {
-      const it = data.items[r.id]
-      list.push({ label: `${it.name} — ${data.creators[it.creator]}`, href: songHref(r.id) })
-    }
-    return list
-  }, [t, data])
-  const hrefs = useMemo(() => new Map(options.map((o) => [o.label.toLowerCase(), o.href])), [options])
   if (t.years.length === 0) return <p className="empty">{tr('Nada por aqui.', 'Nothing here.', 'Nada por aquí.')}</p>
 
   // Quem foi nº 1 em mais anos.
@@ -105,8 +94,6 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
   const rows = Math.max(...t.years.map((y) => y.top.length))
   const maxPeak = t.phases[0]?.peakMs ?? 1
   const maxSongPeak = t.songPhases[0]?.peakPlays ?? 1
-
-  const found = hrefs.get(query.trim().toLowerCase())
 
   return (
     <main className="page">
@@ -138,48 +125,20 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
         </p>
       </section>
 
-      <form
-        className="search"
-        role="search"
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (found !== undefined) location.hash = found
-        }}
-      >
-        <label htmlFor="artist-search">
-          {kind === 'podcast'
+      <Search
+        data={data}
+        timeline={t}
+        label={
+          kind === 'podcast'
             ? tr(`Buscar ${who.one} ou episódio`, `Search ${who.one} or episode`, `Buscar ${who.one} o episodio`)
-            : tr(`Buscar ${who.one} ou música`, `Search ${who.one} or song`, `Buscar ${who.one} o canción`)}
-        </label>
-        <div className="search-row">
-          <input
-            id="artist-search"
-            list="artist-names"
-            placeholder={
-              kind === 'podcast'
-                ? tr('Ex.: Flow Podcast', 'e.g. Flow Podcast', 'Ej.: Flow Podcast')
-                : tr('Ex.: Arctic Monkeys', 'e.g. Arctic Monkeys', 'Ej.: Arctic Monkeys')
-            }
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value)
-              // Escolher uma sugestão já abre a página.
-              const href = hrefs.get(e.target.value.trim().toLowerCase())
-              const how = (e.nativeEvent as InputEvent).inputType
-              if (href !== undefined && (!how || how === 'insertReplacementText')) location.hash = href
-            }}
-            autoComplete="off"
-          />
-          <button type="submit" disabled={found === undefined}>
-            {tr('Abrir', 'Open', 'Abrir')}
-          </button>
-        </div>
-        <datalist id="artist-names">
-          {options.map((o) => (
-            <option key={o.href} value={o.label} />
-          ))}
-        </datalist>
-      </form>
+            : tr(`Buscar ${who.one} ou música`, `Search ${who.one} or song`, `Buscar ${who.one} o canción`)
+        }
+        placeholder={
+          kind === 'podcast'
+            ? tr('Ex.: Flow Podcast', 'e.g. Flow Podcast', 'Ej.: Flow Podcast')
+            : tr('Ex.: Arctic Monkeys', 'e.g. Arctic Monkeys', 'Ej.: Arctic Monkeys')
+        }
+      />
 
       <Section title={tr(`Seu top ${rows} de cada ano`, `Your top ${rows} each year`, `Tu top ${rows} de cada año`)}>
         <div className="segmented view-switch" role="group" aria-label={tr('Mostrar', 'Show', 'Mostrar')}>
