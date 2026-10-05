@@ -168,14 +168,7 @@ export function Esquecidas({ data, filter }: { data: Dataset; filter: Filter }) 
             <a className="wall-name" href={songHref(f.id)}>
               {name}
             </a>
-            <span className="wall-sub">{data.creators[it.creator]}</span>
-            <span className="wall-value">
-              {num(f.plays)} {t('vezes', 'times', 'veces')}
-              {filter.year === null && t(`, mais em ${f.peakYear}`, `, mostly in ${f.peakYear}`, `, más en ${f.peakYear}`)}
-            </span>
-            <span className="faded-last">
-              {t(`última vez em ${monthOf(f.last)}`, `last played ${monthOf(f.last)}`, `última vez en ${monthOf(f.last)}`)}
-            </span>
+            <span className="faded-last">{monthOf(f.last)}</span>
           </li>
         )
       })}

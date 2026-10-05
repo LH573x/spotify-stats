@@ -162,7 +162,6 @@ export function Artista({ data, id, theme }: Props) {
           rows={a.topItems.map((it) => ({
             key: it.id,
             name: it.name,
-            sub: podcast ? undefined : it.album,
             image: podcast ? undefined : itemRef(data, it.id),
             href: songHref(it.id),
             track: trackOf(data, it.id),

@@ -6,7 +6,7 @@ import { Chart, type ChartOption } from '../ui/Chart'
 import { chartColors, type ThemeName } from '../ui/theme'
 import { dayMonth, dayTitle, hours, keyToMs, monthLabel, num, pct, platformLabel, shortDate, weekdayName } from '../ui/format'
 import { BarList } from '../ui/parts'
-import { Section, StatStrip } from '../ui/blocks'
+import { More, Section, StatStrip } from '../ui/blocks'
 import { years } from '../data/stats'
 import { Comparar, Esquecidas, Recordes } from './CuriosidadesExtras'
 import { itemRef } from '../data/refs'
@@ -235,76 +235,77 @@ export function Curiosidades({ data, filter, theme, lastYear }: Props) {
         <Comparar key={`${filter.year}-${filter.kind}`} data={data} years={yearList} filter={filter} />
       </Section>
 
-      <Section title={t('A que horas você dá play', 'When you hit play', 'Cuándo le das al play')}>
-        <div className="card">
-          <Chart
-            option={clockOption}
-            height={300}
-            label={t(
-              'Horas ouvidas por dia da semana e hora do dia',
-              'Hours listened by weekday and hour',
-              'Horas escuchadas por día de la semana y hora',
-            )}
-          />
-        </div>
-      </Section>
+      <More>
+        <Section title={t('A que horas você dá play', 'When you hit play', 'Cuándo le das al play')}>
+          <div className="card">
+            <Chart
+              option={clockOption}
+              height={300}
+              label={t(
+                'Horas ouvidas por dia da semana e hora do dia',
+                'Hours listened by weekday and hour',
+                'Horas escuchadas por día de la semana y hora',
+              )}
+            />
+          </div>
+        </Section>
 
-      <Section title={t(`Seu ${h.calendarYear}, dia por dia`, `Your ${h.calendarYear}, day by day`, `Tu ${h.calendarYear}, día a día`)}>
-        <div className="card">
-          <div className="scroll-x">
-            <div style={{ minWidth: 720 }}>
-              <Chart
-                option={calendarOption}
-                height={200}
-                label={t(
-                  `Calendário de escuta de ${h.calendarYear}, horas por dia`,
-                  `${h.calendarYear} listening calendar, hours per day`,
-                  `Calendario de escucha de ${h.calendarYear}, horas por día`,
-                )}
-              />
+        <Section title={t(`Seu ${h.calendarYear}, dia por dia`, `Your ${h.calendarYear}, day by day`, `Tu ${h.calendarYear}, día a día`)}>
+          <div className="card">
+            <div className="scroll-x">
+              <div style={{ minWidth: 720 }}>
+                <Chart
+                  option={calendarOption}
+                  height={200}
+                  label={t(
+                    `Calendário de escuta de ${h.calendarYear}, horas por dia`,
+                    `${h.calendarYear} listening calendar, hours per day`,
+                    `Calendario de escucha de ${h.calendarYear}, horas por día`,
+                  )}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </Section>
+        </Section>
 
-      <div className="two">
-        {h.platforms.length > 0 && (
-          <Section title={t('Onde você ouve', 'Where you listen', 'Dónde escuchas')}>
-            <ul className="card shares">
-              {h.platforms.map((p) => (
-                <li key={p.name} title={`${platformLabel(p.name)}: ${hours(p.ms)}`}>
-                  <strong>{pct(p.ms / platformTotal)}</strong>
-                  <span>{platformLabel(p.name)}</span>
-                  <i>
-                    <b style={{ width: `${(p.ms / platformTotal) * 100}%` }} />
-                  </i>
-                </li>
-              ))}
-            </ul>
-          </Section>
-        )}
-        {h.topSkipped.length > 0 && (
-          <Section title={t('O que você mais pula', 'What you skip most', 'Lo que más saltas')}>
-            <BarList
-              rows={h.topSkipped.map((s) => ({
-                key: s.id,
-                name: s.name,
-                sub: s.sub,
-                image: itemRef(data, s.id),
-                href: songHref(s.id),
-                track: trackOf(data, s.id),
-                value: t(`${num(s.skips)} de ${num(s.starts)}`, `${num(s.skips)} of ${num(s.starts)}`, `${num(s.skips)} de ${num(s.starts)}`),
-                share: s.skips / maxSkips,
-                title: t(
-                  `${s.name}: pulada ${num(s.skips)} de ${num(s.starts)} vezes (${pct(s.skips / s.starts)})`,
-                  `${s.name}: skipped ${num(s.skips)} of ${num(s.starts)} times (${pct(s.skips / s.starts)})`,
-                  `${s.name}: saltada ${num(s.skips)} de ${num(s.starts)} veces (${pct(s.skips / s.starts)})`,
-                ),
-              }))}
-            />
-          </Section>
-        )}
-      </div>
+        <div className="two">
+          {h.platforms.length > 0 && (
+            <Section title={t('Onde você ouve', 'Where you listen', 'Dónde escuchas')}>
+              <ul className="card shares">
+                {h.platforms.map((p) => (
+                  <li key={p.name} title={`${platformLabel(p.name)}: ${hours(p.ms)}`}>
+                    <strong>{pct(p.ms / platformTotal)}</strong>
+                    <span>{platformLabel(p.name)}</span>
+                    <i>
+                      <b style={{ width: `${(p.ms / platformTotal) * 100}%` }} />
+                    </i>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          )}
+          {h.topSkipped.length > 0 && (
+            <Section title={t('O que você mais pula', 'What you skip most', 'Lo que más saltas')}>
+              <BarList
+                rows={h.topSkipped.map((s) => ({
+                  key: s.id,
+                  name: s.name,
+                  image: itemRef(data, s.id),
+                  href: songHref(s.id),
+                  track: trackOf(data, s.id),
+                  value: t(`${num(s.skips)} de ${num(s.starts)}`, `${num(s.skips)} of ${num(s.starts)}`, `${num(s.skips)} de ${num(s.starts)}`),
+                  share: s.skips / maxSkips,
+                  title: t(
+                    `${s.name}: pulada ${num(s.skips)} de ${num(s.starts)} vezes (${pct(s.skips / s.starts)})`,
+                    `${s.name}: skipped ${num(s.skips)} of ${num(s.starts)} times (${pct(s.skips / s.starts)})`,
+                    `${s.name}: saltada ${num(s.skips)} de ${num(s.starts)} veces (${pct(s.skips / s.starts)})`,
+                  ),
+                }))}
+              />
+            </Section>
+          )}
+        </div>
+      </More>
     </main>
   )
 }

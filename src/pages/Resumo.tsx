@@ -8,7 +8,7 @@ import { trackOf } from '../ui/playerStore'
 import { artistRef, itemRef } from '../data/refs'
 import { Chart, type ChartOption } from '../ui/Chart'
 import { chartColors, type ThemeName } from '../ui/theme'
-import { cleanTitle, hours, monthLabel, num, pct } from '../ui/format'
+import { cleanTitle, hours, monthLabel, num } from '../ui/format'
 import { CountUp } from '../ui/CountUp'
 import { t } from '../i18n'
 
@@ -120,11 +120,6 @@ export function Resumo({ data, filter, theme, onYear }: Props) {
     ...toItem(r),
     href: artistHref(r.id),
     image: artistRef(data, r.id),
-    detail: t(
-      `${num(r.plays)} reproduções · ${pct(r.ms / s.totalMs)} do total`,
-      `${num(r.plays)} plays · ${pct(r.ms / s.totalMs)} of total`,
-      `${num(r.plays)} reproducciones · ${pct(r.ms / s.totalMs)} del total`,
-    ),
   }))
   const items: RankItem[] = s.topItems.map((r) => ({
     ...toItem(r),

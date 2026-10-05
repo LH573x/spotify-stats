@@ -37,6 +37,8 @@ const cache = loadCache()
 let saveTimer: ReturnType<typeof setTimeout> | undefined
 const listeners = new Set<() => void>()
 const inflight = new Map<string, Promise<string | null>>()
+/** Buscas que falharam por rede nesta visita: param de mostrar "carregando". */
+const failed = new Set<string>()
 
 function store(key: string, url: string | null) {
   cache[key] = { url, at: Date.now() }
@@ -203,6 +205,7 @@ function lookup(ref: ImageRef): Promise<string | null> {
   if (hit) return Promise.resolve(hit.url)
   let p = inflight.get(key)
   if (!p) {
+    failed.delete(key)
     const job = ref.kind === 'album' ? findCover(ref.artist, ref.album) : findPhoto(ref.name, ref.kind === 'podcast')
     p = job.then(
       (url) => {
@@ -213,6 +216,8 @@ function lookup(ref: ImageRef): Promise<string | null> {
       // Falha de rede não fica guardada: tenta de novo na próxima vez que a imagem aparecer.
       () => {
         inflight.delete(key)
+        failed.add(key)
+        for (const l of listeners) l()
         return null
       },
     )
@@ -275,6 +280,25 @@ export function useImages(list: (ImageRef | null | undefined)[]): (string | null
 }
 
 export const useImage = (ref: ImageRef | null | undefined) => useImages([ref])[0]
+
+/** Ainda buscando: não se sabe se tem foto (nem a capa reserva). */
+function isWaiting(key: string): boolean {
+  const ref = refs.get(key)
+  if (!ref) return false
+  const main = cached(key)
+  if (!main) return !failed.has(key)
+  if (main.url || ref.kind === 'album' || !ref.fallback) return false
+  const fk = keyOf(ref.fallback)
+  return !cached(fk) && !failed.has(fk)
+}
+
+/** O endereço da imagem e se ela ainda está sendo buscada (para mostrar o cinza de "carregando"). */
+export function useImageState(ref: ImageRef | null | undefined): { url: string | null; waiting: boolean } {
+  const url = useImage(ref)
+  const key = ref ? keyOf(ref) : ''
+  const waiting = useSyncExternalStore(subscribe, () => (key ? isWaiting(key) : false))
+  return { url, waiting }
+}
 
 const dataUrls = new Map<string, Promise<string | null>>()
 const dataCache = new Map<string, string>()

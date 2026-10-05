@@ -4,9 +4,9 @@ import type { KindFilter } from '../data/stats'
 import { timeline } from '../data/timeline'
 import { Chart, type ChartOption } from '../ui/Chart'
 import { chartColors, type ThemeName } from '../ui/theme'
-import { cleanTitle, date, hours, monthLabel, num, ordinal, pct } from '../ui/format'
+import { cleanTitle, date, hours, monthLabel, num, ordinal } from '../ui/format'
 import { BarList } from '../ui/parts'
-import { Section } from '../ui/blocks'
+import { More, Section } from '../ui/blocks'
 import { Art } from '../ui/Thumb'
 import { artistHref, songHref } from '../ui/links'
 import { trackOf } from '../ui/playerStore'
@@ -250,67 +250,69 @@ export function LinhaDoTempo({ data, kind, theme }: Props) {
         </div>
       </Section>
 
-      <Section
-        title={tr(
-          `${who.many[0].toUpperCase() + who.many.slice(1)} novos a cada mês`,
-          `New ${who.many} each month`,
-          `${who.many[0].toUpperCase() + who.many.slice(1)} nuevos cada mes`,
-        )}
-      >
-        <div className="card">
-          <Chart
-            option={newOption}
-            height={240}
-            label={tr(`${who.many} novos por mês`, `New ${who.many} per month`, `${who.many} nuevos por mes`)}
-          />
-        </div>
-      </Section>
-
-      {(t.phases.length > 0 || t.songPhases.length > 0) && (
-        <Section title={tr('Fases e obsessões', 'Phases and obsessions', 'Fases y obsesiones')}>
-          <div className="two">
-            {t.phases.length > 0 && (
-              <BarList
-                title={kind === 'podcast' ? 'Podcasts' : tr('Artistas', 'Artists', 'Artistas')}
-                rows={t.phases.map((p) => ({
-                  key: p.id,
-                  name: p.name,
-                  href: artistHref(p.id),
-                  image: artistRef(data, p.id),
-                  sub: `${monthLabel(p.month)} · ${pct(p.peakMs / p.totalMs)} ${tr('do total', 'of total', 'del total')}`,
-                  value: hours(p.peakMs),
-                  share: p.peakMs / maxPeak,
-                  title: `${p.name}: ${hours(p.peakMs)} ${tr('em', 'in', 'en')} ${monthLabel(p.month)}`,
-                }))}
-              />
-            )}
-            {t.songPhases.length > 0 && (
-              <BarList
-                title={tr('Músicas', 'Songs', 'Canciones')}
-                rows={t.songPhases.map((p) => {
-                  const it = data.items[p.id]
-                  const name = cleanTitle(it.name)
-                  return {
-                    key: p.id,
-                    name,
-                    href: songHref(p.id),
-                    image: itemRef(data, p.id),
-                    track: trackOf(data, p.id),
-                    sub: `${data.creators[it.creator]} · ${monthLabel(p.month)}`,
-                    value: `${num(p.peakPlays)} ${tr('de', 'of', 'de')} ${num(p.totalPlays)}`,
-                    share: p.peakPlays / maxSongPeak,
-                    title: tr(
-                      `${name}: ${num(p.peakPlays)} das ${num(p.totalPlays)} vezes foram em ${monthLabel(p.month)}`,
-                      `${name}: ${num(p.peakPlays)} of ${num(p.totalPlays)} plays were in ${monthLabel(p.month)}`,
-                      `${name}: ${num(p.peakPlays)} de las ${num(p.totalPlays)} veces fueron en ${monthLabel(p.month)}`,
-                    ),
-                  }
-                })}
-              />
-            )}
+      <More>
+        <Section
+          title={tr(
+            `${who.many[0].toUpperCase() + who.many.slice(1)} novos a cada mês`,
+            `New ${who.many} each month`,
+            `${who.many[0].toUpperCase() + who.many.slice(1)} nuevos cada mes`,
+          )}
+        >
+          <div className="card">
+            <Chart
+              option={newOption}
+              height={240}
+              label={tr(`${who.many} novos por mês`, `New ${who.many} per month`, `${who.many} nuevos por mes`)}
+            />
           </div>
         </Section>
-      )}
+
+        {(t.phases.length > 0 || t.songPhases.length > 0) && (
+          <Section title={tr('Fases e obsessões', 'Phases and obsessions', 'Fases y obsesiones')}>
+            <div className="two">
+              {t.phases.length > 0 && (
+                <BarList
+                  title={kind === 'podcast' ? 'Podcasts' : tr('Artistas', 'Artists', 'Artistas')}
+                  rows={t.phases.map((p) => ({
+                    key: p.id,
+                    name: p.name,
+                    href: artistHref(p.id),
+                    image: artistRef(data, p.id),
+                    sub: monthLabel(p.month),
+                    value: hours(p.peakMs),
+                    share: p.peakMs / maxPeak,
+                    title: `${p.name}: ${hours(p.peakMs)} ${tr('em', 'in', 'en')} ${monthLabel(p.month)}`,
+                  }))}
+                />
+              )}
+              {t.songPhases.length > 0 && (
+                <BarList
+                  title={tr('Músicas', 'Songs', 'Canciones')}
+                  rows={t.songPhases.map((p) => {
+                    const it = data.items[p.id]
+                    const name = cleanTitle(it.name)
+                    return {
+                      key: p.id,
+                      name,
+                      href: songHref(p.id),
+                      image: itemRef(data, p.id),
+                      track: trackOf(data, p.id),
+                      sub: `${data.creators[it.creator]} · ${monthLabel(p.month)}`,
+                      value: `${num(p.peakPlays)} ${tr('de', 'of', 'de')} ${num(p.totalPlays)}`,
+                      share: p.peakPlays / maxSongPeak,
+                      title: tr(
+                        `${name}: ${num(p.peakPlays)} das ${num(p.totalPlays)} vezes foram em ${monthLabel(p.month)}`,
+                        `${name}: ${num(p.peakPlays)} of ${num(p.totalPlays)} plays were in ${monthLabel(p.month)}`,
+                        `${name}: ${num(p.peakPlays)} de las ${num(p.totalPlays)} veces fueron en ${monthLabel(p.month)}`,
+                      ),
+                    }
+                  })}
+                />
+              )}
+            </div>
+          </Section>
+        )}
+      </More>
     </main>
   )
 }
