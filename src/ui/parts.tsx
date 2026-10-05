@@ -30,7 +30,7 @@ export function BarList({ title, note, rows, numbered = true }: { title?: string
           {numbered && <span className="rank-n">{i + 1}</span>}
           {r.image && (
             <span className="thumb-wrap">
-              <Thumb image={r.image} label={r.name} />
+              <Thumb image={r.image} label={r.name} size={52} />
               <PlayButton track={r.track ?? null} className="play-thumb" />
             </span>
           )}

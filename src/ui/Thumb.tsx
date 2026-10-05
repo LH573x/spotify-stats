@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from 'react'
-import { useImage, type ImageRef } from '../data/images'
+import { useImageState, type ImageRef } from '../data/images'
 import { hue } from './format'
 
 interface ArtProps {
@@ -13,18 +13,23 @@ interface ArtProps {
   style?: CSSProperties
 }
 
-/** Foto ou capa. Enquanto não carrega (ou se não existir), mostra a inicial num fundo colorido. */
+/**
+ * Foto ou capa. Enquanto busca ou baixa, um cinza que brilha ("esqueleto");
+ * se não existir, a inicial num fundo colorido.
+ */
 export function Art({ image, label, size, round, className = '', style }: ArtProps) {
-  const url = useImage(image)
+  const { url, waiting } = useImageState(image)
   const [failed, setFailed] = useState<string | null>(null)
+  const [loaded, setLoaded] = useState<string | null>(null)
   const isRound = round ?? (image ? image.kind !== 'album' : false)
   const show = url && failed !== url
+  const wait = waiting || (show && loaded !== url)
   const css = { '--h': hue(label), ...(size ? { width: size, height: size } : {}), ...style } as CSSProperties
   return (
-    <span className={`art ${size ? '' : 'fill'} ${isRound ? 'round' : ''} ${className}`} style={css} aria-hidden>
+    <span className={`art ${size ? '' : 'fill'} ${isRound ? 'round' : ''} ${wait ? 'wait' : ''} ${className}`} style={css} aria-hidden>
       {show ? (
-        <img src={url} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => setFailed(url)} />
-      ) : (
+        <img src={url} alt="" loading="lazy" referrerPolicy="no-referrer" onLoad={() => setLoaded(url)} onError={() => setFailed(url)} />
+      ) : waiting ? null : (
         <span className="art-initial">{label.trim().charAt(0).toUpperCase()}</span>
       )}
     </span>

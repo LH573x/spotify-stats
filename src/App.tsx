@@ -18,6 +18,10 @@ import { BulbIcon, CalendarIcon, CompassIcon, DiscIcon, GiftIcon } from './ui/ic
 import { ExitButton } from './ui/ExitButton'
 import { LyraMark } from './ui/LyraMark'
 import { LangPicker } from './ui/LangPicker'
+import { PageTint } from './ui/PageTint'
+import { haptic, hapticOnTaps } from './ui/haptic'
+import { useHeader } from './ui/useHeader'
+import { useTabSwipe } from './ui/useTabSwipe'
 import { t, useLang } from './i18n'
 
 /** As abas, cada uma com a sua cor e o seu ícone. */
@@ -86,7 +90,20 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [filter, setFilter] = useState<Filter>({ year: null, kind: 'all' })
+  const header = useHeader()
+  useEffect(() => hapticOnTaps(), [])
 
+  // Arrastar para os lados troca de aba (só nas abas, não nas páginas de artista e de música).
+  const tab = PAGES.findIndex((p) => p.id === page)
+  useTabSwipe(!!data && tab >= 0, (dir) => {
+    const next = PAGES[tab + dir]
+    if (!next) return
+    const root = document.documentElement
+    root.dataset.swipe = dir > 0 ? 'next' : 'prev'
+    setTimeout(() => delete root.dataset.swipe, 400)
+    haptic()
+    go(next.id)
+  })
 
   const yearList = useMemo(() => (data ? years(data) : []), [data])
   const podcasts = useMemo(() => (data ? hasPodcasts(data) : false), [data])
@@ -148,7 +165,7 @@ export default function App() {
   return (
     <div className="app">
       <Fragment key={lng}>
-        <header className="top">
+        <header className={`top ${header}`}>
           <div className="brand">
             <span className="logo">
               <LyraMark />
@@ -214,6 +231,14 @@ export default function App() {
               </div>
             )}
           </div>
+        )}
+
+        {data && tab >= 0 && (
+          <PageTint
+            data={data}
+            year={page === 'wrapped' ? wrappedYear : page === 'linha' || page === 'explorar' ? null : filter.year}
+            kind={page === 'explorar' ? 'music' : page === 'wrapped' ? 'all' : filter.kind}
+          />
         )}
 
         {booting ? null : data ? (

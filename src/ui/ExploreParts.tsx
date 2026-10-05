@@ -13,11 +13,12 @@ import { t } from '../i18n'
 /** Foto ou capa vinda do Deezer; sem imagem, a inicial num fundo colorido (como no resto do site). */
 export function Pic({ src, label, round = false, size = 48 }: { src: string; label: string; round?: boolean; size?: number }) {
   const [failed, setFailed] = useState(false)
+  const [loaded, setLoaded] = useState(false)
   const css = { '--h': hue(label), width: size, height: size } as CSSProperties
   return (
-    <span className={`art ${round ? 'round' : ''}`} style={css} aria-hidden>
+    <span className={`art ${round ? 'round' : ''} ${src && !failed && !loaded ? 'wait' : ''}`} style={css} aria-hidden>
       {src && !failed ? (
-        <img src={src} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => setFailed(true)} />
+        <img src={src} alt="" loading="lazy" referrerPolicy="no-referrer" onLoad={() => setLoaded(true)} onError={() => setFailed(true)} />
       ) : (
         <span className="art-initial">{label.trim().charAt(0).toUpperCase()}</span>
       )}

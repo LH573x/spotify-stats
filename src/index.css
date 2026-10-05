@@ -75,6 +75,15 @@ body {
 html {
   background: var(--page);
 }
+/* O fundo do cabeçalho vai de ponta a ponta da tela sem criar rolagem para o lado. */
+body {
+  overflow-x: clip;
+}
+/* Quando o cabeçalho diminui, o navegador não "corrige" a rolagem (isso fazia ele aparecer e sumir sem parar). */
+html,
+body {
+  overflow-anchor: none;
+}
 
 /* Cor da capa ou da foto em destaque, como o fundo do player do Spotify */
 @property --tint-h {
@@ -146,6 +155,91 @@ a {
   gap: 16px 24px;
   padding: 16px 0 8px;
   flex-wrap: wrap;
+  /* Fica preso no topo: some ao rolar para baixo e volta menor ao rolar para cima.
+     Sem transform aqui, para a barra de abas (fixa, aqui dentro no celular) não sair do lugar. */
+  position: sticky;
+  z-index: 30;
+  top: 0;
+  transition:
+    top 0.25s ease,
+    padding 0.2s ease;
+}
+.top::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0 calc(50% - 50vw);
+  background: color-mix(in srgb, var(--page) 92%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.top.up,
+.top.away {
+  padding: 8px 0;
+}
+.top.up::before,
+.top.away::before {
+  opacity: 1;
+}
+.top.away {
+  top: -90px;
+}
+.top.up .brand,
+.top.away .brand {
+  font-size: 15px;
+}
+.top.up .logo svg,
+.top.away .logo svg {
+  width: 12px;
+  height: 22px;
+}
+.top.up .actions .ghost.icon,
+.top.away .actions .ghost.icon {
+  width: 32px;
+  padding: 4px 0;
+}
+.top .brand,
+.top .logo svg,
+.top .actions .ghost.icon {
+  transition:
+    font-size 0.2s,
+    width 0.2s,
+    height 0.2s,
+    padding 0.2s;
+}
+/* Altura do cabeçalho pequeno (ao rolar para cima); no celular ele é mais baixo. */
+:root {
+  --top-small: 68px;
+}
+/* Os filtros ficam presos logo abaixo do cabeçalho (ou no topo, quando ele some);
+   no topo da página, sem fundo, para a cor do artista aparecer. */
+.top.up ~ .filters {
+  top: var(--top-small);
+}
+.top.rest ~ .filters::before {
+  opacity: 0;
+}
+/* Trocar de aba arrastando: a página nova entra do lado de onde o dedo veio */
+:root[data-swipe='next'] main.page {
+  animation: tab-in-next 0.28s ease-out;
+}
+:root[data-swipe='prev'] main.page {
+  animation: tab-in-prev 0.28s ease-out;
+}
+@keyframes tab-in-next {
+  from {
+    opacity: 0.4;
+    transform: translateX(36px);
+  }
+}
+@keyframes tab-in-prev {
+  from {
+    opacity: 0.4;
+    transform: translateX(-36px);
+  }
 }
 .brand {
   display: flex;
@@ -353,13 +447,24 @@ a {
   position: sticky;
   top: 0;
   z-index: 5;
-  background: var(--page);
+  transition: top 0.25s ease;
   display: flex;
   gap: 12px;
   align-items: center;
   padding: 10px 0 12px;
   flex-wrap: wrap;
+}
+/* Fundo de vidro fosco de ponta a ponta, igual ao do cabeçalho. */
+.filters::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0 calc(50% - 50vw);
+  background: color-mix(in srgb, var(--page) 92%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
+  transition: opacity 0.2s;
 }
 .chips {
   display: flex;
@@ -754,6 +859,21 @@ a {
     opacity: 0;
   }
 }
+/* "Esqueleto": cinza que brilha enquanto a foto ou a capa ainda está chegando */
+.art.wait,
+:root[data-theme='light'] .art.wait {
+  background: linear-gradient(100deg, var(--surface-2) 35%, color-mix(in srgb, var(--surface-2), var(--ink) 9%) 50%, var(--surface-2) 65%) 0 0 / 300%
+    100%;
+  animation: shimmer 1.3s linear infinite;
+}
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
 .badge {
   position: absolute;
   display: grid;
@@ -926,17 +1046,21 @@ a.podium-runner-name:hover {
   overflow: hidden;
   overflow-wrap: anywhere;
 }
-.wall-sub {
-  color: var(--ink-2);
-  font-size: 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 .wall-value {
   color: var(--muted);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
+}
+
+/* "Ver mais": abre as seções menos usadas da aba */
+.more {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0 24px;
+}
+.more .ghost {
+  padding: 10px 28px;
+  font-weight: 600;
 }
 
 /* Listas com barras */
@@ -2503,8 +2627,14 @@ a.find-card:hover {
 
 @media (prefers-reduced-motion: reduce) {
   .td-disc.td-turning .td-spin,
+  .art.wait,
+  :root[data-swipe] main.page,
   .art img {
     animation: none !important;
+  }
+  .top,
+  .top::before {
+    transition: none;
   }
   .sec .rank-bar span,
   .sec .hours24 i {
@@ -2628,6 +2758,9 @@ a.find-card:hover {
   }
   .wall {
     gap: 22px 14px;
+  }
+  :root {
+    --top-small: 46px;
   }
   /* No celular as abas ficam numa barra fixa embaixo, como no Instagram. */
   .nav {

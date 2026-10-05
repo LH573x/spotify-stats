@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { CountUp } from './CountUp'
 import { useInView } from './motion'
 import { useTint } from './tint'
@@ -30,6 +30,19 @@ export function Section({
       </header>
       {children}
     </section>
+  )
+}
+
+/** As seções menos usadas da aba ficam guardadas atrás de um "Ver mais" (e só são montadas ao abrir). */
+export function More({ children }: { children: ReactNode }) {
+  const [open, setOpen] = useState(false)
+  if (open) return <>{children}</>
+  return (
+    <div className="more">
+      <button className="ghost" onClick={() => setOpen(true)}>
+        {t('Ver mais', 'Show more', 'Ver más')}
+      </button>
+    </div>
   )
 }
 
@@ -122,7 +135,7 @@ export function Podium({ items }: { items: RankItem[] }) {
           {rest.map((r, i) => (
             <li key={r.key} title={r.title}>
               <span className="rank-n">{i + 6}</span>
-              {r.image && <Thumb image={r.image} label={r.name} size={36} />}
+              {r.image && <Thumb image={r.image} label={r.name} size={48} />}
               <span className="podium-rest-body">
                 <Name item={r} className="rank-name" />
                 {r.sub && <span className="rank-sub">{r.sub}</span>}
@@ -148,7 +161,6 @@ export function CoverWall({ items }: { items: RankItem[] }) {
             <PlayButton track={r.track ?? null} className="play-over" />
           </div>
           <Name item={r} className="wall-name" />
-          {r.sub && <span className="wall-sub">{r.sub}</span>}
           <span className="wall-value">{r.value}</span>
         </li>
       ))}
