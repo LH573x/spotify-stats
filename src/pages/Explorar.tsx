@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Dataset } from '../data/types'
 import type { DzTrack } from '../data/deezer'
-import { sideB, spin, toggleLike, topArtists, useLiked, weekly, type SideB } from '../data/explore'
+import { shows, sideB, songKey, spin, toggleLike, topArtists, useHidden, useLiked, weekly, type SideB } from '../data/explore'
 import { Section } from '../ui/blocks'
 import { Failed, Loading, Pic, PreviewButton, SimilarSection, SpotifyLink, TrackRow } from '../ui/ExploreParts'
 import { HeartIcon } from '../ui/icons'
@@ -28,7 +28,9 @@ export function Explorar({ data }: { data: Dataset }) {
 }
 
 function Weekly({ data }: { data: Dataset }) {
-  const { data: picks, failed, retry } = useAsync(`w:${data.importedAt}`, () => weekly(data))
+  const { data: all, failed, retry } = useAsync(`w:${data.importedAt}`, () => weekly(data))
+  const hidden = useHidden()
+  const picks = all?.filter((p) => shows(hidden, songKey(p.track)))
   return (
     <Section
       title={t('Descobertas da semana', "This week's discoveries", 'Descubrimientos de la semana')}
@@ -42,6 +44,7 @@ function Weekly({ data }: { data: Dataset }) {
                 <TrackRow
                   key={p.track.id}
                   track={p.track}
+                  hide={songKey(p.track)}
                   sub={p.track.artist}
                   why={t(`Porque você ouve ${p.because}`, `Because you listen to ${p.because}`, `Porque escuchas a ${p.because}`)}
                 />
@@ -83,26 +86,31 @@ const MANY = 20
 
 function SideBCard({ s }: { s: SideB }) {
   const [all, setAll] = useState(false)
-  const n = s.tracks.length
+  const hidden = useHidden()
+  const tracks = s.tracks.filter((tr) => shows(hidden, songKey(tr)))
+  const n = tracks.filter((tr) => !hidden.has(songKey(tr))).length
+  if (tracks.length === 0) return null
   return (
     <div className="card ex-side">
       <header className="ex-side-head">
         <Pic src={s.artist.picture} label={s.name} round size={44} />
         <div>
           <h3>{s.name}</h3>
-          <p>
-            {n === 1
-              ? t('1 música que você nunca ouviu', "1 song you've never played", '1 canción que nunca has escuchado')
-              : t(`${n} músicas que você nunca ouviu`, `${n} songs you've never played`, `${n} canciones que nunca has escuchado`)}
-          </p>
+          {n > 0 && (
+            <p>
+              {n === 1
+                ? t('1 música que você nunca ouviu', "1 song you've never played", '1 canción que nunca has escuchado')
+                : t(`${n} músicas que você nunca ouviu`, `${n} songs you've never played`, `${n} canciones que nunca has escuchado`)}
+            </p>
+          )}
         </div>
       </header>
       <ul className="ex-list ex-one">
-        {s.tracks.slice(0, all ? MANY : FEW).map((tr) => (
-          <TrackRow key={tr.id} track={tr} />
+        {tracks.slice(0, all ? MANY : FEW).map((tr) => (
+          <TrackRow key={tr.id} track={tr} hide={songKey(tr)} />
         ))}
       </ul>
-      {n > FEW && (
+      {tracks.length > FEW && (
         <button className="ghost ex-more" onClick={() => setAll(!all)}>
           {all ? t('Ver menos', 'Show less', 'Ver menos') : t('Ver todas', 'Show all', 'Ver todas')}
         </button>

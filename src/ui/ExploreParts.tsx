@@ -1,9 +1,9 @@
 import { useState, type CSSProperties, type ReactNode } from 'react'
 import type { Dataset } from '../data/types'
 import { spotifySearch, type DzTrack } from '../data/deezer'
-import { similarTo } from '../data/explore'
+import { artistHideKey, setHidden, shows, similarTo, useHidden } from '../data/explore'
 import { Section } from './blocks'
-import { ExternalIcon } from './icons'
+import { CloseIcon, ExternalIcon } from './icons'
 import { hue } from './format'
 import { togglePreview, usePreview } from './preview'
 import { useAsync } from './useAsync'
@@ -67,7 +67,7 @@ export function SpotifyLink({ track }: { track: DzTrack }) {
   )
 }
 
-/** Uma música: capa, nome, detalhe, prévia e Spotify. */
+/** Uma música: capa, nome, detalhe, prévia e Spotify. Com `hide`, ganha o "Já conheço" (×). */
 export function TrackRow({
   track,
   name = track.title,
@@ -76,6 +76,7 @@ export function TrackRow({
   pic = track.cover,
   round = false,
   extra,
+  hide,
 }: {
   track: DzTrack
   name?: string
@@ -84,7 +85,20 @@ export function TrackRow({
   pic?: string
   round?: boolean
   extra?: ReactNode
+  hide?: string
 }) {
+  const hidden = useHidden()
+  if (hide && hidden.has(hide)) {
+    if (!shows(hidden, hide)) return null
+    return (
+      <li className="ex-row ex-gone">
+        <span>{hide.endsWith('|') ? t('Artista escondido', 'Artist hidden', 'Artista oculto') : t('Música escondida', 'Song hidden', 'Canción oculta')}</span>
+        <button className="ghost" onClick={() => setHidden(hide, false)}>
+          {t('Desfazer', 'Undo', 'Deshacer')}
+        </button>
+      </li>
+    )
+  }
   return (
     <li className="ex-row">
       <Pic src={pic} label={name} round={round} />
@@ -96,6 +110,16 @@ export function TrackRow({
       {extra}
       <PreviewButton track={track} />
       <SpotifyLink track={track} />
+      {hide && (
+        <button
+          className="ex-hide"
+          aria-label={t(`Já conheço ${name}`, `I already know ${name}`, `Ya conozco ${name}`)}
+          title={t('Já conheço', 'I already know this', 'Ya lo conozco')}
+          onClick={() => setHidden(hide, true)}
+        >
+          <CloseIcon />
+        </button>
+      )}
     </li>
   )
 }
@@ -130,7 +154,9 @@ export function Failed({ onRetry }: { onRetry: () => void }) {
 
 /** "Se você gosta de X": 5 artistas parecidos que você nunca ouviu, cada um com a música mais famosa. */
 export function SimilarSection({ data, name }: { data: Dataset; name: string }) {
-  const { data: list, failed, retry } = useAsync(`s:${data.importedAt}:${name}`, () => similarTo(data, name))
+  const { data: all, failed, retry } = useAsync(`s:${data.importedAt}:${name}`, () => similarTo(data, name))
+  const hidden = useHidden()
+  const list = all?.filter((x) => x.track && shows(hidden, artistHideKey(x.artist.name)))
   // O Deezer não conhece o artista (ou só tem parecidos que você já ouve): a seção some.
   if (list && list.length === 0) return null
   return (
@@ -140,7 +166,15 @@ export function SimilarSection({ data, name }: { data: Dataset; name: string }) 
           <ul className="ex-list">
             {list.map(({ artist, track }) =>
               track ? (
-                <TrackRow key={artist.id} track={track} name={artist.name} sub={track.title} pic={artist.picture} round />
+                <TrackRow
+                  key={artist.id}
+                  track={track}
+                  name={artist.name}
+                  sub={track.title}
+                  pic={artist.picture}
+                  round
+                  hide={artistHideKey(artist.name)}
+                />
               ) : null,
             )}
           </ul>
