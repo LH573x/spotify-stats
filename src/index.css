@@ -2811,6 +2811,35 @@ a.find-card:hover {
 .ex-like.on {
   color: var(--accent);
 }
+/* "Já conheço": um × discreto no fim da linha, mais estreito que os outros botões */
+.ex-hide {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 36px;
+  margin-left: -6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+}
+.ex-hide:hover {
+  color: var(--ink);
+}
+.ex-hide svg {
+  width: 15px;
+  height: 15px;
+}
+.ex-gone {
+  min-height: 48px;
+  justify-content: space-between;
+  padding: 0 4px 0 12px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 13px;
+}
 .ex-wait {
   width: 40%;
   height: 40%;

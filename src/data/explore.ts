@@ -47,8 +47,9 @@ function known(d: Dataset): Known {
   return k
 }
 
-const knowsArtist = (k: Known, name: string) => k.artists.has(artistKey(name))
-const knowsSong = (k: Known, t: DzTrack, artist = t.artist) => k.songs.get(artistKey(artist))?.has(titleKey(t.title)) ?? false
+const knowsArtist = (k: Known, name: string) => k.artists.has(artistKey(name)) || hidden.has(artistHideKey(name))
+const knowsSong = (k: Known, t: DzTrack, artist = t.artist) =>
+  (k.songs.get(artistKey(artist))?.has(titleKey(t.title)) ?? false) || hidden.has(songKey(t))
 
 /** Seus artistas de música mais ouvidos (a partir de `since`, em ms). */
 export function topArtists(d: Dataset, n: number, since = -Infinity): { id: number; name: string }[] {
@@ -259,6 +260,31 @@ export function toggleLike(t: DzTrack) {
   write(LIKED_KEY, liked)
   listeners.forEach((f) => f())
 }
+
+// "Já conheço": músicas e artistas que você escondeu (ouviu depois do arquivo, ou fora do Spotify), guardados neste aparelho.
+const HIDDEN_KEY = 'spotify-stats-explore-hidden'
+let hidden: ReadonlySet<string> = new Set((typeof localStorage === 'undefined' ? null : read<string[]>(HIDDEN_KEY)) ?? [])
+/** Escondidos nesta visita: continuam na tela com "Desfazer" até a página recarregar. */
+const recent = new Set<string>()
+
+export const songKey = (t: { title: string; artist: string }) => `${artistKey(t.artist)}|${titleKey(t.title)}`
+export const artistHideKey = (name: string) => `${artistKey(name)}|`
+
+export function setHidden(key: string, on: boolean) {
+  const next = new Set(hidden)
+  if (on) {
+    next.add(key)
+    recent.add(key)
+  } else next.delete(key)
+  hidden = next
+  write(HIDDEN_KEY, [...next])
+  listeners.forEach((f) => f())
+}
+
+/** O que você marcou com "Já conheço". */
+export const useHidden = () => useSyncExternalStore(subscribe, () => hidden)
+/** Aparece na lista: não foi escondido, ou acabou de ser (e mostra "Desfazer"). */
+export const shows = (h: ReadonlySet<string>, key: string) => !h.has(key) || recent.has(key)
 
 function subscribe(f: () => void) {
   listeners.add(f)
