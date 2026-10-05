@@ -7,6 +7,7 @@ import { CloseIcon, ExternalIcon } from './icons'
 import { hue } from './format'
 import { togglePreview, usePreview } from './preview'
 import { useAsync } from './useAsync'
+import { useSwipe } from './useSwipe'
 import { t } from '../i18n'
 
 /** Foto ou capa vinda do Deezer; sem imagem, a inicial num fundo colorido (como no resto do site). */
@@ -67,7 +68,10 @@ export function SpotifyLink({ track }: { track: DzTrack }) {
   )
 }
 
-/** Uma música: capa, nome, detalhe, prévia e Spotify. Com `hide`, ganha o "Já conheço" (×). */
+/**
+ * Uma música: capa, nome, detalhe, prévia e Spotify.
+ * Com `hide`, dá para esconder ("Já conheço"): arrastando para a esquerda no celular, ou com o × que aparece ao passar o mouse.
+ */
 export function TrackRow({
   track,
   name = track.title,
@@ -88,6 +92,7 @@ export function TrackRow({
   hide?: string
 }) {
   const hidden = useHidden()
+  const swipe = useSwipe(hide ? () => setHidden(hide, true) : undefined)
   if (hide && hidden.has(hide)) {
     if (!shows(hidden, hide)) return null
     return (
@@ -99,8 +104,8 @@ export function TrackRow({
       </li>
     )
   }
-  return (
-    <li className="ex-row">
+  const content = (
+    <>
       <Pic src={pic} label={name} round={round} />
       <div className="ex-body">
         <span className="ex-title">{name}</span>
@@ -110,7 +115,16 @@ export function TrackRow({
       {extra}
       <PreviewButton track={track} />
       <SpotifyLink track={track} />
-      {hide && (
+    </>
+  )
+  if (!hide) return <li className="ex-row">{content}</li>
+  return (
+    <li className="ex-swipe" {...swipe.handlers}>
+      <span className="ex-swipe-bg" aria-hidden>
+        {t('Já conheço', 'I know it', 'Ya la conozco')}
+      </span>
+      <div className={`ex-row ${swipe.dragging ? 'dragging' : ''}`} style={swipe.dx ? { transform: `translateX(${swipe.dx}px)` } : undefined}>
+        {content}
         <button
           className="ex-hide"
           aria-label={t(`Já conheço ${name}`, `I already know ${name}`, `Ya conozco ${name}`)}
@@ -119,7 +133,7 @@ export function TrackRow({
         >
           <CloseIcon />
         </button>
-      )}
+      </div>
     </li>
   )
 }

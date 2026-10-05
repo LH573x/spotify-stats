@@ -1281,8 +1281,8 @@ a.rank-name:focus-visible {
 .rec-play.play {
   flex: none;
   align-self: center;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   margin-right: 14px;
 }
 
@@ -1462,8 +1462,8 @@ a.rank-name:focus-visible {
 .play {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -1541,6 +1541,10 @@ a.rank-name:focus-visible {
 .play-thumb:hover {
   transform: none;
 }
+.play-thumb svg {
+  width: 40%;
+  height: 40%;
+}
 .rank li:hover .play-thumb,
 .memory-row:hover .play-thumb,
 .play-thumb:focus-visible,
@@ -1548,15 +1552,15 @@ a.rank-name:focus-visible {
   opacity: 1;
 }
 .play-big {
-  width: 56px;
-  height: 56px;
+  width: 50px;
+  height: 50px;
 }
 @media (hover: none) {
   .play-over {
     opacity: 1;
     transform: none;
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
   }
   .play-thumb {
     opacity: 1;
@@ -2781,8 +2785,8 @@ a.find-card:hover {
 }
 .ex-row .play {
   flex: none;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   box-shadow: none;
 }
 .ex-link,
@@ -2790,8 +2794,8 @@ a.find-card:hover {
   flex: none;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: 1px solid var(--line);
   border-radius: 50%;
@@ -2805,31 +2809,75 @@ a.find-card:hover {
 }
 .ex-link svg,
 .ex-like svg {
-  width: 17px;
-  height: 17px;
+  width: 15px;
+  height: 15px;
 }
 .ex-like.on {
   color: var(--accent);
 }
-/* "Já conheço": um × discreto no fim da linha, mais estreito que os outros botões */
+/* "Já conheço": no celular, arrasta a linha para a esquerda e aparece o aviso por baixo;
+   com mouse, um × discreto só aparece ao passar por cima da linha */
+.ex-swipe {
+  position: relative;
+  min-width: 0;
+  touch-action: pan-y;
+}
+.ex-swipe-bg {
+  position: absolute;
+  inset: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 16px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.ex-swipe > .ex-row {
+  position: relative;
+  background: var(--surface);
+  transition: transform 0.18s ease-out;
+}
+.ex-swipe > .ex-row.dragging {
+  transition: none;
+}
 .ex-hide {
   flex: none;
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 36px;
+  width: 24px;
+  height: 32px;
   margin-left: -6px;
   padding: 0;
   border: 0;
   background: none;
   color: var(--muted);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.ex-swipe:hover .ex-hide,
+.ex-hide:focus-visible {
+  opacity: 1;
 }
 .ex-hide:hover {
   color: var(--ink);
 }
 .ex-hide svg {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
+}
+@media (hover: none) {
+  /* Sem mouse, o × some da tela (continua para leitores de tela) */
+  .ex-hide {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
 }
 .ex-gone {
   min-height: 48px;
@@ -2987,13 +3035,13 @@ a.find-card:hover {
   font-weight: 700;
 }
 .ex-actions .play {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   box-shadow: none;
 }
 .ex-actions .ex-link,
 .ex-actions .ex-like {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
 }
 
