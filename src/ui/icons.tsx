@@ -67,6 +67,16 @@ export function ShareIcon() {
   )
 }
 
+/** O "Adicionar à Tela de Início" do iPhone: um + dentro de um quadrado. */
+export function AddSquareIcon() {
+  return (
+    <svg {...base}>
+      <rect x="4" y="4" width="16" height="16" rx="4" />
+      <path d="M12 8.5v7M8.5 12h7" />
+    </svg>
+  )
+}
+
 export function CloseIcon() {
   return (
     <svg {...base}>

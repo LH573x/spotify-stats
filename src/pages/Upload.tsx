@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
-import { useInstall } from '../ui/install'
+import { iosInstall, useInstall } from '../ui/install'
+import { IosInstall } from '../ui/IosInstall'
 import { pick, t } from '../i18n'
 
 const tapToChoose = () => t('Toque para escolher o arquivo', 'Tap to choose the file', 'Toca para elegir el archivo')
@@ -87,6 +88,12 @@ export function Upload({ busy, error, notice, onFiles }: Props) {
         />
       </div>
       {error && <p className="error">{error}</p>}
+
+      {iosInstall && (
+        <div className="install">
+          <IosInstall label={installApp()} />
+        </div>
+      )}
 
       {install && (
         <div className="install">

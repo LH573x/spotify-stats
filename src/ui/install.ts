@@ -40,3 +40,14 @@ export function useInstall(): (() => Promise<void>) | null {
     notify()
   }
 }
+
+// No iPhone e no iPad o Safari não avisa nada: a instalação é pelo Compartilhar → Adicionar à Tela de Início.
+// O iPad se apresenta como Mac; o que o entrega é a tela de toque.
+const ua = typeof navigator !== 'undefined' ? navigator.userAgent : ''
+const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)
+const installed =
+  typeof window !== 'undefined' &&
+  (window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true)
+
+/** iPhone ou iPad fora do app instalado: mostramos o passo a passo no lugar do botão do Android. */
+export const iosInstall = ios && !installed
