@@ -75,7 +75,9 @@ body {
 html {
   background: var(--page);
 }
-/* O fundo do cabeçalho vai de ponta a ponta da tela sem criar rolagem para o lado. */
+/* O fundo do cabeçalho vai de ponta a ponta da tela sem criar rolagem para o lado. No html também:
+   senão, enquanto o dedo arrasta a aba para a direita, o celular alarga a tela e as abas vizinhas ficam largas demais. */
+html,
 body {
   overflow-x: clip;
 }
@@ -216,30 +218,63 @@ a {
 }
 /* Os filtros ficam presos logo abaixo do cabeçalho (ou no topo, quando ele some);
    no topo da página, sem fundo, para a cor do artista aparecer. */
-.top.up ~ .filters {
+.top.up ~ .pager .slot.cur .filters {
   top: var(--top-small);
 }
-.top.rest ~ .filters::before {
+.top.rest ~ .pager .filters::before,
+.slot:not(.cur) .filters::before {
   opacity: 0;
 }
-/* Trocar de aba arrastando: a página nova entra do lado de onde o dedo veio */
-:root[data-swipe='next'] main.page {
-  animation: tab-in-next 0.28s ease-out;
+
+/* As abas lado a lado: a atual no fluxo da página; as vizinhas presas à tela, fora dela,
+   escondidas até um dedo arrastar (aí elas andam junto, na mesma altura em que vão ficar). */
+.pager,
+.slot.cur,
+.slot-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
-:root[data-swipe='prev'] main.page {
-  animation: tab-in-prev 0.28s ease-out;
+.slot:not(.cur) {
+  position: fixed;
+  z-index: 2;
+  inset: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
 }
-@keyframes tab-in-next {
-  from {
-    opacity: 0.4;
-    transform: translateX(36px);
-  }
+.slot.prev {
+  transform: translateX(-100vw);
 }
-@keyframes tab-in-prev {
-  from {
-    opacity: 0.4;
-    transform: translateX(-36px);
-  }
+.slot.next {
+  transform: translateX(100vw);
+}
+.slot:not(.cur) .slot-col {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--slot-top, 0px) max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
+}
+.pager[data-drag] .slot {
+  will-change: transform;
+}
+.pager[data-drag] .slot:not(.cur) {
+  visibility: visible;
+}
+/* Cada aba com a sua cor, também a vizinha que aparece arrastando. */
+.slot[data-tone='green'] {
+  --accent: var(--green);
+}
+.slot[data-tone='coral'] {
+  --accent: var(--coral);
+}
+.slot[data-tone='amber'] {
+  --accent: var(--amber);
+}
+.slot[data-tone='pink'] {
+  --accent: var(--pink);
+}
+.slot[data-tone='violet'] {
+  --accent: var(--violet);
 }
 .brand {
   display: flex;
@@ -2628,7 +2663,6 @@ a.find-card:hover {
 @media (prefers-reduced-motion: reduce) {
   .td-disc.td-turning .td-spin,
   .art.wait,
-  :root[data-swipe] main.page,
   .art img {
     animation: none !important;
   }

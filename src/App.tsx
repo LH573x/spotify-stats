@@ -20,9 +20,9 @@ import { LyraMark } from './ui/LyraMark'
 import { LangPicker } from './ui/LangPicker'
 import { KindPicker } from './ui/KindPicker'
 import { PageTint } from './ui/PageTint'
-import { haptic, hapticOnTaps } from './ui/haptic'
+import { hapticOnTaps } from './ui/haptic'
 import { useHeader } from './ui/useHeader'
-import { useTabSwipe } from './ui/useTabSwipe'
+import { TabPager } from './ui/TabPager'
 import { t, useLang } from './i18n'
 
 /** As abas, cada uma com a sua cor e o seu ícone. */
@@ -91,17 +91,8 @@ export default function App() {
   const header = useHeader()
   useEffect(() => hapticOnTaps(), [])
 
-  // Arrastar para os lados troca de aba (só nas abas, não nas páginas de artista e de música).
+  // Nas abas (não nas páginas de artista e de música), arrastar para os lados troca de aba.
   const tab = PAGES.findIndex((p) => p.id === page)
-  useTabSwipe(!!data && tab >= 0, (dir) => {
-    const next = PAGES[tab + dir]
-    if (!next) return
-    const root = document.documentElement
-    root.dataset.swipe = dir > 0 ? 'next' : 'prev'
-    setTimeout(() => delete root.dataset.swipe, 400)
-    haptic()
-    go(next.id)
-  })
 
   const yearList = useMemo(() => (data ? years(data) : []), [data])
   const podcasts = useMemo(() => (data ? hasPodcasts(data) : false), [data])
@@ -160,6 +151,56 @@ export default function App() {
     setData(null)
   }
 
+  // Uma aba inteira (filtros de ano e página). Também desenha as vizinhas, escondidas, para o arrastar.
+  const tabPage = (d: Dataset, id: PageId) => (
+    <>
+      {(id === 'curiosidades' || id === 'wrapped') && (
+        <div className="filters">
+          <div className="chips" role="group" aria-label={t('Período', 'Period', 'Período')}>
+            {id !== 'wrapped' && (
+              <button className={filter.year === null ? 'on' : ''} onClick={() => setFilter({ ...filter, year: null })}>
+                {t('Todos os anos', 'All years', 'Todos los años')}
+              </button>
+            )}
+            {yearList.map((y) => {
+              const on = id === 'wrapped' ? wrappedYear === y : filter.year === y
+              return (
+                <button key={y} className={on ? 'on' : ''} onClick={() => setFilter({ ...filter, year: y })}>
+                  {y}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+      {id === 'explorar' ? (
+        <Explorar data={d} />
+      ) : id === 'wrapped' ? (
+        <Wrapped data={d} year={wrappedYear} />
+      ) : id === 'linha' ? (
+        <LinhaDoTempo data={d} kind={filter.kind} theme={theme} />
+      ) : id === 'curiosidades' ? (
+        <Curiosidades data={d} filter={filter} theme={theme} lastYear={lastYear} />
+      ) : (
+        <Resumo data={d} filter={filter} theme={theme} onYear={(year) => setFilter({ ...filter, year })} />
+      )}
+    </>
+  )
+
+  const footer = (
+    <footer className="foot">
+      <p className="credit">
+        {t('Desenvolvido por', 'Developed by', 'Desarrollado por')} <strong>Luiz Hong</strong>
+      </p>
+      <p>
+        {t('Seus dados ficam só neste aparelho', 'Your data stays on this device', 'Tus datos se quedan en este dispositivo')} ·{' '}
+        {t('Fotos', 'Photos', 'Fotos')}: <a href="https://www.wikidata.org/">Wikidata</a> · {t('Capas', 'Covers', 'Portadas')}:{' '}
+        <a href="https://musicbrainz.org/">MusicBrainz</a> · {t('Prévias', 'Previews', 'Avances')}:{' '}
+        <a href="https://www.deezer.com/">Deezer</a>
+      </p>
+    </footer>
+  )
+
   return (
     <div className="app">
       <Fragment key={lng}>
@@ -201,26 +242,6 @@ export default function App() {
           </div>
         </header>
 
-        {data && (page === 'curiosidades' || page === 'wrapped') && (
-          <div className="filters">
-            <div className="chips" role="group" aria-label={t('Período', 'Period', 'Período')}>
-              {page !== 'wrapped' && (
-                <button className={filter.year === null ? 'on' : ''} onClick={() => setFilter({ ...filter, year: null })}>
-                  {t('Todos os anos', 'All years', 'Todos los años')}
-                </button>
-              )}
-              {yearList.map((y) => {
-                const on = page === 'wrapped' ? wrappedYear === y : filter.year === y
-                return (
-                  <button key={y} className={on ? 'on' : ''} onClick={() => setFilter({ ...filter, year: y })}>
-                    {y}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
         {data && tab >= 0 && (
           <PageTint
             data={data}
@@ -229,37 +250,24 @@ export default function App() {
           />
         )}
 
-        {booting ? null : data ? (
-          route.page === 'artista' ? (
-            <Artista data={data} id={route.artist} theme={theme} />
-          ) : route.page === 'musica' ? (
-            <Musica data={data} id={route.item} theme={theme} />
-          ) : page === 'explorar' ? (
-            <Explorar data={data} />
-          ) : page === 'wrapped' ? (
-            <Wrapped data={data} year={wrappedYear} />
-          ) : page === 'linha' ? (
-            <LinhaDoTempo data={data} kind={filter.kind} theme={theme} />
-          ) : page === 'curiosidades' ? (
-            <Curiosidades data={data} filter={filter} theme={theme} lastYear={lastYear} />
-          ) : (
-            <Resumo data={data} filter={filter} theme={theme} onYear={(year) => setFilter({ ...filter, year })} />
-          )
+        {booting ? (
+          footer
+        ) : data && tab >= 0 ? (
+          <TabPager tabs={PAGES} current={tab} render={(id) => tabPage(data, id as PageId)} footer={footer} onChange={(id) => go(id as PageId)} />
         ) : (
-          <Upload busy={busy} error={error} notice={notice} onFiles={onFiles} />
+          <>
+            {data ? (
+              route.page === 'artista' ? (
+                <Artista data={data} id={route.artist} theme={theme} />
+              ) : route.page === 'musica' ? (
+                <Musica data={data} id={route.item} theme={theme} />
+              ) : null
+            ) : (
+              <Upload busy={busy} error={error} notice={notice} onFiles={onFiles} />
+            )}
+            {footer}
+          </>
         )}
-
-        <footer className="foot">
-          <p className="credit">
-            {t('Desenvolvido por', 'Developed by', 'Desarrollado por')} <strong>Luiz Hong</strong>
-          </p>
-          <p>
-            {t('Seus dados ficam só neste aparelho', 'Your data stays on this device', 'Tus datos se quedan en este dispositivo')} ·{' '}
-            {t('Fotos', 'Photos', 'Fotos')}: <a href="https://www.wikidata.org/">Wikidata</a> · {t('Capas', 'Covers', 'Portadas')}:{' '}
-            <a href="https://musicbrainz.org/">MusicBrainz</a> · {t('Prévias', 'Previews', 'Avances')}:{' '}
-            <a href="https://www.deezer.com/">Deezer</a>
-          </p>
-        </footer>
       </Fragment>
       {data && <PlayerDock />}
     </div>
