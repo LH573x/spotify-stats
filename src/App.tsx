@@ -204,7 +204,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <Splash />
+      <Splash ready={!booting} />
       <Fragment key={lng}>
         <header className={`top ${header}`}>
           <div className="brand">
