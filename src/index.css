@@ -3213,7 +3213,7 @@ a.find-card:hover {
 
 
 /* Abertura do app: continua a tela do Android (o ícone de Lyra no fundo #121212, no centro).
-   O símbolo fica parado no mesmo lugar e tamanho do ícone; o nome e o crédito aparecem em volta.
+   O símbolo fica no mesmo lugar e tamanho do ícone; as estrelas acendem e o nome e o crédito sobem.
    Sempre escura, igual à tela do Android, nos dois temas. */
 .splash[hidden] {
   display: none;
@@ -3242,6 +3242,28 @@ a.find-card:hover {
 }
 .splash-mark path {
   opacity: 0.55;
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: splash-line 0.6s 0.45s ease-out forwards;
+}
+/* As estrelas acendem uma a uma, de Vega para baixo. */
+.splash-mark circle {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: splash-star 0.35s ease-out forwards;
+}
+.splash-mark circle:nth-of-type(2) {
+  animation-delay: 0.08s;
+}
+.splash-mark circle:nth-of-type(3) {
+  animation-delay: 0.16s;
+}
+.splash-mark circle:nth-of-type(4) {
+  animation-delay: 0.24s;
+}
+.splash-mark circle:nth-of-type(5) {
+  animation-delay: 0.32s;
 }
 .splash-name {
   position: absolute;
@@ -3252,7 +3274,7 @@ a.find-card:hover {
   font: 800 44px/1 var(--display);
   letter-spacing: 0.01em;
   opacity: 0;
-  animation: splash-up 0.5s 0.15s ease-out forwards;
+  animation: splash-up 0.5s 0.45s ease-out forwards;
 }
 .splash-credit {
   position: absolute;
@@ -3265,7 +3287,7 @@ a.find-card:hover {
   align-items: center;
   gap: 4px;
   opacity: 0;
-  animation: splash-up 0.5s 0.35s ease-out forwards;
+  animation: splash-up 0.6s 0.7s ease-out forwards;
 }
 .splash-credit span {
   color: #c3c2b7;
@@ -3275,10 +3297,25 @@ a.find-card:hover {
   font-size: 18px;
   font-weight: 700;
 }
+@keyframes splash-star {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes splash-line {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
 @keyframes splash-up {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -3287,8 +3324,14 @@ a.find-card:hover {
 }
 @media (prefers-reduced-motion: reduce) {
   .splash-name,
-  .splash-credit {
+  .splash-credit,
+  .splash-mark path,
+  .splash-mark circle {
     animation: none;
     opacity: 1;
+    stroke-dashoffset: 0;
+  }
+  .splash-mark path {
+    opacity: 0.55;
   }
 }
