@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -27,6 +29,8 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+      - name: Versões antigas (/v1, /v2, /v3)
+        run: ./scripts/versoes-antigas.sh
       - uses: actions/upload-pages-artifact@v3
         if: github.ref == 'refs/heads/main'
         with:
