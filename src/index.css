@@ -388,20 +388,20 @@ a {
   padding: 10px 0;
   font-weight: 600;
 }
-/* Escolha do idioma */
-.lang-btn svg {
+/* Escolha do idioma e de música/podcasts: um ícone que abre uma janelinha */
+.pick-btn svg {
   width: 20px;
   height: 20px;
 }
-.lang-sheet {
+.pick-sheet {
   width: min(280px, calc(100vw - 32px));
 }
-.lang-list {
+.pick-list {
   list-style: none;
   margin: 0;
   padding: 8px;
 }
-.lang-list button {
+.pick-list button {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -414,21 +414,21 @@ a {
   font: 600 15px/1 var(--body);
   text-align: left;
 }
-.lang-list button:hover {
+.pick-list button:hover {
   background: var(--surface-2);
 }
-.lang-list button.on {
+.pick-list button.on {
   color: var(--accent);
 }
-.lang-list svg {
+.pick-list svg {
   flex: none;
   width: 26px;
   height: 26px;
 }
-.lang-list span {
+.pick-list span {
   flex: 1;
 }
-.lang-list button svg:last-child:not(:first-child) {
+.pick-list button svg:last-child:not(:first-child) {
   width: 18px;
   height: 18px;
 }
