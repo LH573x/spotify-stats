@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react'
 
-const SHOW_MS = 2100
+const SHOW_MS = 2600
 const FADE_MS = 400
 
 /**
- * Tira a abertura (que já vem no index.html) depois de ela ficar ~2,1 s de verdade na tela
+ * Tira a abertura (que já vem no index.html) depois de ela ficar ~2,6 s de verdade na tela
  * e de os dados terem carregado. O tempo conta só quadros desenhados: enquanto o celular
  * está ocupado lendo os dados e não desenha nada, o relógio da abertura não anda.
  */
