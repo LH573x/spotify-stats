@@ -17,6 +17,7 @@ import { useTheme, type Tone } from './ui/theme'
 import { BulbIcon, CalendarIcon, CompassIcon, DiscIcon, GiftIcon } from './ui/icons'
 import { ExitButton } from './ui/ExitButton'
 import { LyraMark } from './ui/LyraMark'
+import { Splash } from './ui/Splash'
 import { LangPicker } from './ui/LangPicker'
 import { KindPicker } from './ui/KindPicker'
 import { PageTint } from './ui/PageTint'
@@ -203,6 +204,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <Splash />
       <Fragment key={lng}>
         <header className={`top ${header}`}>
           <div className="brand">
