@@ -103,6 +103,27 @@ export function MicIcon() {
   )
 }
 
+/** Só músicas: duas notas ligadas. */
+export function MusicIcon() {
+  return (
+    <svg {...base}>
+      <path d="M9 18V5l11-2v13" />
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="17" cy="16" r="3" />
+    </svg>
+  )
+}
+
+/** Tudo (músicas e podcasts): fones de ouvido. */
+export function HeadphonesIcon() {
+  return (
+    <svg {...base}>
+      <path d="M3.5 18v-6a8.5 8.5 0 0 1 17 0v6" />
+      <path d="M20.5 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3ZM3.5 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2h-3Z" />
+    </svg>
+  )
+}
+
 /* Bandeiras de traço, sem cor, no mesmo estilo dos ícones. */
 
 const flagBox = <rect x="2.5" y="5" width="19" height="14" rx="2" />

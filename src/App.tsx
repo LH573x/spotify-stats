@@ -3,7 +3,7 @@ import type { Dataset } from './data/types'
 import { loadFiles } from './data/load'
 import { clearSaved, loadSaved, save } from './data/store'
 import { takeSharedFiles } from './data/shared'
-import { hasPodcasts, years, type Filter, type KindFilter } from './data/stats'
+import { hasPodcasts, years, type Filter } from './data/stats'
 import { Upload } from './pages/Upload'
 import { Resumo } from './pages/Resumo'
 import { Curiosidades } from './pages/Curiosidades'
@@ -18,6 +18,7 @@ import { BulbIcon, CalendarIcon, CompassIcon, DiscIcon, GiftIcon } from './ui/ic
 import { ExitButton } from './ui/ExitButton'
 import { LyraMark } from './ui/LyraMark'
 import { LangPicker } from './ui/LangPicker'
+import { KindPicker } from './ui/KindPicker'
 import { PageTint } from './ui/PageTint'
 import { haptic, hapticOnTaps } from './ui/haptic'
 import { useHeader } from './ui/useHeader'
@@ -68,11 +69,8 @@ function useRoute(): [Route, (p: PageId) => void] {
   return [route, go]
 }
 
-const KINDS: { id: KindFilter; label: () => string }[] = [
-  { id: 'all', label: () => t('Tudo', 'All', 'Todo') },
-  { id: 'music', label: () => t('Música', 'Music', 'Música') },
-  { id: 'podcast', label: () => 'Podcasts' },
-]
+/** Abas em que "música, podcasts ou tudo" muda os números. */
+const KIND_PAGES = new Set<string>(['resumo', 'curiosidades', 'linha'])
 
 export default function App() {
   // Trocar o idioma remonta a página inteira, para todo texto sair no idioma novo.
@@ -89,7 +87,7 @@ export default function App() {
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
-  const [filter, setFilter] = useState<Filter>({ year: null, kind: 'all' })
+  const [filter, setFilter] = useState<Filter>({ year: null, kind: 'music' })
   const header = useHeader()
   useEffect(() => hapticOnTaps(), [])
 
@@ -117,7 +115,7 @@ export default function App() {
     try {
       const d = await loadFiles(files, setBusy)
       await save(d)
-      setFilter({ year: null, kind: 'all' })
+      setFilter({ year: null, kind: 'music' })
       setData(d)
     } catch (e) {
       setError((e as Error).message)
@@ -190,6 +188,7 @@ export default function App() {
             </nav>
           )}
           <div className="actions">
+            {data && podcasts && KIND_PAGES.has(page) && <KindPicker kind={filter.kind} onChange={(kind) => setFilter({ ...filter, kind })} />}
             <LangPicker />
             {data && <ExitButton onConfirm={reset} />}
             <button
@@ -202,34 +201,23 @@ export default function App() {
           </div>
         </header>
 
-        {data && page !== 'artista' && page !== 'musica' && page !== 'explorar' && ((page !== 'resumo' && page !== 'linha') || podcasts) && (
+        {data && (page === 'curiosidades' || page === 'wrapped') && (
           <div className="filters">
-            {page === 'linha' || page === 'resumo' ? null : (
-              <div className="chips" role="group" aria-label={t('Período', 'Period', 'Período')}>
-                {page !== 'wrapped' && (
-                  <button className={filter.year === null ? 'on' : ''} onClick={() => setFilter({ ...filter, year: null })}>
-                    {t('Todos os anos', 'All years', 'Todos los años')}
+            <div className="chips" role="group" aria-label={t('Período', 'Period', 'Período')}>
+              {page !== 'wrapped' && (
+                <button className={filter.year === null ? 'on' : ''} onClick={() => setFilter({ ...filter, year: null })}>
+                  {t('Todos os anos', 'All years', 'Todos los años')}
+                </button>
+              )}
+              {yearList.map((y) => {
+                const on = page === 'wrapped' ? wrappedYear === y : filter.year === y
+                return (
+                  <button key={y} className={on ? 'on' : ''} onClick={() => setFilter({ ...filter, year: y })}>
+                    {y}
                   </button>
-                )}
-                {yearList.map((y) => {
-                  const on = page === 'wrapped' ? wrappedYear === y : filter.year === y
-                  return (
-                    <button key={y} className={on ? 'on' : ''} onClick={() => setFilter({ ...filter, year: y })}>
-                      {y}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-            {podcasts && page !== 'wrapped' && (
-              <div className="segmented" role="group" aria-label={t('O que contar', 'What to count', 'Qué contar')}>
-                {KINDS.map((k) => (
-                  <button key={k.id} className={filter.kind === k.id ? 'on' : ''} onClick={() => setFilter({ ...filter, kind: k.id })}>
-                    {k.label()}
-                  </button>
-                ))}
-              </div>
-            )}
+                )
+              })}
+            </div>
           </div>
         )}
 
