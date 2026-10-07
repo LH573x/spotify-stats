@@ -3213,6 +3213,9 @@ a.find-card:hover {
 
 
 /* Abertura do app: estrelas acendem uma a uma, o nome sobe, o crédito embaixo. */
+.splash[hidden] {
+  display: none;
+}
 .splash {
   position: fixed;
   z-index: 100;

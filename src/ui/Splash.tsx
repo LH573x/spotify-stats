@@ -1,57 +1,45 @@
-import { useEffect, useState } from 'react'
-import { LyraShape } from './LyraMark'
-import { t } from '../i18n'
+import { useEffect, useRef } from 'react'
 
-const SEEN = 'lyra-abertura'
-const SHOW_MS = 1500
+const SHOW_MS = 1600
 const FADE_MS = 400
 
 /**
- * A abertura só aparece quando o app instalado é aberto (não no navegador nem ao recarregar).
- * `?abertura` no endereço força, para ver no computador.
+ * Tira a abertura (que já vem no index.html) depois de ela ficar ~1,6 s de verdade na tela
+ * e de os dados terem carregado. O tempo conta só quadros desenhados: enquanto o celular
+ * está ocupado lendo os dados e não desenha nada, o relógio da abertura não anda.
  */
-function shouldShow(): boolean {
-  try {
-    if (new URLSearchParams(location.search).has('abertura')) return true
-    const app =
-      matchMedia('(display-mode: standalone)').matches ||
-      (navigator as Navigator & { standalone?: boolean }).standalone === true
-    if (!app || sessionStorage.getItem(SEEN)) return false
-    sessionStorage.setItem(SEEN, '1')
-    return true
-  } catch {
-    return false
-  }
-}
-
-/** Ao abrir o app: as estrelas de Lyra acendem uma a uma, o nome aparece e o crédito embaixo. */
-export function Splash() {
-  const [phase, setPhase] = useState<'on' | 'out' | 'gone'>(() => (shouldShow() ? 'on' : 'gone'))
+export function Splash({ ready }: { ready: boolean }) {
+  const readyRef = useRef(ready)
+  useEffect(() => {
+    readyRef.current = ready
+  }, [ready])
 
   useEffect(() => {
-    if (phase === 'on') {
-      const id = setTimeout(() => setPhase('out'), SHOW_MS)
-      return () => clearTimeout(id)
+    const el = document.getElementById('splash')
+    if (!el || el.hidden) return
+    let shown = 0
+    let last = 0
+    let raf = 0
+    let timer = 0
+    const close = () => {
+      cancelAnimationFrame(raf)
+      el.classList.add('out')
+      timer = window.setTimeout(() => el.remove(), FADE_MS)
     }
-    if (phase === 'out') {
-      const id = setTimeout(() => setPhase('gone'), FADE_MS)
-      return () => clearTimeout(id)
+    const tick = (now: number) => {
+      if (last) shown += Math.min(now - last, 50)
+      last = now
+      if (shown >= SHOW_MS && readyRef.current) close()
+      else raf = requestAnimationFrame(tick)
     }
-  }, [phase])
-
-  if (phase === 'gone') return null
-  return (
-    <div className={`splash ${phase}`} onClick={() => setPhase('out')} aria-hidden>
-      <div className="splash-mid">
-        <svg viewBox="9 2 15 28" className="splash-mark">
-          <LyraShape color="currentColor" />
-        </svg>
-        <span className="splash-name">Lyra</span>
-      </div>
-      <p className="splash-credit">
-        <span>{t('desenvolvido por', 'developed by', 'desarrollado por')}</span>
-        <strong>Luiz Hong</strong>
-      </p>
-    </div>
-  )
+    raf = requestAnimationFrame(tick)
+    el.addEventListener('click', close, { once: true })
+    return () => {
+      cancelAnimationFrame(raf)
+      clearTimeout(timer)
+      el.removeEventListener('click', close)
+      el.classList.remove('out')
+    }
+  }, [])
+  return null
 }
