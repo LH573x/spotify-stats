@@ -1,41 +1,41 @@
 import { useMemo, useState } from 'react'
 import type { Dataset, SavedTrack } from '../data/types'
-import { likedForgotten, playlistStats } from '../data/account'
+import { likedForgotten, playlistRanking } from '../data/account'
 import { itemRef } from '../data/refs'
 import { Art } from '../ui/Thumb'
-import { BarList } from '../ui/parts'
+import { PlaylistCover } from '../ui/PlaylistCover'
 import { PlayButton } from '../ui/player'
 import { isSpotifyUri, trackOf } from '../ui/playerStore'
-import { songHref } from '../ui/links'
+import { playlistHref, songHref } from '../ui/links'
 import { cleanTitle, date, hours, monthLabel, num } from '../ui/format'
 import { t } from '../i18n'
 
 const FEW = 6
 
-/** Suas playlists, da que você mais ouve para a que ficou parada. */
+/** Ranking das suas playlists em capas grandes, 3 por linha. */
 export function Playlists({ data }: { data: Dataset }) {
-  const list = useMemo(() => playlistStats(data), [data])
+  const list = useMemo(() => playlistRanking(data), [data])
   const [all, setAll] = useState(false)
-  if (list.length === 0) return null
-  const max = list[0].msYear || 1
+  const lists = data.account?.playlists
+  if (!lists || list.length === 0) return null
   return (
     <>
-      <BarList
-        numbered={false}
-        rows={list.slice(0, all ? list.length : FEW).map((p, i) => ({
-          key: i,
-          name: p.name,
-          sub: t(
-            `${num(p.recent)} de ${num(p.songs)} músicas tocaram no último ano`,
-            `${num(p.recent)} of ${num(p.songs)} songs played in the last year`,
-            `${num(p.recent)} de ${num(p.songs)} canciones sonaron en el último año`,
-          ),
-          value: hours(p.msYear),
-          share: p.msYear / max,
-          image: p.top === null ? undefined : itemRef(data, p.top),
-          track: p.top === null ? null : trackOf(data, p.top),
-        }))}
-      />
+      <ol className="pl-grid">
+        {list.slice(0, all ? list.length : FEW).map((p) => (
+          <li key={p.index}>
+            <a href={playlistHref(p.index)} className="pl-tile">
+              <span className="pl-art">
+                <PlaylistCover playlist={lists[p.index]} />
+                <span className="pl-rank">{p.rank}</span>
+              </span>
+              <span className="pl-name">{p.name}</span>
+              <span className="pl-value">
+                {hours(p.ms)} · {num(p.songs)} {p.songs === 1 ? t('música', 'song', 'canción') : t('músicas', 'songs', 'canciones')}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
       {list.length > FEW && (
         <div className="more">
           <button className="ghost" onClick={() => setAll(!all)}>

@@ -234,17 +234,21 @@ export function Curiosidades({ data, filter, theme, lastYear }: Props) {
 
       {data.account && filter.year === null && filter.kind !== 'podcast' && (
         <>
-          {data.account.liked.length > 0 && (
-            <Section title={t('Curtidas esquecidas', 'Forgotten likes', 'Favoritas olvidadas')}>
-              <Curtidas data={data} />
-            </Section>
-          )}
           {data.account.playlists.length > 0 && (
             <Section
               title={t('Suas playlists', 'Your playlists', 'Tus playlists')}
-              note={t('Tempo ouvindo as músicas de cada uma no último ano', 'Time spent on each one\'s songs in the last year', 'Tiempo escuchando las canciones de cada una en el último año')}
+              note={t(
+                'Tempo ouvindo as músicas de cada uma desde que entraram nela',
+                "Time spent on each one's songs since they were added",
+                'Tiempo escuchando las canciones de cada una desde que entraron',
+              )}
             >
               <Playlists data={data} />
+            </Section>
+          )}
+          {data.account.liked.length > 0 && (
+            <Section title={t('Curtidas esquecidas', 'Forgotten likes', 'Favoritas olvidadas')}>
+              <Curtidas data={data} />
             </Section>
           )}
         </>
