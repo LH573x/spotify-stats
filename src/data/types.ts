@@ -37,4 +37,25 @@ export interface Dataset {
     platform: Uint8Array
   }
   importedAt: number
+  /** Playlists, curtidas e selos de ouvinte, quando veio o pacote "Dados da conta". */
+  account?: Account
+}
+
+/** Uma música salva numa playlist ou nas curtidas (pode nunca ter tocado no histórico). */
+export interface SavedTrack {
+  name: string
+  artist: string
+  album: string
+  uri?: string
+}
+
+/** Como o Spotify classifica você como ouvinte de um artista (Marquee.json). */
+export type ListenerTier = 'super' | 'moderate' | 'light' | 'past'
+
+/** O que vem do pacote "Dados da conta". Dados pessoais (e-mail, endereço, mensagens) nunca entram aqui. */
+export interface Account {
+  playlists: { name: string; tracks: SavedTrack[] }[]
+  liked: SavedTrack[]
+  /** Nome do artista → selo. */
+  tiers: Record<string, ListenerTier>
 }

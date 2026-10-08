@@ -9,6 +9,7 @@ import { BarList } from '../ui/parts'
 import { More, Section, StatStrip } from '../ui/blocks'
 import { years } from '../data/stats'
 import { Comparar, Esquecidas, Recordes } from './CuriosidadesExtras'
+import { Curtidas, Playlists } from './Colecao'
 import { itemRef } from '../data/refs'
 import { songHref } from '../ui/links'
 import { trackOf } from '../ui/playerStore'
@@ -229,6 +230,24 @@ export function Curiosidades({ data, filter, theme, lastYear }: Props) {
         <Section title={t('Músicas que você esqueceu', 'Songs you forgot', 'Canciones olvidadas')}>
           <Esquecidas data={data} filter={filter} />
         </Section>
+      )}
+
+      {data.account && filter.year === null && filter.kind !== 'podcast' && (
+        <>
+          {data.account.liked.length > 0 && (
+            <Section title={t('Curtidas esquecidas', 'Forgotten likes', 'Favoritas olvidadas')}>
+              <Curtidas data={data} />
+            </Section>
+          )}
+          {data.account.playlists.length > 0 && (
+            <Section
+              title={t('Suas playlists', 'Your playlists', 'Tus playlists')}
+              note={t('Tempo ouvindo as músicas de cada uma no último ano', 'Time spent on each one\'s songs in the last year', 'Tiempo escuchando las canciones de cada una en el último año')}
+            >
+              <Playlists data={data} />
+            </Section>
+          )}
+        </>
       )}
 
       <Section title={t('Um ano contra o outro', 'Year vs year', 'Año contra año')}>

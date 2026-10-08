@@ -131,6 +131,10 @@ export function Upload({ busy, error, notice, onFiles }: Props) {
             </li>
             <li>Confirme pelo e-mail. O Spotify manda o link em alguns dias.</li>
             <li>Baixe o <code>my_spotify_data.zip</code> e solte aqui, sem precisar descompactar.</li>
+            <li>
+              Pediu também os <strong>Dados da conta</strong>? Solte os dois zips juntos para ver suas playlists, curtidas
+              esquecidas e o seu selo de ouvinte em cada artista.
+            </li>
           </ol>,
           <ol>
             <li>
@@ -142,6 +146,10 @@ export function Upload({ busy, error, notice, onFiles }: Props) {
             </li>
             <li>Confirm by email. Spotify sends the link within a few days.</li>
             <li>Download <code>my_spotify_data.zip</code> and drop it here, no need to unzip it.</li>
+            <li>
+              Also requested your <strong>Account data</strong>? Drop both zips together to see your playlists, forgotten
+              likes and your listener badge for each artist.
+            </li>
           </ol>,
           <ol>
             <li>
@@ -153,6 +161,10 @@ export function Upload({ busy, error, notice, onFiles }: Props) {
             </li>
             <li>Confírmalo por correo. Spotify manda el enlace en unos días.</li>
             <li>Descarga el <code>my_spotify_data.zip</code> y suéltalo aquí, sin descomprimirlo.</li>
+            <li>
+              ¿Pediste también los <strong>Datos de la cuenta</strong>? Suelta los dos zips juntos para ver tus playlists,
+              favoritas olvidadas y tu sello de oyente en cada artista.
+            </li>
           </ol>,
         )}
       </details>

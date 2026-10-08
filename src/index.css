@@ -3354,3 +3354,25 @@ a.find-card:hover {
     opacity: 0.55;
   }
 }
+
+/* Selo de ouvinte do Spotify, ao lado da posição na página do artista */
+.tier {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 600;
+  vertical-align: 1px;
+}
+.tier-super {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* Curtidas que nunca tocaram: a frase fica entre as duas paredes de capas */
+.liked-never {
+  margin: 28px 0 16px;
+}

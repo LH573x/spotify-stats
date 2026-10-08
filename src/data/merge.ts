@@ -29,8 +29,9 @@ export function mergeSameSongs(d: Dataset): Dataset {
     remap[old] = id
     if (lastPlay[old] > latest[id]) {
       latest[id] = lastPlay[old]
-      const { uri, album } = it
-      items[id] = uri ? { ...items[id], album, uri } : { ...items[id], album }
+      // O histórico básico não traz álbum nem código: fica o que a outra versão tinha.
+      const album = it.album || items[id].album
+      items[id] = it.uri ? { ...items[id], album, uri: it.uri } : { ...items[id], album }
     }
   })
 
