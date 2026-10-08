@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
-import { iosInstall, useInstall } from '../ui/install'
-import { IosInstall } from '../ui/IosInstall'
+import { installGuide, useInstall } from '../ui/install'
+import { InstallGuide } from '../ui/InstallGuide'
 import { pick, t } from '../i18n'
 
 const tapToChoose = () => t('Toque para escolher o arquivo', 'Tap to choose the file', 'Toca para elegir el archivo')
@@ -89,24 +89,24 @@ export function Upload({ busy, error, notice, onFiles }: Props) {
       </div>
       {error && <p className="error">{error}</p>}
 
-      {iosInstall && (
+      {(install || installGuide) && (
         <div className="install">
-          <IosInstall label={installApp()} />
-        </div>
-      )}
-
-      {install && (
-        <div className="install">
-          <button className="primary" onClick={install}>
-            {installApp()}
-          </button>
-          <span>
-            {t(
-              'Com o app instalado, é só tocar em Compartilhar no zip e escolher Lyra.',
-              'With the app installed, just tap Share on the zip and choose Lyra.',
-              'Con la app instalada, solo tienes que tocar Compartir en el zip y elegir Lyra.',
-            )}
-          </span>
+          {install ? (
+            <button className="primary" onClick={install}>
+              {installApp()}
+            </button>
+          ) : (
+            installGuide && <InstallGuide label={installApp()} kind={installGuide} />
+          )}
+          {!installGuide?.startsWith('ios') && (
+            <span>
+              {t(
+                'Com o app instalado, é só tocar em Compartilhar no zip e escolher Lyra.',
+                'With the app installed, just tap Share on the zip and choose Lyra.',
+                'Con la app instalada, solo tienes que tocar Compartir en el zip y elegir Lyra.',
+              )}
+            </span>
+          )}
         </div>
       )}
 
