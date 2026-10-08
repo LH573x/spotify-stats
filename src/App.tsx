@@ -10,6 +10,7 @@ import { Curiosidades } from './pages/Curiosidades'
 import { LinhaDoTempo } from './pages/LinhaDoTempo'
 import { Artista } from './pages/Artista'
 import { Musica } from './pages/Musica'
+import { Playlist } from './pages/Playlist'
 import { PlayerDock } from './ui/player'
 import { Wrapped } from './pages/Wrapped'
 import { Explorar } from './pages/Explorar'
@@ -36,7 +37,7 @@ const PAGES = [
 ] as const satisfies readonly { id: string; label: () => string; tone: Tone; Icon: () => ReactElement }[]
 
 type PageId = (typeof PAGES)[number]['id']
-type Route = { page: PageId } | { page: 'artista'; artist: number } | { page: 'musica'; item: number }
+type Route = { page: PageId } | { page: 'artista'; artist: number } | { page: 'musica'; item: number } | { page: 'playlist'; index: number }
 
 /** Endereços antigos que mudaram de nome. */
 const RENAMED: Record<string, PageId> = { habitos: 'curiosidades' }
@@ -48,6 +49,8 @@ function readRoute(): Route {
   if (m) return { page: 'artista', artist: Number(m[1]) }
   const s = /^musica-(\d+)$/.exec(h)
   if (s) return { page: 'musica', item: Number(s[1]) }
+  const pl = /^playlist-(\d+)$/.exec(h)
+  if (pl) return { page: 'playlist', index: Number(pl[1]) }
   const p = PAGES.find((x) => x.id === (RENAMED[h] ?? h))
   return { page: p ? p.id : 'resumo' }
 }
@@ -263,6 +266,8 @@ export default function App() {
                 <Artista data={data} id={route.artist} theme={theme} />
               ) : route.page === 'musica' ? (
                 <Musica data={data} id={route.item} theme={theme} />
+              ) : route.page === 'playlist' ? (
+                <Playlist data={data} index={route.index} theme={theme} />
               ) : null
             ) : (
               <Upload busy={busy} error={error} notice={notice} onFiles={onFiles} />

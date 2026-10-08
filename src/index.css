@@ -3376,3 +3376,107 @@ a.find-card:hover {
 .liked-never {
   margin: 28px 0 16px;
 }
+
+/* Playlists: capa em mosaico (4 álbuns) e ranking em capas grandes, 3 por linha */
+.pl-cover {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px var(--shadow);
+}
+.pl-mosaic {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+.pl-mosaic .art {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+.pl-mosaic .art-initial {
+  font-size: 30cqi;
+}
+.pl-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 20px;
+  /* No computador as capas não passam de uns 240px */
+  max-width: 780px;
+}
+.pl-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+.pl-art {
+  position: relative;
+  margin-bottom: 10px;
+  transition: transform 0.2s;
+}
+.pl-tile:hover .pl-art {
+  transform: translateY(-4px) rotate(-1deg);
+}
+.pl-rank {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: 800 16px/1 var(--display);
+  box-shadow: 0 4px 12px var(--shadow);
+}
+.pl-name {
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pl-value {
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.pl-cover.pl-hero {
+  flex: none;
+  width: 200px;
+  box-shadow: 0 16px 40px var(--shadow);
+}
+@media (max-width: 600px) {
+  .pl-grid {
+    gap: 22px 12px;
+  }
+  .pl-name {
+    font-size: 14px;
+  }
+  .pl-value {
+    font-size: 12px;
+  }
+  .pl-rank {
+    top: 6px;
+    left: 6px;
+    min-width: 26px;
+    height: 26px;
+    font-size: 14px;
+  }
+  .pl-cover.pl-hero {
+    width: 120px;
+  }
+}

@@ -47,6 +47,15 @@ export interface SavedTrack {
   artist: string
   album: string
   uri?: string
+  /** Dia em que entrou na playlist ("2026-08-16"); as curtidas não trazem. */
+  added?: string
+}
+
+export interface Playlist {
+  name: string
+  /** Última vez que a playlist mudou ("2026-08-16"). */
+  modified?: string
+  tracks: SavedTrack[]
 }
 
 /** Como o Spotify classifica você como ouvinte de um artista (Marquee.json). */
@@ -54,7 +63,7 @@ export type ListenerTier = 'super' | 'moderate' | 'light' | 'past'
 
 /** O que vem do pacote "Dados da conta". Dados pessoais (e-mail, endereço, mensagens) nunca entram aqui. */
 export interface Account {
-  playlists: { name: string; tracks: SavedTrack[] }[]
+  playlists: Playlist[]
   liked: SavedTrack[]
   /** Nome do artista → selo. */
   tiers: Record<string, ListenerTier>
