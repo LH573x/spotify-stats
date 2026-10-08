@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { Dataset } from '../data/types'
+import type { Dataset, ListenerTier } from '../data/types'
 import { artistDetail } from '../data/artist'
 import { Chart, type ChartOption } from '../ui/Chart'
 import { chartColors, type ThemeName } from '../ui/theme'
@@ -22,6 +22,20 @@ interface Props {
 
 /** Posição no ranking: "nº 3". */
 const rankLabel = (n: number) => t(`nº ${num(n)}`, `#${num(n)}`, `n.º ${num(n)}`)
+
+/** Selo de ouvinte do Spotify para um artista. */
+function tierLabel(tier: ListenerTier): string {
+  switch (tier) {
+    case 'super':
+      return t('Super ouvinte', 'Super listener', 'Superoyente')
+    case 'moderate':
+      return t('Ouvinte frequente', 'Regular listener', 'Oyente habitual')
+    case 'light':
+      return t('Ouvinte casual', 'Casual listener', 'Oyente ocasional')
+    case 'past':
+      return t('Ouvia antes', 'Used to listen', 'Lo escuchabas antes')
+  }
+}
 
 function back() {
   if (history.length > 1) history.back()
@@ -99,6 +113,7 @@ export function Artista({ data, id, theme }: Props) {
   const bestYear = a.yearly.reduce((x, y) => (y.ms > x.ms ? y : x), a.yearly[0])
   const peak = a.monthly.reduce((x, y) => (y.hours > x.hours ? y : x), a.monthly[0])
   const maxItem = a.topItems[0]?.ms ?? 1
+  const tier = data.account?.tiers[a.name]
 
   return (
     <main className="page">
@@ -110,6 +125,11 @@ export function Artista({ data, id, theme }: Props) {
         <div>
           <p className="eyebrow">
             {podcast ? 'Podcast' : t('Artista', 'Artist', 'Artista')} · {rankLabel(a.rank)}
+            {tier && (
+              <span className={`tier tier-${tier}`} title={t('Como o Spotify te classifica', 'How Spotify ranks you', 'Cómo te clasifica Spotify')}>
+                {tierLabel(tier)}
+              </span>
+            )}
           </p>
           <h1 className="artist-name">{a.name}</h1>
           <p className="sub">

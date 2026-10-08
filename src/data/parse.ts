@@ -105,6 +105,15 @@ export function parseFiles(files: SourceFile[]): Dataset {
     platform.push(pl)
   }
 
+  // O histórico básico (último ano) repete o que o estendido já tem: dele só entra o que vem depois.
+  let extendedEnd = -Infinity
+  for (const file of files)
+    for (const raw of file.rows)
+      if (raw && typeof raw === 'object' && 'ts' in raw) {
+        const end = Date.parse((raw as ExtendedRow).ts)
+        if (end > extendedEnd) extendedEnd = end
+      }
+
   for (const file of files) {
     for (const raw of file.rows) {
       if (!raw || typeof raw !== 'object') continue
@@ -143,6 +152,7 @@ export function parseFiles(files: SourceFile[]): Dataset {
         if (played <= 0) continue
         // endTime vem como "2023-01-31 22:15" em UTC.
         const end = Date.parse(r.endTime.replace(' ', 'T') + ':00Z')
+        if (end <= extendedEnd) continue
         let it: number
         let f = 0
         if (r.trackName) {

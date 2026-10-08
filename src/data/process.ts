@@ -1,5 +1,6 @@
 import { unzipSync, strFromU8 } from 'fflate'
 import { isHistoryFile, parseFiles, type SourceFile } from './parse'
+import { isAccountFile, readAccount } from './account'
 import type { Dataset } from './types'
 import { t } from '../i18n'
 
@@ -11,21 +12,27 @@ function parseJson(name: string, text: string): SourceFile | null {
 /** Descompacta (se for zip), lê os JSONs de histórico e monta o Dataset. */
 export async function processFiles(files: File[], progress: (message: string) => void): Promise<Dataset> {
   const sources: SourceFile[] = []
+  const account: { name: string; json: unknown }[] = []
+  const take = (name: string, text: string) => {
+    if (isAccountFile(name)) account.push({ name, json: JSON.parse(text) })
+    else {
+      const src = parseJson(name, text)
+      if (src) sources.push(src)
+    }
+  }
   for (const file of files) {
     if (/\.zip$/i.test(file.name)) {
       progress(`${t('Descompactando', 'Unzipping', 'Descomprimiendo')} ${file.name}…`)
       const entries = unzipSync(new Uint8Array(await file.arrayBuffer()), {
-        filter: (f) => isHistoryFile(f.name),
+        filter: (f) => isHistoryFile(f.name) || isAccountFile(f.name),
       })
       for (const [path, bytes] of Object.entries(entries)) {
         progress(`${t('Lendo', 'Reading', 'Leyendo')} ${path.split('/').pop()}…`)
-        const src = parseJson(path, strFromU8(bytes))
-        if (src) sources.push(src)
+        take(path, strFromU8(bytes))
       }
-    } else if (isHistoryFile(file.name)) {
+    } else if (isHistoryFile(file.name) || isAccountFile(file.name)) {
       progress(`${t('Lendo', 'Reading', 'Leyendo')} ${file.name}…`)
-      const src = parseJson(file.name, await file.text())
-      if (src) sources.push(src)
+      take(file.name, await file.text())
     }
   }
   if (sources.length === 0) {
@@ -38,5 +45,7 @@ export async function processFiles(files: File[], progress: (message: string) =>
     )
   }
   progress(t('Organizando suas reproduções…', 'Sorting your plays…', 'Organizando tus reproducciones…'))
-  return parseFiles(sources)
+  const dataset = parseFiles(sources)
+  const extra = readAccount(account)
+  return extra ? { ...dataset, account: extra } : dataset
 }
