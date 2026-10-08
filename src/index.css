@@ -611,7 +611,7 @@ a {
     font-size: 14px;
   }
 }
-/* Passo a passo para instalar no iPhone */
+/* Passo a passo para instalar quando o navegador não abre a janela de instalar */
 .install-steps {
   list-style: none;
   margin: 18px 0 20px;
@@ -638,6 +638,25 @@ a {
   height: 24px;
   color: var(--accent);
 }
+/* Navegador do Android que não instala: abrir no Chrome ou copiar o link */
+.install-actions {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.install-actions .primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 0;
+  text-decoration: none;
+}
+.install-actions .primary svg {
+  width: 18px;
+  height: 18px;
+}
+.install-actions .ghost,
 .install-sheet .confirm-box > .ghost {
   width: 100%;
   padding: 10px 0;

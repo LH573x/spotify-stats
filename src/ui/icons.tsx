@@ -77,6 +77,17 @@ export function AddSquareIcon() {
   )
 }
 
+/** O menu ⋮ do Chrome no Android. */
+export function MenuDotsIcon() {
+  return (
+    <svg {...base}>
+      <circle cx="12" cy="5.5" r="1.2" fill="currentColor" />
+      <circle cx="12" cy="12" r="1.2" fill="currentColor" />
+      <circle cx="12" cy="18.5" r="1.2" fill="currentColor" />
+    </svg>
+  )
+}
+
 export function CloseIcon() {
   return (
     <svg {...base}>
